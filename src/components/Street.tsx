@@ -339,7 +339,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
             <div className="absolute -bottom-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white" />
           </div>
         )}
-        <PushokSprite />
+        <CatSprite size="md" />
         <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-yellow-200">
           ПУШОК
         </div>
@@ -355,11 +355,12 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
         style={{ opacity: moodRyzhik === "hate" ? 0.35 : 1 }}
       >
         <MoodBadge tier={moodRyzhik} />
-        <CatSprite />
+        <CatSprite size="md" />
         <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-orange-300">
           РЫЖИК
         </div>
       </button>
+
 
 
 
