@@ -46,10 +46,15 @@ function Index() {
     setXp((x) => x + 25);
     setStage("done");
     toast("Контракт выполнен!", {
-      description: "Выходим на улицу...",
+      description: "+50 монет · +25 опыта",
     });
-    setTimeout(() => setStage("street"), 1800);
+    setTimeout(() => setStage("room-after"), 1800);
   };
+
+  const handleLeaveRoom = () => {
+    setStage("street");
+  };
+
 
   const handleCommunicate = (xpGain: number) => {
     setXp((x) => x + xpGain);
