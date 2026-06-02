@@ -100,7 +100,7 @@ const RYZHIK_CHOICES: DialogChoice[] = [
 ];
 
 
-export function Street({ onCommunicate, onDiscoverCafe }: Props) {
+export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCreated }: Props) {
   // Needs bars
   const [thirst, setThirst] = useState(82);
   const [hunger, setHunger] = useState(78);
@@ -115,9 +115,10 @@ export function Street({ onCommunicate, onDiscoverCafe }: Props) {
   const [metPushok, setMetPushok] = useState(false);
   const [metRyzhik, setMetRyzhik] = useState(false);
 
-  // Stats appear gradually
-  useEffect(() => {
-    const id = setInterval(() => {
+  // Character creation flow
+  const [showCreation, setShowCreation] = useState(false);
+  const [pushokFarewell, setPushokFarewell] = useState(false);
+
       setThirst((v) => Math.max(0, v - 0.6));
       setHunger((v) => Math.max(0, v - 0.45));
       setSocial((v) => Math.max(0, v - 0.8));
