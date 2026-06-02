@@ -4,6 +4,7 @@ import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
 import { Workshop } from "@/components/Workshop";
 import { Street } from "@/components/Street";
+import { Leaderboard } from "@/components/Leaderboard";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -24,6 +25,7 @@ function Index() {
   const [stage, setStage] = useState<Stage>("menu");
   const [coins, setCoins] = useState(0);
   const [xp, setXp] = useState(0);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
 
   const handlePlay = () => {
     setStage("zooming");
@@ -166,6 +168,17 @@ function Index() {
           </span>
         </div>
       )}
+
+      {/* Leaderboard trigger — always available */}
+      <button
+        type="button"
+        onClick={() => setLeaderboardOpen(true)}
+        className="absolute left-3 top-3 z-[60] rounded-full bg-black/60 px-3 py-1.5 text-xs text-cyan-200 ring-1 ring-cyan-400/30 backdrop-blur hover:bg-cyan-400/10 hover:text-cyan-100 transition"
+      >
+        🏆 Рейтинг
+      </button>
+
+      <Leaderboard open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
 
       {/* Global CRT scanlines */}
       <div
