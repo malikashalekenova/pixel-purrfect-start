@@ -4,6 +4,7 @@ import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
 import { Workshop } from "@/components/Workshop";
 import { Street } from "@/components/Street";
+import { Room } from "@/components/Room";
 import { Leaderboard } from "@/components/Leaderboard";
 import { toast } from "sonner";
 
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Stage = "menu" | "zooming" | "desktop" | "mission" | "workshop" | "done" | "street";
+type Stage = "menu" | "zooming" | "desktop" | "mission" | "workshop" | "done" | "room-after" | "street";
 
 function Index() {
   const [stage, setStage] = useState<Stage>("menu");
@@ -45,10 +46,15 @@ function Index() {
     setXp((x) => x + 25);
     setStage("done");
     toast("Контракт выполнен!", {
-      description: "Выходим на улицу...",
+      description: "+50 монет · +25 опыта",
     });
-    setTimeout(() => setStage("street"), 1800);
+    setTimeout(() => setStage("room-after"), 1800);
   };
+
+  const handleLeaveRoom = () => {
+    setStage("street");
+  };
+
 
   const handleCommunicate = (xpGain: number) => {
     setXp((x) => x + xpGain);
@@ -149,6 +155,9 @@ function Index() {
         <Workshop onComplete={handleWorkshopComplete} />
       )}
 
+      {/* Room scene — after first contract, before going outside */}
+      {stage === "room-after" && <Room onExit={handleLeaveRoom} />}
+
       {/* Street scene after first contract */}
       {stage === "street" && (
         <Street
@@ -158,7 +167,7 @@ function Index() {
       )}
 
       {/* HUD: coins / xp */}
-      {(stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done" || stage === "street") && (
+      {(stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done" || stage === "room-after" || stage === "street") && (
         <div className="pointer-events-none absolute right-3 top-3 z-[60] flex items-center gap-2 text-xs">
           <span className="rounded-full bg-black/60 px-2.5 py-1 text-amber-300 ring-1 ring-white/10 backdrop-blur">
             🪙 {coins}
