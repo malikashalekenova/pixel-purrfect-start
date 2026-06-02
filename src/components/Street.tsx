@@ -151,6 +151,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   // Character creation flow
   const [showCreation, setShowCreation] = useState(false);
   const [pushokFarewell, setPushokFarewell] = useState(false);
+  const [showPhone, setShowPhone] = useState(false);
 
   // Stats appear gradually
   useEffect(() => {
