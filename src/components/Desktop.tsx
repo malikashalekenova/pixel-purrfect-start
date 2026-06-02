@@ -4,18 +4,20 @@ type IconKey =
   | "contracts"
   | "messages"
   | "map"
-  | "contacts"
+  | "shop"
+  | "leaderboard"
+  | "profile"
   | "bank"
-  | "inventory"
   | "settings";
 
 const ICONS: { key: IconKey; label: string; glyph: string; accent: string }[] = [
   { key: "contracts", label: "Контракты", glyph: "📋", accent: "#7fe7ff" },
   { key: "messages", label: "Сообщения", glyph: "✉", accent: "#a78bfa" },
-  { key: "map", label: "Карта города", glyph: "🗺", accent: "#34d399" },
-  { key: "contacts", label: "Контакты", glyph: "👥", accent: "#fbbf24" },
-  { key: "bank", label: "Банк", glyph: "💳", accent: "#22d3ee" },
-  { key: "inventory", label: "Инвентарь", glyph: "🎒", accent: "#f472b6" },
+  { key: "shop", label: "Магазин", glyph: "🛒", accent: "#34d399" },
+  { key: "leaderboard", label: "Рейтинг", glyph: "🏆", accent: "#fbbf24" },
+  { key: "profile", label: "Профиль", glyph: "👤", accent: "#f472b6" },
+  { key: "map", label: "Карта города", glyph: "🗺", accent: "#22d3ee" },
+  { key: "bank", label: "Банк", glyph: "💳", accent: "#60a5fa" },
   { key: "settings", label: "Настройки", glyph: "⚙", accent: "#94a3b8" },
 ];
 
@@ -34,7 +36,19 @@ function useClock() {
   return { time, date };
 }
 
-export function Desktop({ onStartMission }: { onStartMission: () => void }) {
+export function Desktop({
+  onStartMission,
+  onOpenShop,
+  onOpenLeaderboard,
+  onOpenProfile,
+  hasProfile,
+}: {
+  onStartMission: () => void;
+  onOpenShop?: () => void;
+  onOpenLeaderboard?: () => void;
+  onOpenProfile?: () => void;
+  hasProfile?: boolean;
+}) {
   const { time, date } = useClock();
   const [notif, setNotif] = useState(false);
   const [openMessages, setOpenMessages] = useState(false);
@@ -48,6 +62,15 @@ export function Desktop({ onStartMission }: { onStartMission: () => void }) {
   const openMail = () => {
     setOpenMessages(true);
     setNotif(false);
+  };
+
+  const handleIconClick = (key: IconKey) => {
+    if (key === "messages") return openMail();
+    if (key === "shop") return onOpenShop?.();
+    if (key === "leaderboard") return onOpenLeaderboard?.();
+    if (key === "profile") {
+      if (hasProfile) onOpenProfile?.();
+    }
   };
 
   return (
@@ -93,11 +116,14 @@ export function Desktop({ onStartMission }: { onStartMission: () => void }) {
         <div className="relative grid w-fit grid-cols-3 gap-x-4 gap-y-5 sm:grid-cols-4 sm:gap-x-6 sm:gap-y-7">
           {ICONS.map((ic) => {
             const isMail = ic.key === "messages";
+            const disabled = ic.key === "profile" && !hasProfile;
             return (
               <button
                 key={ic.key}
-                onClick={isMail ? openMail : undefined}
-                className="group relative flex w-20 flex-col items-center gap-2 rounded-xl p-2 text-center transition-all hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-cyan-400/60 sm:w-24"
+                onClick={() => handleIconClick(ic.key)}
+                disabled={disabled}
+                title={disabled ? "Профиль появится после регистрации" : ic.label}
+                className="group relative flex w-20 flex-col items-center gap-2 rounded-xl p-2 text-center transition-all hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-cyan-400/60 sm:w-24 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <div
                   className="relative flex h-14 w-14 items-center justify-center rounded-2xl text-2xl text-white sm:h-16 sm:w-16 sm:text-[28px] transition-transform group-hover:-translate-y-0.5"
@@ -288,7 +314,7 @@ export function Desktop({ onStartMission }: { onStartMission: () => void }) {
           {ICONS.slice(0, 6).map((ic) => (
             <button
               key={`dock-${ic.key}`}
-              onClick={ic.key === "messages" ? openMail : undefined}
+              onClick={() => handleIconClick(ic.key)}
               className="group relative flex h-10 w-10 items-center justify-center rounded-xl text-lg transition-transform hover:-translate-y-1"
               style={{
                 background:

@@ -215,7 +215,13 @@ function Index() {
 
       {/* Desktop OS appears after zoom */}
       {(stage === "desktop" || stage === "mission" || stage === "done") && (
-        <Desktop onStartMission={handleStartMission} />
+        <Desktop
+          onStartMission={handleStartMission}
+          onOpenShop={() => setShopOpen(true)}
+          onOpenLeaderboard={() => setLeaderboardOpen(true)}
+          onOpenProfile={() => setProfileOpen(true)}
+          hasProfile={!!profile}
+        />
       )}
 
       {/* Mission travel overlay */}
@@ -271,32 +277,34 @@ function Index() {
         </div>
       )}
 
-      {/* Leaderboard + Profile triggers */}
-      <div className="absolute left-3 top-3 z-[60] flex gap-2">
-        <button
-          type="button"
-          onClick={() => setLeaderboardOpen(true)}
-          className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-cyan-200 ring-1 ring-cyan-400/30 backdrop-blur hover:bg-cyan-400/10 hover:text-cyan-100 transition"
-        >
-          🏆 Рейтинг
-        </button>
-        {profile && (
+      {/* Leaderboard + Profile + Shop triggers — only outside the computer */}
+      {(stage === "room-after" || stage === "street") && (
+        <div className="absolute left-3 top-3 z-[60] flex gap-2">
           <button
             type="button"
-            onClick={() => setProfileOpen(true)}
-            className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-amber-200 ring-1 ring-amber-400/30 backdrop-blur hover:bg-amber-400/10 hover:text-amber-100 transition"
+            onClick={() => setLeaderboardOpen(true)}
+            className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-cyan-200 ring-1 ring-cyan-400/30 backdrop-blur hover:bg-cyan-400/10 hover:text-cyan-100 transition"
           >
-            👤 Профиль
+            🏆 Рейтинг
           </button>
-        )}
-        <button
-          type="button"
-          onClick={() => setShopOpen(true)}
-          className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-emerald-200 ring-1 ring-emerald-400/30 backdrop-blur hover:bg-emerald-400/10 hover:text-emerald-100 transition"
-        >
-          🛒 Магазин
-        </button>
-      </div>
+          {profile && (
+            <button
+              type="button"
+              onClick={() => setProfileOpen(true)}
+              className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-amber-200 ring-1 ring-amber-400/30 backdrop-blur hover:bg-amber-400/10 hover:text-amber-100 transition"
+            >
+              👤 Профиль
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setShopOpen(true)}
+            className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-emerald-200 ring-1 ring-emerald-400/30 backdrop-blur hover:bg-emerald-400/10 hover:text-emerald-100 transition"
+          >
+            🛒 Магазин
+          </button>
+        </div>
+      )}
 
       {profile && profileOpen && (
         <ProfileWindow profile={profile} onClose={() => setProfileOpen(false)} />
