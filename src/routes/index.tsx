@@ -52,6 +52,15 @@ function Index() {
     setCoins(newCoins);
     setPurchases((prev) => [...prev, item]);
     toast(`Куплено: ${item.name}`, { description: `−${item.price} монет` });
+
+    // Apply item effect on vitals (30% rule items)
+    const n = item.name.toLowerCase();
+    if (n.includes("анти") || n.includes("патч")) modVitals({ stability: 25 });
+    else if (n.includes("защит") || n.includes("firewall") || n.includes("shield")) modVitals({ health: 20, stability: 10 });
+    else if (n.includes("энерг") || n.includes("energy") || n.includes("coffee") || n.includes("кофе")) modVitals({ energy: 40 });
+    else if (n.includes("резерв")) modVitals({ health: 30, psyche: 20 });
+    else modVitals({ psyche: 10 });
+
     if (profile) {
       const updated = await updateMyProfile({ coins: newCoins });
       if (updated) setProfile(updated);
