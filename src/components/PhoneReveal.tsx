@@ -135,6 +135,7 @@ export function PhoneReveal({ onComplete }: Props) {
         setTimeout(() => setHint(null), 800);
         return;
       }
+      lastStepRef.current = now;
       setPos({ r: nr, c: nc });
 
       // Effects on arrival
