@@ -42,6 +42,18 @@ function Index() {
     setCoins((c) => c + 50);
     setXp((x) => x + 25);
     setStage("done");
+    toast("Контракт выполнен!", {
+      description: "Выходим на улицу...",
+    });
+    setTimeout(() => setStage("street"), 1800);
+  };
+
+  const handleCommunicate = (xpGain: number) => {
+    setXp((x) => x + xpGain);
+  };
+
+  const handleDiscoverCafe = () => {
+    // marker added to city map (future feature)
   };
 
   // Monitor approximate center in the background image (percent of image)
