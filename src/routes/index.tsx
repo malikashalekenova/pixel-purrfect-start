@@ -28,7 +28,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Stage = "menu" | "zooming" | "level1" | "desktop" | "mission" | "workshop" | "done" | "room-after" | "street";
+type Stage = "menu" | "zooming" | "desktop" | "mission" | "workshop" | "done" | "room-after" | "street";
 
 function Index() {
   const [stage, setStage] = useState<Stage>("menu");
