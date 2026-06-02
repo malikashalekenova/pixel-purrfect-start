@@ -292,10 +292,11 @@ export function CafeScene({ onExit }: Props) {
                   {moodIcon(m)} {Math.round(rel[g.id])}
                 </div>
                 {/* cat at table */}
-                <div className="rounded-md border border-amber-200/20 bg-amber-950/40 px-3 py-2 text-center">
-                  <div className="text-2xl animate-[cat-idle_2.4s_ease-in-out_infinite]">{g.emoji}</div>
-                  <div className="font-mono text-[10px] text-amber-100/80">{g.name}</div>
+                <div className="rounded-md border border-amber-200/20 bg-amber-950/40 px-3 py-2 flex flex-col items-center">
+                  <div className="animate-[cat-idle_2.4s_ease-in-out_infinite]"><CatSprite size="sm" /></div>
+                  <div className="font-mono text-[10px] text-amber-100/80 mt-1">{g.name}</div>
                 </div>
+
                 {/* table */}
                 <div className="-mt-0.5 h-1.5 w-16 rounded-b bg-amber-900/70" />
                 <div className="mt-0.5 text-[9px] text-amber-200/50">{behaviorTag(g.behavior)}</div>
