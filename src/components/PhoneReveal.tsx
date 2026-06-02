@@ -312,13 +312,13 @@ export function PhoneReveal({ onComplete }: Props) {
                               opacity: visible ? 1 : 0.25,
                             }}
                           >
-                            {visible && cell === "cafe" && <span className="text-[8px]">☕</span>}
-                            {visible && cell === "npc" && <span className="text-[8px]">🐱</span>}
-                            {visible && cell === "glitch" && <span className="text-[7px] text-white/70">⚡</span>}
-                            {visible && cell === "hazard" && <span className="text-[7px]">🧠</span>}
-                            {visible && cell === "blocked" && <span className="text-[7px]">⛔</span>}
+                            {visible && cell === "cafe" && <div className="h-2 w-2 rounded-sm bg-amber-400 ring-1 ring-amber-200/60" />}
+                            {visible && cell === "npc" && <div className="h-2 w-2 rounded-full bg-emerald-400 ring-1 ring-emerald-200/60" />}
+                            {visible && cell === "glitch" && <div className="h-1.5 w-1.5 rounded-full bg-violet-400 shadow-[0_0_4px_#a78bfa]" />}
+                            {visible && cell === "hazard" && <div className="h-1.5 w-1.5 rotate-45 bg-red-500 ring-1 ring-red-300/60" />}
+                            {visible && cell === "blocked" && <div className="h-2 w-0.5 bg-red-800 rotate-45" />}
                             {isCat && (
-                              <span
+                              <div
                                 className="absolute inset-0 flex items-center justify-center text-[10px] transition-transform"
                                 style={{
                                   transform:
@@ -326,8 +326,8 @@ export function PhoneReveal({ onComplete }: Props) {
                                   filter: "drop-shadow(0 0 3px #7fe7ff)",
                                 }}
                               >
-                                🐱
-                              </span>
+                                <div className="h-2.5 w-2.5 rounded-full bg-cyan-300 ring-1 ring-white/60" />
+                              </div>
                             )}
                           </div>
                         );
