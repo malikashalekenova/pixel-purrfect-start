@@ -174,8 +174,24 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   };
 
   const closeDialog = () => {
+    const wasPushok = activeNpc === "pushok";
+    const justMetPushok = wasPushok && metPushok && !hasProfile && !showCreation && !pushokFarewell;
     setActiveNpc(null);
     setReply(null);
+    // After first Пушок dialog, if player has no profile yet — open character creation
+    if (justMetPushok) {
+      setTimeout(() => setShowCreation(true), 400);
+    }
+  };
+
+  const handleProfileCreated = (profile: Profile) => {
+    setShowCreation(false);
+    onProfileCreated(profile);
+    // Final farewell line from Пушок
+    setTimeout(() => {
+      setPushokFarewell(true);
+      setTimeout(() => setPushokFarewell(false), 5000);
+    }, 600);
   };
 
   const currentChoices = activeNpc === "pushok" ? PUSHOK_CHOICES : RYZHIK_CHOICES;
