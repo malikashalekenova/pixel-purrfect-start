@@ -54,13 +54,22 @@ export function PhoneReveal({ onComplete }: Props) {
   const [tab, setTab] = useState<Tab>("map");
   const [glitch, setGlitch] = useState(false);
 
+  const maze = useMemo(() => generateMaze(ROWS, COLS), []);
+  const cellAt = useCallback(
+    (r: number, c: number): Cell => {
+      if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return "wall";
+      return maze[r][c];
+    },
+    [maze],
+  );
+
   const [pos, setPos] = useState(START);
   const [face, setFace] = useState<Dir>("up");
   const [arrived, setArrived] = useState(false);
-  const [nearNpc, setNearNpc] = useState(false);
   const [nearCafe, setNearCafe] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
   const lastStepRef = useRef(0);
+
 
   useEffect(() => {
     const timings: Record<Frame, number> = {
