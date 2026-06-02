@@ -289,10 +289,7 @@ export function PhoneReveal({ onComplete }: Props) {
                             }}
                           >
                             {visible && cell === "cafe" && <div className="h-2 w-2 rounded-sm bg-amber-400 ring-1 ring-amber-200/60" />}
-                            {visible && cell === "npc" && <div className="h-2 w-2 rounded-full bg-emerald-400 ring-1 ring-emerald-200/60" />}
-                            {visible && cell === "glitch" && <div className="h-1.5 w-1.5 rounded-full bg-violet-400 shadow-[0_0_4px_#a78bfa]" />}
-                            {visible && cell === "hazard" && <div className="h-1.5 w-1.5 rotate-45 bg-red-500 ring-1 ring-red-300/60" />}
-                            {visible && cell === "blocked" && <div className="h-2 w-0.5 bg-red-800 rotate-45" />}
+
                             {isCat && (
                               <div
                                 className="absolute inset-0 flex items-center justify-center text-[10px] transition-transform"
