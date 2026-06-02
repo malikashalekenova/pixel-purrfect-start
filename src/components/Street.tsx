@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CharacterCreation } from "@/components/CharacterCreation";
 import { PhoneReveal } from "@/components/PhoneReveal";
+import { CafeScene } from "@/components/CafeScene";
 import { modVitals, getVitals } from "@/components/VitalsHUD";
 import type { Profile } from "@/lib/profile";
 
@@ -152,6 +153,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const [showCreation, setShowCreation] = useState(false);
   const [pushokFarewell, setPushokFarewell] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
+  const [showCafe, setShowCafe] = useState(false);
 
   // Stats appear gradually
   useEffect(() => {
@@ -243,10 +245,16 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const handlePhoneComplete = () => {
     setShowPhone(false);
     onDiscoverCafe();
-    toast("📍 Кафе отмечено на карте", { description: "Маршрут построен." });
+    setShowCafe(true);
+  };
+
+  const handleCafeExit = () => {
+    setShowCafe(false);
+    toast("📍 Кафе отмечено на карте", { description: "Ты вышел обратно в город." });
     setPushokFarewell(true);
     setTimeout(() => setPushokFarewell(false), 5000);
   };
+
 
   const currentChoices = activeNpc === "pushok" ? PUSHOK_CHOICES : RYZHIK_CHOICES;
   const currentIntro = activeNpc === "pushok" ? PUSHOK_INTRO : RYZHIK_INTRO;
@@ -414,6 +422,9 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
 
       {/* Cinematic phone reveal → opens map mission to cafe */}
       {showPhone && <PhoneReveal onComplete={handlePhoneComplete} />}
+
+      {/* Cafe interior */}
+      {showCafe && <CafeScene onExit={handleCafeExit} />}
 
       {/* Pull phone from pocket button */}
       <button
