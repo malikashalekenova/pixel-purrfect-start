@@ -361,10 +361,10 @@ export function PhoneReveal({ onComplete }: Props) {
                         className={`rounded bg-cyan-400/20 py-2 text-xs text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>^</button>
                       <div />
                       <button type="button" onClick={() => step("left")}
-                        className={`rounded bg-cyan-400/20 py-2 text-xs text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>&lt;</button>
+                        className={`rounded bg-cyan-400/20 py-2 text-xs text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>{'<'}</button>
                       <div className="flex items-center justify-center text-[9px] text-white/40">{pos.r},{pos.c}</div>
                       <button type="button" onClick={() => step("right")}
-                        className={`rounded bg-cyan-400/20 py-2 text-xs text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>&gt;</button>
+                        className={`rounded bg-cyan-400/20 py-2 text-xs text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>{'>'}</button>
                       <div />
                       <button type="button" onClick={() => step("down")}
                         className={`rounded bg-cyan-400/20 py-2 text-xs text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>v</button>
