@@ -19,7 +19,7 @@ type Npc = {
   behavior: Behavior;
   story: string;
   intro: string;
-  choices: Array<{ label: string; tone: "good" | "mid" | "bad"; reply: string; social: number }>;
+  choices: Array<{ label: string; reply: string; social: number }>;
 };
 
 const GUESTS: Npc[] = [
