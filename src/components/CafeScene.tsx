@@ -19,7 +19,7 @@ type Npc = {
   behavior: Behavior;
   story: string;
   intro: string;
-  choices: Array<{ label: string; tone: "good" | "mid" | "bad"; reply: string; social: number }>;
+  choices: Array<{ label: string; reply: string; social: number }>;
 };
 
 const GUESTS: Npc[] = [
@@ -32,9 +32,10 @@ const GUESTS: Npc[] = [
     story: "Художница. Рисует портреты котов прямо за столиком.",
     intro: "Ты впервые здесь? У тебя интересная мордочка — нарисую как-нибудь.",
     choices: [
-      { label: "С удовольствием, спасибо", tone: "good", reply: "Договорились. Заходи почаще.", social: 8 },
-      { label: "Может быть, как-нибудь", tone: "mid", reply: "Окей, не настаиваю.", social: 1 },
-      { label: "Не лезь ко мне", tone: "bad", reply: "Поняла. Извини.", social: -10 },
+      { label: "С удовольствием, спасибо", reply: "Договорились. Заходи почаще.", social: 8 },
+      { label: "Может быть, как-нибудь", reply: "Окей, не настаиваю.", social: 1 },
+      { label: "А что ты обычно рисуешь?", reply: "Котов, неон, пустые улицы. Всё, что молчит красиво.", social: 5 },
+      { label: "Не лезь ко мне", reply: "Поняла. Извини.", social: -10 },
     ],
   },
   {
@@ -46,9 +47,10 @@ const GUESTS: Npc[] = [
     story: "Старый системщик. Уверяет, что NEKO_OS «дышит» по ночам.",
     intro: "Слышал, система опять глючит по ночам… ты тоже это чувствуешь?",
     choices: [
-      { label: "Да, что-то странное есть", tone: "good", reply: "Значит не один я. Спасибо, брат.", social: 7 },
-      { label: "Не замечал такого", tone: "mid", reply: "Мм. Может, показалось.", social: 0 },
-      { label: "Это бред параноика", tone: "bad", reply: "Понял. Разговор окончен.", social: -8 },
+      { label: "Да, что-то странное есть", reply: "Значит не один я. Спасибо, брат.", social: 7 },
+      { label: "Не замечал такого", reply: "Мм. Может, показалось.", social: 0 },
+      { label: "Расскажи подробнее", reply: "Гул в три ночи. И коты замолкают одновременно.", social: 4 },
+      { label: "Это бред параноика", reply: "Понял. Разговор окончен.", social: -8 },
     ],
   },
   {
@@ -60,9 +62,10 @@ const GUESTS: Npc[] = [
     story: "Тихо пьёт чай у окна. Любит смотреть на город.",
     intro: "У тебя усталый вид. Всё ок?",
     choices: [
-      { label: "Бывает по-разному", tone: "good", reply: "Держись. Здесь можно отдохнуть.", social: 6 },
-      { label: "Норм, не парься", tone: "mid", reply: "Ну ок.", social: 0 },
-      { label: "Отстань", tone: "bad", reply: "…", social: -9 },
+      { label: "Бывает по-разному", reply: "Держись. Здесь можно отдохнуть.", social: 6 },
+      { label: "Норм, не парься", reply: "Ну ок.", social: 0 },
+      { label: "А ты что тут делаешь одна?", reply: "Смотрю на город. Он тише, когда на него смотришь.", social: 4 },
+      { label: "Отстань", reply: "…", social: -9 },
     ],
   },
   {
@@ -74,9 +77,10 @@ const GUESTS: Npc[] = [
     story: "Компанейский кот. Травит байки за столиком с друзьями.",
     intro: "Ха-ха, ты бы видел его морду! А ты кто такой? Присядешь?",
     choices: [
-      { label: "Давай послушаю", tone: "good", reply: "Вот это разговор! Свой кот.", social: 9 },
-      { label: "Может позже", tone: "mid", reply: "Понял, заходи.", social: 1 },
-      { label: "Громко слишком", tone: "bad", reply: "Эээ… ну окей.", social: -6 },
+      { label: "Давай послушаю", reply: "Вот это разговор! Свой кот.", social: 9 },
+      { label: "Может позже", reply: "Понял, заходи.", social: 1 },
+      { label: "Расскажи самую дикую историю", reply: "О-о-о, садись. Это надолго.", social: 6 },
+      { label: "Громко слишком", reply: "Эээ… ну окей.", social: -6 },
     ],
   },
   {
@@ -88,9 +92,10 @@ const GUESTS: Npc[] = [
     story: "Молчит и смотрит. Кажется, наблюдает именно за тобой.",
     intro: "…Я тебя уже видел. В другом районе. Любопытно.",
     choices: [
-      { label: "Возможно. Мир тесен", tone: "good", reply: "Хороший ответ. Запомню.", social: 5 },
-      { label: "Обознался", tone: "mid", reply: "Возможно.", social: 0 },
-      { label: "Следишь за мной?", tone: "bad", reply: "Не льсти себе.", social: -7 },
+      { label: "Возможно. Мир тесен", reply: "Хороший ответ. Запомню.", social: 5 },
+      { label: "Обознался", reply: "Возможно.", social: 0 },
+      { label: "И что ты обо мне думаешь?", reply: "Что ты ещё не решил, кем хочешь быть.", social: 3 },
+      { label: "Следишь за мной?", reply: "Не льсти себе.", social: -7 },
     ],
   },
 ];
@@ -544,15 +549,9 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
                       key={i}
                       type="button"
                       onClick={() => choose(c)}
-                      className={`w-full rounded-md px-3 py-2 text-left text-[12px] ring-1 transition hover:bg-white/5 ${
-                        c.tone === "good"
-                          ? "ring-emerald-400/50 text-emerald-100"
-                          : c.tone === "mid"
-                            ? "ring-zinc-300/30 text-zinc-100"
-                            : "ring-rose-400/50 text-rose-100"
-                      }`}
+                      className="w-full rounded-md px-3 py-2 text-left text-[12px] text-amber-100 ring-1 ring-amber-200/30 transition hover:bg-white/5"
                     >
-                      {c.tone === "good" ? "🟢" : c.tone === "mid" ? "🟡" : "🔴"} {c.label}
+                      {c.label}
                     </button>
                   ))}
                 </div>
