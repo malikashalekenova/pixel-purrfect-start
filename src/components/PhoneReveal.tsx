@@ -10,42 +10,44 @@ type Props = {
 };
 
 // Tile types
-// 0 = road, 1 = building (blocked), 2 = glitch (slow), 3 = stability hazard
-// N = npc, C = cafe
-// 11 cols × 11 rows. Cafe (C) sits on row 0 with road below; start at bottom-left.
-// Harder maze: 13 rows × 13 cols, twisting corridors, dead-ends, hazards & glitches
+// 0 = road, 1 = wall, 2 = glitch (slow), 3 = hazard (-stability)
+// B = blocked sector (отказ доступа), N = npc, C = cafe
+// 15×15 labyrinth: несколько маршрутов, тупики, ложные пути, глитч-зоны
 const MAP: string[] = [
-  "11111111C1111",
-  "1000000000001",
-  "1011111110101",
-  "1010003000101",
-  "10101110N0101",
-  "1010100010111",
-  "1010101110001",
-  "1000101000101",
-  "1110101011101",
-  "10002000300N1",
-  "1011111111101",
-  "1000000000001",
-  "1111111111111",
+  "11111111C111111",
+  "100000000000001",
+  "101110110111101",
+  "101N101000B0101",
+  "101010101110101",
+  "100010001300101",
+  "101111101111101",
+  "100020001000001",
+  "101011111101111",
+  "100000000030001",
+  "10111B111111101",
+  "10100000N100101",
+  "101011111110101",
+  "100000020000001",
+  "111111111111111",
 ];
 
 const ROWS = MAP.length;
 const COLS = MAP[0].length;
 
-type Cell = "road" | "wall" | "glitch" | "hazard" | "npc" | "cafe";
+type Cell = "road" | "wall" | "glitch" | "hazard" | "blocked" | "npc" | "cafe";
 function cellAt(r: number, c: number): Cell {
   if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return "wall";
   const ch = MAP[r][c];
   if (ch === "1") return "wall";
   if (ch === "2") return "glitch";
   if (ch === "3") return "hazard";
+  if (ch === "B") return "blocked";
   if (ch === "N") return "npc";
   if (ch === "C") return "cafe";
   return "road";
 }
 
-const START = { r: 11, c: 1 };
+const START = { r: 13, c: 1 };
 
 export function PhoneReveal({ onComplete }: Props) {
   const [frame, setFrame] = useState<Frame>(1);
@@ -128,6 +130,11 @@ export function PhoneReveal({ onComplete }: Props) {
         setTimeout(() => setHint(null), 500);
         return;
       }
+      if (target === "blocked") {
+        setHint("⛔ отказ доступа: сектор заражён");
+        setTimeout(() => setHint(null), 800);
+        return;
+      }
       lastStepRef.current = now;
       setPos({ r: nr, c: nc });
 
@@ -190,10 +197,20 @@ export function PhoneReveal({ onComplete }: Props) {
       case "wall": return "#1a2740";
       case "glitch": return "#7c3aed";
       case "hazard": return "#7f1d1d";
+      case "blocked": return "#3a1f1f";
       case "cafe": return "#fbbf24";
       case "npc": return "#34d399";
       default: return "#06101c";
     }
+  };
+
+  // Fog-of-war: visibility радиус. Под 30% — карта дрожит и часть тайлов скрыта.
+  const unstable = minVital < 30;
+  const visionRadius = unstable ? 3 : 99;
+  const isVisible = (r: number, c: number) => {
+    if (visionRadius >= 99) return true;
+    const d = Math.abs(r - pos.r) + Math.abs(c - pos.c);
+    return d <= visionRadius;
   };
 
   const arrowDisabledClass = minVital < 30 ? "animate-pulse" : "";
@@ -272,8 +289,7 @@ export function PhoneReveal({ onComplete }: Props) {
                   📍 <b>добраться до кафе</b> {arrived && "✅"}
                 </div>
 
-                {/* Tile map */}
-                <div className="relative flex-1 overflow-hidden rounded-md bg-[#06101c] p-1">
+                <div className={`relative flex-1 overflow-hidden rounded-md bg-[#06101c] p-1 ${unstable ? "vitals-glitch-mini" : ""}`}>
                   <div
                     className="grid h-full w-full gap-[1px]"
                     style={{
@@ -285,19 +301,22 @@ export function PhoneReveal({ onComplete }: Props) {
                       Array.from({ length: COLS }).map((_, c) => {
                         const cell = cellAt(r, c);
                         const isCat = pos.r === r && pos.c === c;
+                        const visible = isVisible(r, c);
                         return (
                           <div
                             key={`${r}-${c}`}
                             className="relative flex items-center justify-center"
                             style={{
-                              background: tileBg(cell),
-                              boxShadow: cell === "cafe" ? "0 0 8px #fbbf24" : undefined,
+                              background: visible ? tileBg(cell) : "#02060c",
+                              boxShadow: cell === "cafe" && visible ? "0 0 8px #fbbf24" : undefined,
+                              opacity: visible ? 1 : 0.25,
                             }}
                           >
-                            {cell === "cafe" && <span className="text-[8px]">☕</span>}
-                            {cell === "npc" && <span className="text-[8px]">🐱</span>}
-                            {cell === "glitch" && <span className="text-[7px] text-white/70">⚡</span>}
-                            {cell === "hazard" && <span className="text-[7px]">🧠</span>}
+                            {visible && cell === "cafe" && <span className="text-[8px]">☕</span>}
+                            {visible && cell === "npc" && <span className="text-[8px]">🐱</span>}
+                            {visible && cell === "glitch" && <span className="text-[7px] text-white/70">⚡</span>}
+                            {visible && cell === "hazard" && <span className="text-[7px]">🧠</span>}
+                            {visible && cell === "blocked" && <span className="text-[7px]">⛔</span>}
                             {isCat && (
                               <span
                                 className="absolute inset-0 flex items-center justify-center text-[10px] transition-transform"
