@@ -13,18 +13,21 @@ type Props = {
 // 0 = road, 1 = building (blocked), 2 = glitch (slow), 3 = stability hazard
 // N = npc, C = cafe
 // 11 cols × 11 rows. Cafe (C) sits on row 0 with road below; start at bottom-left.
+// Harder maze: 13 rows × 13 cols, twisting corridors, dead-ends, hazards & glitches
 const MAP: string[] = [
-  "11111C11111",
-  "10000003001",
-  "10111110101",
-  "10100010101",
-  "10101010101",
-  "1010N010101",
-  "10101010101",
-  "10101110101",
-  "10100020001",
-  "10000000001",
-  "11111111111",
+  "11111111C1111",
+  "1000000010001",
+  "1011111110101",
+  "1010003010101",
+  "10101110N0101",
+  "1010100010111",
+  "1010101110001",
+  "1000101000101",
+  "1110101011101",
+  "10002000300N1",
+  "1011111111101",
+  "1000000000001",
+  "1111111111111",
 ];
 
 const ROWS = MAP.length;
@@ -42,7 +45,7 @@ function cellAt(r: number, c: number): Cell {
   return "road";
 }
 
-const START = { r: 9, c: 1 };
+const START = { r: 11, c: 1 };
 
 export function PhoneReveal({ onComplete }: Props) {
   const [frame, setFrame] = useState<Frame>(1);
