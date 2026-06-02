@@ -197,10 +197,20 @@ export function PhoneReveal({ onComplete }: Props) {
       case "wall": return "#1a2740";
       case "glitch": return "#7c3aed";
       case "hazard": return "#7f1d1d";
+      case "blocked": return "#3a1f1f";
       case "cafe": return "#fbbf24";
       case "npc": return "#34d399";
       default: return "#06101c";
     }
+  };
+
+  // Fog-of-war: visibility радиус. Под 30% — карта дрожит и часть тайлов скрыта.
+  const unstable = minVital < 30;
+  const visionRadius = unstable ? 3 : 99;
+  const isVisible = (r: number, c: number) => {
+    if (visionRadius >= 99) return true;
+    const d = Math.abs(r - pos.r) + Math.abs(c - pos.c);
+    return d <= visionRadius;
   };
 
   const arrowDisabledClass = minVital < 30 ? "animate-pulse" : "";
