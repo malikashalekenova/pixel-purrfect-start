@@ -5,6 +5,7 @@ export type Vitals = {
   energy: number;
   stability: number;
   psyche: number;
+  social: number;
 };
 
 export const FULL_VITALS: Vitals = {
@@ -12,6 +13,7 @@ export const FULL_VITALS: Vitals = {
   energy: 100,
   stability: 100,
   psyche: 100,
+  social: 100,
 };
 
 type Props = {
@@ -30,6 +32,7 @@ const STATS: Array<{
   { key: "energy", label: "Энергия", icon: "⚡", color: "#facc15" },
   { key: "stability", label: "Стабильность", icon: "🧠", color: "#22d3ee" },
   { key: "psyche", label: "Психика", icon: "🧩", color: "#a78bfa" },
+  { key: "social", label: "Общение", icon: "💬", color: "#34d399" },
 ];
 
 // Singleton store so any scene can read/modify vitals
@@ -45,6 +48,7 @@ export function setVitals(patch: Partial<Vitals>) {
     energy: clamp((patch.energy ?? _vitals.energy)),
     stability: clamp((patch.stability ?? _vitals.stability)),
     psyche: clamp((patch.psyche ?? _vitals.psyche)),
+    social: clamp((patch.social ?? _vitals.social)),
   };
   _listeners.forEach((l) => l(_vitals));
 }
@@ -54,6 +58,7 @@ export function modVitals(delta: Partial<Vitals>) {
     energy: _vitals.energy + (delta.energy ?? 0),
     stability: _vitals.stability + (delta.stability ?? 0),
     psyche: _vitals.psyche + (delta.psyche ?? 0),
+    social: _vitals.social + (delta.social ?? 0),
   });
 }
 function clamp(n: number) {
@@ -101,7 +106,7 @@ export function VitalsHUD({ location, paused, onCrash }: Props) {
     return () => clearInterval(id);
   }, [location, paused, onCrash]);
 
-  const minVal = Math.min(v.health, v.energy, v.stability, v.psyche);
+  const minVal = Math.min(v.health, v.energy, v.stability, v.psyche, v.social);
   const danger = minVal < 30;
   const critical = minVal < 15;
 
