@@ -1,0 +1,66 @@
+import { FUR_COLORS, EYE_COLORS, CLOTHING, type Profile } from "@/lib/profile";
+
+type Props = {
+  profile: Profile;
+  onClose: () => void;
+};
+
+export function ProfileWindow({ profile, onClose }: Props) {
+  const fur = FUR_COLORS.find((c) => c.id === profile.fur_color);
+  const eyes = EYE_COLORS.find((c) => c.id === profile.eye_color);
+  const clothing = CLOTHING.find((c) => c.id === profile.clothing);
+
+  const rows: [string, React.ReactNode][] = [
+    ["ID игрока", <span className="font-mono text-[10px] text-white/40">{profile.user_id.slice(0, 8)}...</span>],
+    ["Имя", profile.display_name ?? profile.username],
+    ["Цвет шерсти", <span className="inline-flex items-center gap-2">{fur && <span className="h-3 w-3 rounded-full ring-1 ring-white/30" style={{ background: fur.hex }} />}{fur?.label ?? profile.fur_color}</span>],
+    ["Цвет глаз", <span className="inline-flex items-center gap-2">{eyes && <span className="h-3 w-3 rounded-full ring-1 ring-white/30" style={{ background: eyes.hex }} />}{eyes?.label ?? profile.eye_color}</span>],
+    ["Одежда", `${clothing?.icon ?? ""} ${clothing?.label ?? profile.clothing}`],
+    ["Монеты", <span className="text-amber-300">🪙 {profile.coins}</span>],
+    ["Репутация", profile.reputation],
+    ["Уровень", <span className="text-cyan-300">{profile.level}</span>],
+    ["Опыт", <span className="text-cyan-300">✦ {profile.xp}</span>],
+    ["Выполнено контрактов", profile.contracts_completed],
+    ["Заработано всего", <span className="text-amber-300">🪙 {profile.total_earned}</span>],
+    ["Банда", profile.gang ?? <span className="text-white/40">Нет</span>],
+    ["Лидер банды", profile.gang_leader ? "Да" : <span className="text-white/40">Нет</span>],
+  ];
+
+  return (
+    <div className="absolute inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="w-full max-w-md rounded-2xl border border-cyan-400/20 bg-[#0a0f1a] text-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/80">
+              Профиль
+            </p>
+            <h2 className="mt-1 text-xl font-semibold">
+              {profile.display_name ?? profile.username}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md px-3 py-1.5 text-sm text-white/70 hover:bg-white/10 hover:text-white"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="max-h-[60vh] overflow-y-auto px-5 py-4">
+          <table className="w-full text-sm">
+            <tbody>
+              {rows.map(([label, value], i) => (
+                <tr key={i} className="border-b border-white/5 last:border-0">
+                  <td className="py-2 text-xs uppercase tracking-wider text-white/40">
+                    {label}
+                  </td>
+                  <td className="py-2 text-right text-white/90">{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
