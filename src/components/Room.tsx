@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
+import { CatSprite } from "@/components/CatSprite";
+
 
 type Props = {
   onExit: () => void;
@@ -158,7 +160,7 @@ export function Room({ onExit, onRestart, onLoad }: Props) {
       {/* Animated cat sprite during dying sequence */}
       {showCat && (
         <div className={`cat-base ${catState}`} aria-hidden>
-          🐱
+          <CatSprite size="lg" />
           {(phase === "lying" || phase === "critical" || phase === "unconscious") && (
             <div
               className="absolute left-1/2 top-full mt-2 h-2 w-24 -translate-x-1/2 rounded-full bg-black/60 blur-md"
@@ -166,6 +168,7 @@ export function Room({ onExit, onRestart, onLoad }: Props) {
             />
           )}
         </div>
+
       )}
 
       {/* Dizziness swirl */}

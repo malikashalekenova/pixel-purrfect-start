@@ -3,8 +3,10 @@ import { toast } from "sonner";
 import { CharacterCreation } from "@/components/CharacterCreation";
 import { PhoneReveal } from "@/components/PhoneReveal";
 import { CafeScene } from "@/components/CafeScene";
+import { CatSprite } from "@/components/CatSprite";
 import { modVitals, getVitals } from "@/components/VitalsHUD";
 import type { Profile } from "@/lib/profile";
+
 
 type MoodTier = "friend" | "neutral" | "negative" | "hate";
 
@@ -337,7 +339,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
             <div className="absolute -bottom-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white" />
           </div>
         )}
-        <PushokSprite />
+        <CatSprite size="md" />
         <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-yellow-200">
           ПУШОК
         </div>
@@ -353,11 +355,12 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
         style={{ opacity: moodRyzhik === "hate" ? 0.35 : 1 }}
       >
         <MoodBadge tier={moodRyzhik} />
-        <CatSprite />
+        <CatSprite size="md" />
         <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-orange-300">
           РЫЖИК
         </div>
       </button>
+
 
 
 
@@ -366,9 +369,10 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
         <div className="absolute inset-0 z-30 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center">
           <div className={`m-4 w-full max-w-xl rounded-xl border ${currentBorder} bg-[#0a0e1a]/95 p-5 shadow-2xl ring-1 ring-white/5`}>
             <div className="mb-3 flex items-center gap-3">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${currentAccent} text-lg`}>
-                🐱
+              <div className={`flex h-12 w-10 items-center justify-center rounded-md bg-gradient-to-br ${currentAccent}`}>
+                <CatSprite size="xs" />
               </div>
+
               <div>
                 <div className={`font-['Press_Start_2P'] text-[10px] ${currentLabelColor}`}>
                   {currentName}
@@ -438,63 +442,8 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   );
 }
 
-function PushokSprite() {
-  // Маленький пушистый кремовый котик в большом жёлтом свитере
-  return (
-    <div className="relative h-20 w-16" style={{ imageRendering: "pixelated" }}>
-      {/* Head (cream) */}
-      <div className="absolute left-1/2 top-0 h-8 w-10 -translate-x-1/2 rounded-sm bg-amber-100 ring-2 ring-amber-300" />
-      {/* Fluffy ears */}
-      <div className="absolute left-0 top-0 h-3 w-3 -rotate-12 bg-amber-100 ring-1 ring-amber-300" />
-      <div className="absolute right-0 top-0 h-3 w-3 rotate-12 bg-amber-100 ring-1 ring-amber-300" />
-      {/* Inner ears */}
-      <div className="absolute left-1 top-1 h-1.5 w-1.5 bg-pink-300" />
-      <div className="absolute right-1 top-1 h-1.5 w-1.5 bg-pink-300" />
-      {/* Eyes */}
-      <div className="absolute left-3 top-3 h-1.5 w-1.5 bg-sky-700" />
-      <div className="absolute right-3 top-3 h-1.5 w-1.5 bg-sky-700" />
-      {/* Nose */}
-      <div className="absolute left-1/2 top-5 h-1 w-1 -translate-x-1/2 bg-pink-400" />
-      {/* Big yellow sweater */}
-      <div className="absolute left-1/2 top-7 h-11 w-14 -translate-x-1/2 rounded-md bg-yellow-300 ring-2 ring-yellow-600" />
-      {/* Sweater pattern */}
-      <div className="absolute left-1/2 top-9 h-1 w-10 -translate-x-1/2 bg-yellow-500/60" />
-      <div className="absolute left-1/2 top-12 h-1 w-10 -translate-x-1/2 bg-yellow-500/60" />
-      {/* Waving paw */}
-      <div className="absolute -right-1 top-8 h-3 w-3 rotate-12 bg-amber-100 ring-1 ring-amber-300" />
-      {/* Legs */}
-      <div className="absolute left-3 bottom-0 h-3 w-2.5 bg-amber-100 ring-1 ring-amber-300" />
-      <div className="absolute right-3 bottom-0 h-3 w-2.5 bg-amber-100 ring-1 ring-amber-300" />
-    </div>
-  );
-}
+// Котики унифицированы — см. src/components/CatSprite.tsx
 
-
-function CatSprite() {
-  // Simple CSS pixel cat in green jacket
-  return (
-    <div
-      className="relative h-20 w-16"
-      style={{ imageRendering: "pixelated" }}
-    >
-      {/* Head */}
-      <div className="absolute left-1/2 top-0 h-8 w-10 -translate-x-1/2 rounded-sm bg-orange-400 ring-2 ring-orange-700" />
-      {/* Ears */}
-      <div className="absolute left-1 top-0 h-3 w-3 -rotate-12 bg-orange-400" />
-      <div className="absolute right-1 top-0 h-3 w-3 rotate-12 bg-orange-400" />
-      {/* Eyes */}
-      <div className="absolute left-3 top-3 h-1.5 w-1.5 bg-emerald-300" />
-      <div className="absolute right-3 top-3 h-1.5 w-1.5 bg-emerald-300" />
-      {/* Body (green jacket) */}
-      <div className="absolute left-1/2 top-7 h-10 w-12 -translate-x-1/2 rounded-sm bg-emerald-600 ring-2 ring-emerald-900" />
-      {/* Jacket zipper */}
-      <div className="absolute left-1/2 top-8 h-8 w-0.5 -translate-x-1/2 bg-emerald-300/70" />
-      {/* Legs */}
-      <div className="absolute left-3 bottom-0 h-3 w-2.5 bg-stone-800" />
-      <div className="absolute right-3 bottom-0 h-3 w-2.5 bg-stone-800" />
-    </div>
-  );
-}
 
 function NeedsHud({
   thirst,
