@@ -238,11 +238,16 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const handleProfileCreated = (profile: Profile) => {
     setShowCreation(false);
     onProfileCreated(profile);
-    // Final farewell line from Пушок
-    setTimeout(() => {
-      setPushokFarewell(true);
-      setTimeout(() => setPushokFarewell(false), 5000);
-    }, 600);
+    // Cinematic phone reveal → map mission to cafe
+    setTimeout(() => setShowPhone(true), 500);
+  };
+
+  const handlePhoneComplete = () => {
+    setShowPhone(false);
+    onDiscoverCafe();
+    toast("📍 Кафе отмечено на карте", { description: "Маршрут построен." });
+    setPushokFarewell(true);
+    setTimeout(() => setPushokFarewell(false), 5000);
   };
 
   const currentChoices = activeNpc === "pushok" ? PUSHOK_CHOICES : RYZHIK_CHOICES;
