@@ -4,6 +4,7 @@ import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
 import { Workshop } from "@/components/Workshop";
 import { Street } from "@/components/Street";
+import { Room } from "@/components/Room";
 import { Leaderboard } from "@/components/Leaderboard";
 import { toast } from "sonner";
 
