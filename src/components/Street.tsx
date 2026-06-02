@@ -1,7 +1,39 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CharacterCreation } from "@/components/CharacterCreation";
+import { modVitals, getVitals } from "@/components/VitalsHUD";
 import type { Profile } from "@/lib/profile";
+
+type MoodTier = "friend" | "neutral" | "negative" | "hate";
+
+function moodFromScore(rel: number, social: number): MoodTier {
+  // Combine local relationship (-N..+N) with global social vital (0..100)
+  const score = rel * 8 + (social - 50);
+  if (score >= 20) return "friend";
+  if (score >= -10) return "neutral";
+  if (score >= -35) return "negative";
+  return "hate";
+}
+
+const MOOD_META: Record<MoodTier, { icon: string; ring: string; label: string; line: string }> = {
+  friend:   { icon: "💚", ring: "ring-emerald-400 bg-emerald-500/20", label: "Дружелюбие", line: "Привет! Рад тебя видеть!" },
+  neutral:  { icon: "😐", ring: "ring-zinc-400 bg-zinc-500/20",       label: "Нейтрально", line: "..." },
+  negative: { icon: "😾", ring: "ring-rose-500 bg-rose-500/20",       label: "Негатив",    line: "Я тебе не доверяю..." },
+  hate:     { icon: "🚫", ring: "ring-red-600 bg-red-900/40",         label: "Отказ",      line: "Уйди." },
+};
+
+function MoodBadge({ tier }: { tier: MoodTier }) {
+  const m = MOOD_META[tier];
+  return (
+    <div
+      className={`absolute -top-16 left-1/2 -translate-x-1/2 flex h-7 w-7 items-center justify-center rounded-full ring-2 ${m.ring} backdrop-blur text-sm shadow-lg`}
+      title={m.label}
+      style={{ animation: tier === "hate" ? "vitals-flicker 0.4s steps(2) infinite" : undefined }}
+    >
+      {m.icon}
+    </div>
+  );
+}
 
 type Props = {
   onCommunicate: (delta: number) => void;
@@ -140,7 +172,22 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
     }
   }, [social, lonely]);
 
+  // Track global social vital for mood reactivity
+  const [globalSocial, setGlobalSocial] = useState(getVitals().social);
+  useEffect(() => {
+    const id = setInterval(() => setGlobalSocial(getVitals().social), 600);
+    return () => clearInterval(id);
+  }, []);
+
+  const moodPushok = moodFromScore(relPushok, globalSocial);
+  const moodRyzhik = moodFromScore(relRyzhik, globalSocial);
+
   const openDialog = (npc: NpcId) => {
+    const tier = npc === "pushok" ? moodPushok : moodRyzhik;
+    if (tier === "hate") {
+      toast("NPC игнорирует тебя", { description: "Подними 💬 Общение, чтобы вернуть доверие." });
+      return;
+    }
     setActiveNpc(npc);
     setReply(null);
   };
@@ -149,6 +196,8 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
     if (!activeNpc) return;
     setReply(c.reply);
     setSocial((s) => Math.min(100, s + c.comm));
+    // Push to global Общение vital (rude answers drain it)
+    modVitals({ social: c.rel < 0 ? -15 : c.comm * 0.4 });
     onCommunicate(c.xp);
 
     if (activeNpc === "pushok") {
@@ -265,17 +314,14 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
         type="button"
         onClick={() => openDialog("pushok")}
         aria-label="Поговорить с Пушком"
-        className="group absolute left-[28%] bottom-[20%] cursor-pointer focus:outline-none"
+        className="group absolute left-[28%] bottom-[20%] cursor-pointer focus:outline-none transition-opacity"
+        style={{ opacity: moodPushok === "hate" ? 0.35 : 1 }}
       >
+        <MoodBadge tier={moodPushok} />
         {pushokFarewell && (
-          <div className="absolute -top-20 left-1/2 z-10 w-56 -translate-x-1/2 rounded-2xl bg-white px-3 py-2 text-[11px] leading-snug text-stone-800 shadow-2xl ring-1 ring-black/10 animate-fade-in">
+          <div className="absolute -top-28 left-1/2 z-10 w-56 -translate-x-1/2 rounded-2xl bg-white px-3 py-2 text-[11px] leading-snug text-stone-800 shadow-2xl ring-1 ring-black/10 animate-fade-in">
             «Надеюсь, тебе понравится в нашем городе!»
             <div className="absolute -bottom-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white" />
-          </div>
-        )}
-        {!pushokFarewell && (
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 animate-bounce text-2xl drop-shadow-[0_0_8px_rgba(253,224,71,0.7)]">
-            👋
           </div>
         )}
         <PushokSprite />
@@ -290,16 +336,17 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
         type="button"
         onClick={() => openDialog("ryzhik")}
         aria-label="Поговорить с Рыжиком"
-        className="group absolute left-[68%] bottom-[22%] -translate-x-1/2 cursor-pointer focus:outline-none"
+        className="group absolute left-[68%] bottom-[22%] -translate-x-1/2 cursor-pointer focus:outline-none transition-opacity"
+        style={{ opacity: moodRyzhik === "hate" ? 0.35 : 1 }}
       >
-        <div className="absolute -top-10 left-1/2 -translate-x-1/2 animate-bounce text-2xl drop-shadow-[0_0_8px_rgba(127,231,255,0.7)]">
-          💬
-        </div>
+        <MoodBadge tier={moodRyzhik} />
         <CatSprite />
         <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-orange-300">
           РЫЖИК
         </div>
       </button>
+
+
 
       {/* Dialog modal */}
       {activeNpc && (
