@@ -10,12 +10,55 @@ type DialogChoice = {
   id: 1 | 2 | 3 | 4;
   label: string;
   reply: string;
-  rel: number; // relation change
+  rel: number;
   xp: number;
-  comm: number; // communication restore
+  comm: number;
 };
 
-const CHOICES: DialogChoice[] = [
+type NpcId = "pushok" | "ryzhik";
+
+const PUSHOK_INTRO =
+  "Ой! Привет! Я тебя раньше здесь не видел. Ты недавно сюда переехал?";
+
+const PUSHOK_CHOICES: DialogChoice[] = [
+  {
+    id: 1,
+    label: "😊 Да, совсем недавно.",
+    reply: "Здорово! Добро пожаловать! Если что-то понадобится, можешь спрашивать.",
+    rel: 2,
+    xp: 8,
+    comm: 12,
+  },
+  {
+    id: 2,
+    label: "😺 Ага. Пока привыкаю к району.",
+    reply: "Понимаю. Тут очень уютно, когда привыкнешь.",
+    rel: 1,
+    xp: 6,
+    comm: 10,
+  },
+  {
+    id: 3,
+    label: "🤔 Может быть. А ты кто?",
+    reply: "Я Пушок! Живу тут неподалёку и люблю знакомиться с соседями!",
+    rel: 1,
+    xp: 5,
+    comm: 8,
+  },
+  {
+    id: 4,
+    label: "😶 Извини, мне пора.",
+    reply: "Ой, хорошо! Хорошего дня тогда!",
+    rel: 0,
+    xp: 1,
+    comm: 5,
+  },
+];
+
+const RYZHIK_INTRO =
+  "Привет. Ты новенький в этом районе, да? Я раньше тебя здесь не видел.";
+
+const RYZHIK_CHOICES: DialogChoice[] = [
   {
     id: 1,
     label: "Да, недавно переехал.",
@@ -50,6 +93,7 @@ const CHOICES: DialogChoice[] = [
     comm: 5,
   },
 ];
+
 
 export function Street({ onCommunicate, onDiscoverCafe }: Props) {
   // Needs bars
