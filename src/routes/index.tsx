@@ -25,6 +25,7 @@ function Index() {
   const [stage, setStage] = useState<Stage>("menu");
   const [coins, setCoins] = useState(0);
   const [xp, setXp] = useState(0);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
 
   const handlePlay = () => {
     setStage("zooming");
