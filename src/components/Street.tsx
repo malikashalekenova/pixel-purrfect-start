@@ -356,6 +356,9 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
           </div>
         </div>
       )}
+
+      {/* Character creation after meeting Пушок */}
+      {showCreation && <CharacterCreation onCreated={handleProfileCreated} />}
     </div>
   );
 }
