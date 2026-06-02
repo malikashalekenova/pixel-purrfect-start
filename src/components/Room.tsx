@@ -9,12 +9,15 @@ type Props = {
 
 type Phase =
   | "idle"        // initial thought + choice
-  | "staying"     // chose to stay — slight darken
-  | "dizzy"       // dizziness effects
-  | "fainting"    // falls unconscious
-  | "alone"       // camera pulls back, cat lying alone
-  | "black"       // screen fully black
-  | "dead";       // death message + buttons
+  | "standing"    // chose to stay — stands still
+  | "swaying"     // light sway, losing balance
+  | "stumbling"   // uneven steps, screen shake
+  | "collapsing"  // legs give out, falls on side
+  | "lying"       // lies motionless, camera zooms in
+  | "critical"    // "Состояние критическое" message
+  | "unconscious" // "Персонаж потерял сознание"
+  | "black"       // full black
+  | "dead";       // death screen
 
 export function Room({ onExit, onRestart, onLoad }: Props) {
   const [showThought, setShowThought] = useState(false);
@@ -30,39 +33,115 @@ export function Room({ onExit, onRestart, onLoad }: Props) {
     };
   }, []);
 
-  // Drive the death sequence when player chooses to stay
+  // Drive the death sequence
   useEffect(() => {
     if (phase === "idle" || phase === "dead") return;
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    if (phase === "staying") {
-      timers.push(setTimeout(() => setPhase("dizzy"), 2200));
-    } else if (phase === "dizzy") {
-      timers.push(setTimeout(() => setPhase("fainting"), 2800));
-    } else if (phase === "fainting") {
-      timers.push(setTimeout(() => setPhase("alone"), 2200));
-    } else if (phase === "alone") {
-      timers.push(setTimeout(() => setPhase("black"), 3800));
-    } else if (phase === "black") {
-      timers.push(setTimeout(() => setPhase("dead"), 1600));
-    }
-    return () => timers.forEach(clearTimeout);
+    const seq: Record<Phase, { next: Phase; delay: number } | null> = {
+      idle: null,
+      standing: { next: "swaying", delay: 1800 },
+      swaying: { next: "stumbling", delay: 2600 },
+      stumbling: { next: "collapsing", delay: 2400 },
+      collapsing: { next: "lying", delay: 1600 },
+      lying: { next: "critical", delay: 2800 },
+      critical: { next: "unconscious", delay: 2200 },
+      unconscious: { next: "black", delay: 2000 },
+      black: { next: "dead", delay: 1400 },
+      dead: null,
+    };
+    const step = seq[phase];
+    if (!step) return;
+    const t = setTimeout(() => setPhase(step.next), step.delay);
+    return () => clearTimeout(t);
   }, [phase]);
 
   const isDying = phase !== "idle";
+
+  // Camera scale: gentle zoom-in as he lies alone
+  const cameraScale =
+    phase === "lying" || phase === "critical" ? 1.15 :
+    phase === "unconscious" ? 1.2 :
+    phase === "black" || phase === "dead" ? 1.25 :
+    1;
+
+  // Edge darkening
   const darkness =
-    phase === "staying" ? 0.35 :
-    phase === "dizzy" ? 0.55 :
-    phase === "fainting" ? 0.78 :
-    phase === "alone" ? 0.88 :
+    phase === "standing" ? 0.15 :
+    phase === "swaying" ? 0.3 :
+    phase === "stumbling" ? 0.45 :
+    phase === "collapsing" ? 0.6 :
+    phase === "lying" ? 0.7 :
+    phase === "critical" ? 0.82 :
+    phase === "unconscious" ? 0.92 :
     phase === "black" || phase === "dead" ? 1 : 0;
 
-  const cameraScale =
-    phase === "alone" ? 0.85 :
-    phase === "black" || phase === "dead" ? 0.7 : 1;
+  const blur =
+    phase === "swaying" ? "blur(1px)" :
+    phase === "stumbling" ? "blur(2px) saturate(0.7)" :
+    phase === "collapsing" || phase === "lying" ? "blur(2.5px) saturate(0.5)" :
+    phase === "critical" || phase === "unconscious" ? "blur(3px) saturate(0.3)" :
+    "none";
+
+  // Cat sprite animation class per phase
+  const catState =
+    phase === "standing" ? "cat-standing" :
+    phase === "swaying" ? "cat-swaying" :
+    phase === "stumbling" ? "cat-stumbling" :
+    phase === "collapsing" ? "cat-collapsing" :
+    phase === "lying" || phase === "critical" || phase === "unconscious" ? "cat-lying" :
+    "";
+
+  const showCat = isDying && phase !== "black" && phase !== "dead";
 
   return (
-    <div className="absolute inset-0 z-20 overflow-hidden bg-black">
-      {/* Room background (same dirty apartment) */}
+    <div
+      className={`absolute inset-0 z-20 overflow-hidden bg-black ${
+        phase === "stumbling" ? "shake" : ""
+      }`}
+    >
+      <style>{`
+        @keyframes sway {
+          0%,100% { transform: translateX(-50%) rotate(-3deg); }
+          50%     { transform: translateX(-50%) rotate(3deg); }
+        }
+        @keyframes stumble {
+          0%   { transform: translate(-50%, 0) rotate(-6deg); }
+          25%  { transform: translate(-55%, -2px) rotate(4deg); }
+          50%  { transform: translate(-45%, 2px) rotate(-5deg); }
+          75%  { transform: translate(-52%, -1px) rotate(6deg); }
+          100% { transform: translate(-50%, 0) rotate(-3deg); }
+        }
+        @keyframes collapse {
+          0%   { transform: translate(-50%, 0) rotate(-3deg); }
+          40%  { transform: translate(-50%, 8px) rotate(-10deg); }
+          70%  { transform: translate(-48%, 22px) rotate(-55deg); }
+          100% { transform: translate(-46%, 38px) rotate(-90deg); }
+        }
+        @keyframes shake {
+          0%,100% { transform: translate(0,0); }
+          20% { transform: translate(-2px, 1px); }
+          40% { transform: translate(2px, -1px); }
+          60% { transform: translate(-1px, 2px); }
+          80% { transform: translate(1px, -2px); }
+        }
+        .shake { animation: shake 0.25s infinite; }
+        .cat-base {
+          position: absolute;
+          left: 50%;
+          bottom: 22%;
+          font-size: 56px;
+          filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+          transform: translateX(-50%);
+          transition: filter 1s ease;
+          user-select: none;
+        }
+        .cat-standing { transform: translateX(-50%) rotate(0deg); }
+        .cat-swaying  { animation: sway 1.6s ease-in-out infinite; }
+        .cat-stumbling{ animation: stumble 0.9s ease-in-out infinite; }
+        .cat-collapsing { animation: collapse 1.5s ease-in forwards; }
+        .cat-lying    { transform: translate(-46%, 38px) rotate(-90deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8)) grayscale(0.6); }
+      `}</style>
+
+      {/* Room background */}
       <img
         src={bg}
         alt="Маленькая грязная квартира главного героя"
@@ -70,36 +149,38 @@ export function Room({ onExit, onRestart, onLoad }: Props) {
         style={{
           imageRendering: "pixelated",
           transform: `scale(${cameraScale})`,
-          filter: phase === "dizzy" || phase === "fainting" ? "blur(2px) saturate(0.6)" : "none",
+          transformOrigin: "50% 70%",
+          filter: blur,
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/70" />
 
-      {/* Fallen cat silhouette during alone/black phase */}
-      {(phase === "alone" || phase === "fainting") && (
-        <div
-          className="absolute z-30 animate-fade-in"
-          style={{ left: "50%", top: "68%", transform: "translate(-50%, -50%)" }}
-        >
-          <div className="text-6xl opacity-90 select-none" style={{ filter: "grayscale(0.5)" }}>
-            🐈‍⬛
-          </div>
-          <div className="mt-1 h-2 w-20 rounded-full bg-black/50 blur-sm mx-auto" />
+      {/* Animated cat sprite during dying sequence */}
+      {showCat && (
+        <div className={`cat-base ${catState}`} aria-hidden>
+          🐱
+          {(phase === "lying" || phase === "critical" || phase === "unconscious") && (
+            <div
+              className="absolute left-1/2 top-full mt-2 h-2 w-24 -translate-x-1/2 rounded-full bg-black/60 blur-md"
+              style={{ transform: "translateX(-50%) rotate(90deg)" }}
+            />
+          )}
         </div>
       )}
 
-      {/* Dizziness swirl overlay */}
-      {(phase === "dizzy" || phase === "fainting") && (
+      {/* Dizziness swirl */}
+      {(phase === "swaying" || phase === "stumbling" || phase === "collapsing") && (
         <div
-          className="pointer-events-none absolute inset-0 z-30 animate-pulse"
+          className="pointer-events-none absolute inset-0 z-30"
           style={{
             background:
-              "radial-gradient(ellipse at center, rgba(120,80,180,0.25) 0%, rgba(0,0,0,0.6) 70%)",
+              "radial-gradient(ellipse at center, rgba(120,80,180,0.18) 0%, rgba(0,0,0,0.5) 75%)",
+            animation: "pulse 1.4s ease-in-out infinite",
           }}
         />
       )}
 
-      {/* Thought bubble above the cat (initial) */}
+      {/* Thought bubble (idle only) */}
       {showThought && phase === "idle" && (
         <div
           className="absolute z-30 -translate-x-1/2 -translate-y-full animate-fade-in"
@@ -126,14 +207,10 @@ export function Room({ onExit, onRestart, onLoad }: Props) {
         </div>
       )}
 
-      {/* Choice buttons: Exit / Stay */}
+      {/* Choice buttons */}
       {showHint && phase === "idle" && (
         <div className="absolute left-1/2 bottom-10 z-30 flex -translate-x-1/2 gap-4 animate-fade-in">
-          <button
-            type="button"
-            onClick={onExit}
-            className="group flex flex-col items-center"
-          >
+          <button type="button" onClick={onExit} className="group flex flex-col items-center">
             <div className="relative h-24 w-14 rounded-t-md bg-gradient-to-b from-amber-900 to-amber-950 ring-2 ring-black/60 shadow-[0_0_24px_rgba(251,191,36,0.25)] transition group-hover:shadow-[0_0_36px_rgba(251,191,36,0.55)]">
               <div className="absolute right-2 top-1/2 h-1.5 w-1.5 rounded-full bg-amber-300" />
               <div className="absolute inset-2 rounded-sm border border-amber-700/60" />
@@ -145,7 +222,7 @@ export function Room({ onExit, onRestart, onLoad }: Props) {
 
           <button
             type="button"
-            onClick={() => setPhase("staying")}
+            onClick={() => setPhase("standing")}
             className="group flex flex-col items-center"
           >
             <div className="relative h-24 w-14 rounded-md bg-gradient-to-b from-stone-700 to-stone-900 ring-2 ring-black/60 shadow-[0_0_18px_rgba(120,120,140,0.25)] transition group-hover:shadow-[0_0_28px_rgba(160,160,200,0.45)] flex items-center justify-center text-2xl">
@@ -158,31 +235,60 @@ export function Room({ onExit, onRestart, onLoad }: Props) {
         </div>
       )}
 
-      {/* Subtle inner thought during dying */}
-      {phase === "staying" && (
-        <div className="absolute left-1/2 top-10 z-30 -translate-x-1/2 animate-fade-in">
+      {/* Inner-thought captions */}
+      {phase === "standing" && (
+        <div className="absolute left-1/2 top-10 z-40 -translate-x-1/2 animate-fade-in">
           <p className="rounded-lg bg-black/60 px-4 py-2 text-xs italic text-stone-300 backdrop-blur">
             Что-то мне нехорошо...
           </p>
         </div>
       )}
-      {phase === "dizzy" && (
-        <div className="absolute left-1/2 top-10 z-30 -translate-x-1/2 animate-fade-in">
+      {phase === "swaying" && (
+        <div className="absolute left-1/2 top-10 z-40 -translate-x-1/2 animate-fade-in">
           <p className="rounded-lg bg-black/60 px-4 py-2 text-xs italic text-stone-400 backdrop-blur">
-            Голова кружится... в глазах темнеет...
+            Земля плывёт под лапами...
+          </p>
+        </div>
+      )}
+      {phase === "stumbling" && (
+        <div className="absolute left-1/2 top-10 z-40 -translate-x-1/2 animate-fade-in">
+          <p className="rounded-lg bg-black/60 px-4 py-2 text-xs italic text-stone-400 backdrop-blur">
+            Не могу удержаться на ногах...
           </p>
         </div>
       )}
 
       {/* Darkening veil */}
       <div
-        className="pointer-events-none absolute inset-0 z-40 bg-black transition-opacity duration-[1600ms]"
+        className="pointer-events-none absolute inset-0 z-40 bg-black transition-opacity duration-[1400ms]"
         style={{ opacity: darkness }}
       />
 
       {/* Vignette (idle only) */}
       {phase === "idle" && (
         <div className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_45%,rgba(0,0,0,0.75)_100%)]" />
+      )}
+
+      {/* Mid-fade status messages */}
+      {phase === "critical" && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center animate-fade-in">
+          <p
+            className="font-['Press_Start_2P'] text-base text-red-400 sm:text-2xl"
+            style={{ textShadow: "0 0 14px rgba(248,113,113,0.5)" }}
+          >
+            СОСТОЯНИЕ КРИТИЧЕСКОЕ
+          </p>
+        </div>
+      )}
+      {phase === "unconscious" && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center animate-fade-in">
+          <p
+            className="font-['Press_Start_2P'] text-sm text-stone-300 sm:text-xl"
+            style={{ textShadow: "0 0 10px rgba(0,0,0,0.8)" }}
+          >
+            ПЕРСОНАЖ ПОТЕРЯЛ СОЗНАНИЕ
+          </p>
+        </div>
       )}
 
       {/* Death screen */}
@@ -195,10 +301,10 @@ export function Room({ onExit, onRestart, onLoad }: Props) {
             ВЫ ПОГИБЛИ
           </h2>
           <p className="mt-8 max-w-md text-sm text-stone-300 sm:text-base">
-            <span className="text-amber-300">Совет:</span> необходимо поддерживать
-            все показатели состояния не ниже{" "}
-            <span className="font-bold text-amber-300">30%</span>. Если какой-либо
-            показатель опускается ниже 30%, здоровье начинает быстро ухудшаться.
+            <span className="text-amber-300">Совет:</span> все показатели должны
+            быть не ниже{" "}
+            <span className="font-bold text-amber-300">30%</span>. При падении
+            ниже этого уровня начинается необратимое ухудшение состояния.
           </p>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
@@ -218,11 +324,6 @@ export function Room({ onExit, onRestart, onLoad }: Props) {
             </button>
           </div>
         </div>
-      )}
-
-      {/* Hide HUD-ish chrome by covering corners during dying handled by overlay */}
-      {isDying && phase !== "dead" && (
-        <div className="pointer-events-none absolute inset-0 z-30" />
       )}
     </div>
   );
