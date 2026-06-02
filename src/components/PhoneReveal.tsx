@@ -16,9 +16,9 @@ type Props = {
 // Harder maze: 13 rows × 13 cols, twisting corridors, dead-ends, hazards & glitches
 const MAP: string[] = [
   "11111111C1111",
-  "1000000010001",
+  "1000000000001",
   "1011111110101",
-  "1010003010101",
+  "1010003000101",
   "10101110N0101",
   "1010100010111",
   "1010101110001",
