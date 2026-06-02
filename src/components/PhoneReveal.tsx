@@ -332,7 +332,7 @@ export function PhoneReveal({ onComplete }: Props) {
                 {frame === 6 && (
                   <button type="button" onClick={startMission}
                     className="rounded-md bg-cyan-400 px-3 py-1.5 text-xs font-bold text-[#0a1322] hover:bg-cyan-300">
-                    [>] ЗАПУСТИТЬ МАРШРУТ
+                    {'[>]' } ЗАПУСТИТЬ МАРШРУТ
                   </button>
                 )}
 
