@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
+import { Workshop } from "@/components/Workshop";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
