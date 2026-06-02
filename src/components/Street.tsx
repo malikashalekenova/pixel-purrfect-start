@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CharacterCreation } from "@/components/CharacterCreation";
 import { PhoneReveal } from "@/components/PhoneReveal";
+import { CafeScene } from "@/components/CafeScene";
 import { modVitals, getVitals } from "@/components/VitalsHUD";
 import type { Profile } from "@/lib/profile";
 
