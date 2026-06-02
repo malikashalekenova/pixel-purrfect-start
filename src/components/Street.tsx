@@ -153,6 +153,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const [showCreation, setShowCreation] = useState(false);
   const [pushokFarewell, setPushokFarewell] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
+  const [showCafe, setShowCafe] = useState(false);
 
   // Stats appear gradually
   useEffect(() => {
