@@ -155,6 +155,9 @@ function Index() {
         <Workshop onComplete={handleWorkshopComplete} />
       )}
 
+      {/* Room scene — after first contract, before going outside */}
+      {stage === "room-after" && <Room onExit={handleLeaveRoom} />}
+
       {/* Street scene after first contract */}
       {stage === "street" && (
         <Street
@@ -164,7 +167,7 @@ function Index() {
       )}
 
       {/* HUD: coins / xp */}
-      {(stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done" || stage === "street") && (
+      {(stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done" || stage === "room-after" || stage === "street") && (
         <div className="pointer-events-none absolute right-3 top-3 z-[60] flex items-center gap-2 text-xs">
           <span className="rounded-full bg-black/60 px-2.5 py-1 text-amber-300 ring-1 ring-white/10 backdrop-blur">
             🪙 {coins}
