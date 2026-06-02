@@ -245,7 +245,7 @@ export function ShopWindow({ open, onClose, coins, onBuy, purchaseCount }: Props
 
                   <div className="flex flex-col items-end gap-1">
                     <span className="font-bold text-amber-300">
-                      {item.price} <span className="text-[10px] text-amber-300/70">DC</span>
+                      🪙 {item.price}
                     </span>
                     <button
                       type="button"
