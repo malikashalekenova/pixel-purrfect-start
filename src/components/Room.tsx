@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
+import { CatSprite } from "@/components/CatSprite";
+
 
 type Props = {
   onExit: () => void;
