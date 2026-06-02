@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getVitals } from "./VitalsHUD";
 
 type Frame = 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -9,45 +9,45 @@ type Props = {
   onComplete: () => void;
 };
 
-// Tile types
-// 0 = road, 1 = wall, 2 = glitch (slow), 3 = hazard (-stability)
-// B = blocked sector (отказ доступа), N = npc, C = cafe
-// 15x15 labyrinth
-const MAP: string[] = [
-  "11111111C111111",
-  "100000000000001",
-  "101110110111101",
-  "101N101000B0101",
-  "101010101110101",
-  "100010001300101",
-  "101111101111101",
-  "100020001000001",
-  "101011111101111",
-  "100000000030001",
-  "10111B111111101",
-  "10100000N100101",
-  "101011111110101",
-  "100000020000001",
-  "111111111111111",
-];
+type Cell = "road" | "wall" | "cafe";
 
-const ROWS = MAP.length;
-const COLS = MAP[0].length;
+// Dense maze generated via randomized DFS on an odd-sized grid.
+// Walls are 1-cell thick — looks like the reference labyrinth.
+const ROWS = 25;
+const COLS = 21;
 
-type Cell = "road" | "wall" | "glitch" | "hazard" | "blocked" | "npc" | "cafe";
-function cellAt(r: number, c: number): Cell {
-  if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return "wall";
-  const ch = MAP[r][c];
-  if (ch === "1") return "wall";
-  if (ch === "2") return "glitch";
-  if (ch === "3") return "hazard";
-  if (ch === "B") return "blocked";
-  if (ch === "N") return "npc";
-  if (ch === "C") return "cafe";
-  return "road";
+function generateMaze(rows: number, cols: number): Cell[][] {
+  const grid: Cell[][] = Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => "wall" as Cell),
+  );
+  const stack: Array<[number, number]> = [[1, 1]];
+  grid[1][1] = "road";
+  const dirs: Array<[number, number]> = [
+    [-2, 0], [2, 0], [0, -2], [0, 2],
+  ];
+  while (stack.length) {
+    const [r, c] = stack[stack.length - 1];
+    const shuffled = [...dirs].sort(() => Math.random() - 0.5);
+    let carved = false;
+    for (const [dr, dc] of shuffled) {
+      const nr = r + dr;
+      const nc = c + dc;
+      if (nr > 0 && nc > 0 && nr < rows - 1 && nc < cols - 1 && grid[nr][nc] === "wall") {
+        grid[r + dr / 2][c + dc / 2] = "road";
+        grid[nr][nc] = "road";
+        stack.push([nr, nc]);
+        carved = true;
+        break;
+      }
+    }
+    if (!carved) stack.pop();
+  }
+  // Cafe at bottom-right corner
+  grid[rows - 2][cols - 2] = "cafe";
+  return grid;
 }
 
-const START = { r: 13, c: 1 };
+const START = { r: 1, c: 1 };
 
 export function PhoneReveal({ onComplete }: Props) {
   const [frame, setFrame] = useState<Frame>(1);
