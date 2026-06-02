@@ -1,9 +1,10 @@
-// Котики в стиле "Бубу" — рыжий (по умолчанию) и чёрный злой.
-import orangeAsset from "@/assets/bubu-orange.png.asset.json";
+// Котики в стиле "Бубу" — кремовый, чёрный злой, и Томас (фото).
+import creamAsset from "@/assets/bubu-cream.png.asset.json";
 import blackAsset from "@/assets/bubu-black.png.asset.json";
+import tomasAsset from "@/assets/bubu-tomas.png.asset.json";
 
 type Size = "xs" | "sm" | "md" | "lg";
-type Variant = "orange" | "black";
+type Variant = "cream" | "black" | "tomas" | "orange";
 
 const SIZES: Record<Size, number> = {
   xs: 40,
@@ -13,8 +14,10 @@ const SIZES: Record<Size, number> = {
 };
 
 const SRC: Record<Variant, string> = {
-  orange: orangeAsset.url,
+  cream: creamAsset.url,
+  orange: creamAsset.url, // legacy alias
   black: blackAsset.url,
+  tomas: tomasAsset.url,
 };
 
 type Props = {
@@ -23,7 +26,7 @@ type Props = {
   className?: string;
 };
 
-export function CatSprite({ size = "md", variant = "orange", className = "" }: Props) {
+export function CatSprite({ size = "md", variant = "cream", className = "" }: Props) {
   const px = SIZES[size];
   return (
     <img
