@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { CharacterCreation } from "@/components/CharacterCreation";
+import type { Profile } from "@/lib/profile";
 
 type Props = {
   onCommunicate: (delta: number) => void;
   onDiscoverCafe: () => void;
+  hasProfile: boolean;
+  onProfileCreated: (profile: Profile) => void;
 };
+
 
 type DialogChoice = {
   id: 1 | 2 | 3 | 4;
