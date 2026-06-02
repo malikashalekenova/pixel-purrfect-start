@@ -234,6 +234,8 @@ function Index() {
         <Street
           onCommunicate={handleCommunicate}
           onDiscoverCafe={handleDiscoverCafe}
+          hasProfile={!!profile}
+          onProfileCreated={handleProfileCreated}
         />
       )}
 
