@@ -210,7 +210,15 @@ function Index() {
         </>
       )}
 
-      {/* Desktop OS appears after zoom */}
+      {/* Level 1: pixel desktop platforming intro */}
+      {stage === "level1" && (
+        <DesktopLevel
+          onExitSystem={handleLevel1Exit}
+          onStayInProcess={handleLevel1Stay}
+        />
+      )}
+
+      {/* Desktop OS appears after the boot level */}
       {(stage === "desktop" || stage === "mission" || stage === "done") && (
         <Desktop onStartMission={handleStartMission} />
       )}
