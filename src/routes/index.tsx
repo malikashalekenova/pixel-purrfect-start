@@ -1,11 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
 import { Workshop } from "@/components/Workshop";
 import { Street } from "@/components/Street";
 import { Room } from "@/components/Room";
 import { Leaderboard } from "@/components/Leaderboard";
+import { ProfileWindow } from "@/components/ProfileWindow";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  getCurrentProfile,
+  levelFromXp,
+  updateMyProfile,
+  type Profile,
+} from "@/lib/profile";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
