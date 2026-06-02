@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
+import { DesktopLevel } from "@/components/DesktopLevel";
 import { Workshop } from "@/components/Workshop";
 import { Street } from "@/components/Street";
 import { Room } from "@/components/Room";
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Stage = "menu" | "zooming" | "desktop" | "mission" | "workshop" | "done" | "room-after" | "street";
+type Stage = "menu" | "zooming" | "level1" | "desktop" | "mission" | "workshop" | "done" | "room-after" | "street";
 
 function Index() {
   const [stage, setStage] = useState<Stage>("menu");
@@ -67,7 +68,17 @@ function Index() {
 
   const handlePlay = () => {
     setStage("zooming");
-    setTimeout(() => setStage("desktop"), 2200);
+    setTimeout(() => setStage("level1"), 2200);
+  };
+
+  const handleLevel1Exit = () => {
+    toast("Выход из системы...", { description: "Загрузка рабочего стола." });
+    setStage("desktop");
+  };
+
+  const handleLevel1Stay = () => {
+    toast("Остаёмся в процессе.", { description: "Система продолжает работу в фоне." });
+    setStage("desktop");
   };
 
   const handleStartMission = () => {
@@ -199,7 +210,15 @@ function Index() {
         </>
       )}
 
-      {/* Desktop OS appears after zoom */}
+      {/* Level 1: pixel desktop platforming intro */}
+      {stage === "level1" && (
+        <DesktopLevel
+          onExitSystem={handleLevel1Exit}
+          onStayInProcess={handleLevel1Stay}
+        />
+      )}
+
+      {/* Desktop OS appears after the boot level */}
       {(stage === "desktop" || stage === "mission" || stage === "done") && (
         <Desktop onStartMission={handleStartMission} />
       )}
@@ -246,7 +265,7 @@ function Index() {
       )}
 
       {/* HUD: coins / xp */}
-      {(stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done" || stage === "room-after" || stage === "street") && (
+      {(stage === "level1" || stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done" || stage === "room-after" || stage === "street") && (
         <div className="pointer-events-none absolute right-3 top-3 z-[60] flex items-center gap-2 text-xs">
           <span className="rounded-full bg-black/60 px-2.5 py-1 text-amber-300 ring-1 ring-white/10 backdrop-blur">
             🪙 {coins}
