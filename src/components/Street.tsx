@@ -235,18 +235,32 @@ export function Street({ onCommunicate, onDiscoverCafe }: Props) {
       {/* Needs HUD — vertical bars with stickers */}
       <NeedsHud thirst={thirst} hunger={hunger} social={social} lonely={lonely} />
 
+      {/* NPC: Пушок (первый знакомый) */}
+      <button
+        type="button"
+        onClick={() => openDialog("pushok")}
+        aria-label="Поговорить с Пушком"
+        className="group absolute left-[28%] bottom-[20%] cursor-pointer focus:outline-none"
+      >
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2 animate-bounce text-2xl drop-shadow-[0_0_8px_rgba(253,224,71,0.7)]">
+          👋
+        </div>
+        <PushokSprite />
+        <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-yellow-200">
+          ПУШОК
+        </div>
+      </button>
+
       {/* NPC: Рыжик */}
       <button
         type="button"
-        onClick={openDialog}
+        onClick={() => openDialog("ryzhik")}
         aria-label="Поговорить с Рыжиком"
-        className="group absolute left-1/2 bottom-[22%] -translate-x-1/2 cursor-pointer focus:outline-none"
+        className="group absolute left-[68%] bottom-[22%] -translate-x-1/2 cursor-pointer focus:outline-none"
       >
-        {/* Speech bubble icon */}
         <div className="absolute -top-10 left-1/2 -translate-x-1/2 animate-bounce text-2xl drop-shadow-[0_0_8px_rgba(127,231,255,0.7)]">
           💬
         </div>
-        {/* Cat sprite (CSS pixel) */}
         <CatSprite />
         <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-orange-300">
           РЫЖИК
@@ -254,20 +268,20 @@ export function Street({ onCommunicate, onDiscoverCafe }: Props) {
       </button>
 
       {/* Dialog modal */}
-      {dialogOpen && (
+      {activeNpc && (
         <div className="absolute inset-0 z-30 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center">
-          <div className="m-4 w-full max-w-xl rounded-xl border border-orange-400/30 bg-[#0a0e1a]/95 p-5 shadow-2xl ring-1 ring-white/5">
+          <div className={`m-4 w-full max-w-xl rounded-xl border ${currentBorder} bg-[#0a0e1a]/95 p-5 shadow-2xl ring-1 ring-white/5`}>
             <div className="mb-3 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-amber-600 text-lg">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${currentAccent} text-lg`}>
                 🐱
               </div>
               <div>
-                <div className="font-['Press_Start_2P'] text-[10px] text-orange-300">
-                  РЫЖИК
+                <div className={`font-['Press_Start_2P'] text-[10px] ${currentLabelColor}`}>
+                  {currentName}
                 </div>
                 <div className="text-[10px] text-white/40">
-                  Отношение: {relation > 0 ? "+" : ""}
-                  {relation}
+                  Отношение: {currentRel > 0 ? "+" : ""}
+                  {currentRel}
                 </div>
               </div>
             </div>
@@ -275,11 +289,10 @@ export function Street({ onCommunicate, onDiscoverCafe }: Props) {
             {!reply ? (
               <>
                 <p className="mb-4 rounded-lg bg-white/5 p-3 text-sm leading-relaxed text-white/90">
-                  «Привет. Ты новенький в этом районе, да? Я раньше тебя здесь
-                  не видел.»
+                  «{currentIntro}»
                 </p>
                 <div className="grid gap-2">
-                  {CHOICES.map((c) => (
+                  {currentChoices.map((c) => (
                     <button
                       key={c.id}
                       type="button"
@@ -312,6 +325,38 @@ export function Street({ onCommunicate, onDiscoverCafe }: Props) {
     </div>
   );
 }
+
+function PushokSprite() {
+  // Маленький пушистый кремовый котик в большом жёлтом свитере
+  return (
+    <div className="relative h-20 w-16" style={{ imageRendering: "pixelated" }}>
+      {/* Head (cream) */}
+      <div className="absolute left-1/2 top-0 h-8 w-10 -translate-x-1/2 rounded-sm bg-amber-100 ring-2 ring-amber-300" />
+      {/* Fluffy ears */}
+      <div className="absolute left-0 top-0 h-3 w-3 -rotate-12 bg-amber-100 ring-1 ring-amber-300" />
+      <div className="absolute right-0 top-0 h-3 w-3 rotate-12 bg-amber-100 ring-1 ring-amber-300" />
+      {/* Inner ears */}
+      <div className="absolute left-1 top-1 h-1.5 w-1.5 bg-pink-300" />
+      <div className="absolute right-1 top-1 h-1.5 w-1.5 bg-pink-300" />
+      {/* Eyes */}
+      <div className="absolute left-3 top-3 h-1.5 w-1.5 bg-sky-700" />
+      <div className="absolute right-3 top-3 h-1.5 w-1.5 bg-sky-700" />
+      {/* Nose */}
+      <div className="absolute left-1/2 top-5 h-1 w-1 -translate-x-1/2 bg-pink-400" />
+      {/* Big yellow sweater */}
+      <div className="absolute left-1/2 top-7 h-11 w-14 -translate-x-1/2 rounded-md bg-yellow-300 ring-2 ring-yellow-600" />
+      {/* Sweater pattern */}
+      <div className="absolute left-1/2 top-9 h-1 w-10 -translate-x-1/2 bg-yellow-500/60" />
+      <div className="absolute left-1/2 top-12 h-1 w-10 -translate-x-1/2 bg-yellow-500/60" />
+      {/* Waving paw */}
+      <div className="absolute -right-1 top-8 h-3 w-3 rotate-12 bg-amber-100 ring-1 ring-amber-300" />
+      {/* Legs */}
+      <div className="absolute left-3 bottom-0 h-3 w-2.5 bg-amber-100 ring-1 ring-amber-300" />
+      <div className="absolute right-3 bottom-0 h-3 w-2.5 bg-amber-100 ring-1 ring-amber-300" />
+    </div>
+  );
+}
+
 
 function CatSprite() {
   // Simple CSS pixel cat in green jacket
