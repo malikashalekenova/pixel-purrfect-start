@@ -157,9 +157,8 @@ export function ShopWindow({ open, onClose, coins, onBuy, purchaseCount }: Props
           </p>
           <div className="mt-2 flex items-center justify-between">
             <span className="text-xs text-slate-400">
-              Кошелёк:{" "}
-              <span className="font-bold text-amber-300">{coins} DC</span>
-              <span className="ml-2 text-[10px] text-slate-500">DATA-COINS</span>
+  Кошелёк:{" "}
+              <span className="font-bold text-amber-300">🪙 {coins}</span>
             </span>
             {corruptionLevel >= 1 && (
               <span className="text-[10px] uppercase tracking-widest text-rose-400/80">
