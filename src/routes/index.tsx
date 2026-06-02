@@ -277,6 +277,16 @@ function Index() {
           onDiscoverCafe={handleDiscoverCafe}
           hasProfile={!!profile}
           onProfileCreated={handleProfileCreated}
+          coins={coins}
+          onSpend={(amount) => {
+            if (coins < amount) return false;
+            const newCoins = coins - amount;
+            setCoins(newCoins);
+            if (profile) {
+              updateMyProfile({ coins: newCoins }).then((u) => u && setProfile(u));
+            }
+            return true;
+          }}
         />
       )}
 

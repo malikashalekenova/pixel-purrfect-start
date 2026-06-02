@@ -44,6 +44,8 @@ type Props = {
   onDiscoverCafe: () => void;
   hasProfile: boolean;
   onProfileCreated: (profile: Profile) => void;
+  coins: number;
+  onSpend: (amount: number) => boolean;
 };
 
 
@@ -136,7 +138,7 @@ const RYZHIK_CHOICES: DialogChoice[] = [
 ];
 
 
-export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCreated }: Props) {
+export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCreated, coins, onSpend }: Props) {
   // Needs bars
   const [thirst, setThirst] = useState(82);
   const [hunger, setHunger] = useState(78);
@@ -428,7 +430,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
       {showPhone && <PhoneReveal onComplete={handlePhoneComplete} />}
 
       {/* Cafe interior */}
-      {showCafe && <CafeScene onExit={handleCafeExit} />}
+      {showCafe && <CafeScene onExit={handleCafeExit} coins={coins} onSpend={onSpend} />}
 
       {/* Pull phone from pocket button */}
       <button
