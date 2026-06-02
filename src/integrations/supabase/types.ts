@@ -16,9 +16,18 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          clothing: string
+          coins: number
           contracts_completed: number
           created_at: string
+          display_name: string | null
+          eye_color: string
+          fur_color: string
+          gang: string | null
+          gang_leader: boolean
           id: string
+          level: number
+          reputation: number
           total_earned: number
           updated_at: string
           user_id: string
@@ -26,9 +35,18 @@ export type Database = {
           xp: number
         }
         Insert: {
+          clothing?: string
+          coins?: number
           contracts_completed?: number
           created_at?: string
+          display_name?: string | null
+          eye_color?: string
+          fur_color?: string
+          gang?: string | null
+          gang_leader?: boolean
           id?: string
+          level?: number
+          reputation?: number
           total_earned?: number
           updated_at?: string
           user_id: string
@@ -36,9 +54,18 @@ export type Database = {
           xp?: number
         }
         Update: {
+          clothing?: string
+          coins?: number
           contracts_completed?: number
           created_at?: string
+          display_name?: string | null
+          eye_color?: string
+          fur_color?: string
+          gang?: string | null
+          gang_leader?: boolean
           id?: string
+          level?: number
+          reputation?: number
           total_earned?: number
           updated_at?: string
           user_id?: string
