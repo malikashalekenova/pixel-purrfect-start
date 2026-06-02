@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
+import { Desktop } from "@/components/Desktop";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -13,53 +16,118 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+type Stage = "menu" | "zooming" | "desktop" | "mission";
+
 function Index() {
+  const [stage, setStage] = useState<Stage>("menu");
+
+  const handlePlay = () => {
+    setStage("zooming");
+    setTimeout(() => setStage("desktop"), 2200);
+  };
+
+  const handleStartMission = () => {
+    setStage("mission");
+    toast("Контракт принят. Направляйся по адресу.", {
+      description: "Управление персонажем активировано.",
+    });
+  };
+
+  // Monitor approximate center in the background image (percent of image)
+  // From the generated bg: monitor sits ~58% from left, ~46% from top.
+  const monitorOrigin = "58% 46%";
+  const zoomScale = stage === "menu" ? 1 : 8;
+
   return (
-    <main
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-black"
-      style={{ imageRendering: "pixelated" }}
-    >
+    <main className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-black">
+      {/* Background that zooms into the monitor */}
       <img
         src={bg}
         alt="Pixel art cat in hoodie sitting at an old computer in a dirty apartment"
         width={1920}
         height={1080}
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{ imageRendering: "pixelated" }}
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-[2000ms] ease-in-out"
+        style={{
+          imageRendering: "pixelated",
+          transformOrigin: monitorOrigin,
+          transform: `scale(${zoomScale})`,
+        }}
       />
-      {/* vignette / darkening */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/30 to-black/80" />
-      <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.85)_100%)]" />
 
-      <div className="relative z-10 flex w-full flex-col items-center px-6 pt-10 sm:pt-16">
-        <h1
-          className="text-center font-['Press_Start_2P'] text-4xl leading-tight tracking-tight text-[#7fe7ff] sm:text-6xl md:text-7xl lg:text-8xl"
-          style={{
-            textShadow:
-              "0 0 12px rgba(127,231,255,0.55), 4px 4px 0 #0a1a26, 8px 8px 0 rgba(0,0,0,0.6)",
-          }}
-        >
-          SHADOW
-          <br />
-          DISTRICT
-        </h1>
+      {/* Vignette only in menu */}
+      {stage === "menu" && (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/30 to-black/80" />
+          <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.85)_100%)]" />
+        </>
+      )}
 
-        <div className="mt-auto" />
-      </div>
-
-      <div className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2 sm:bottom-24">
-        <button
-          type="button"
-          className="group relative font-['Press_Start_2P'] text-xl sm:text-2xl text-[#0a1016] bg-[#7fe7ff] px-10 py-5 border-4 border-[#0a1016] shadow-[6px_6px_0_0_#0a1016] transition-transform active:translate-x-[3px] active:translate-y-[3px] active:shadow-[3px_3px_0_0_#0a1016] hover:bg-[#a8f1ff]"
-          style={{ imageRendering: "pixelated" }}
-        >
-          ИГРАТЬ
-        </button>
-      </div>
-
-      {/* scanlines */}
+      {/* Fade-to-black during zoom transition */}
       <div
-        className="pointer-events-none absolute inset-0 z-20 opacity-20 mix-blend-overlay"
+        className="pointer-events-none absolute inset-0 bg-black transition-opacity duration-1000"
+        style={{ opacity: stage === "zooming" ? 0.85 : 0, transitionDelay: stage === "zooming" ? "1200ms" : "0ms" }}
+      />
+
+      {/* Title + Play button (menu only) */}
+      {stage === "menu" && (
+        <>
+          <div className="relative z-10 flex w-full flex-col items-center px-6 pt-10 sm:pt-16">
+            <h1
+              className="text-center font-['Press_Start_2P'] text-4xl leading-tight tracking-tight text-[#7fe7ff] sm:text-6xl md:text-7xl lg:text-8xl"
+              style={{
+                textShadow:
+                  "0 0 12px rgba(127,231,255,0.55), 4px 4px 0 #0a1a26, 8px 8px 0 rgba(0,0,0,0.6)",
+              }}
+            >
+              SHADOW
+              <br />
+              DISTRICT
+            </h1>
+          </div>
+
+          <div className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2 sm:bottom-24">
+            <button
+              type="button"
+              onClick={handlePlay}
+              className="font-['Press_Start_2P'] text-xl sm:text-2xl text-[#0a1016] bg-[#7fe7ff] px-10 py-5 border-4 border-[#0a1016] shadow-[6px_6px_0_0_#0a1016] transition-transform active:translate-x-[3px] active:translate-y-[3px] active:shadow-[3px_3px_0_0_#0a1016] hover:bg-[#a8f1ff]"
+            >
+              ИГРАТЬ
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Desktop OS appears after zoom */}
+      {(stage === "desktop" || stage === "mission") && (
+        <Desktop onStartMission={handleStartMission} />
+      )}
+
+      {/* Mission overlay */}
+      {stage === "mission" && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/85 animate-fade-in">
+          <div className="max-w-md px-6 text-center font-['Press_Start_2P']">
+            <p className="text-[10px] leading-loose text-[#7fe7ff] sm:text-xs">
+              ГЛАВА 1
+            </p>
+            <h2
+              className="mt-4 text-2xl text-white sm:text-3xl"
+              style={{ textShadow: "3px 3px 0 #0a1a26" }}
+            >
+              ПЕРВЫЙ КОНТРАКТ
+            </h2>
+            <p className="mt-6 text-[9px] leading-loose text-white/70 sm:text-[10px]">
+              Используй WASD чтобы двигаться. Найди адрес из сообщения.
+            </p>
+            <div className="mt-8 inline-block animate-pulse text-[9px] text-[#9be37f]">
+              ▶ Загрузка локации...
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Global CRT scanlines */}
+      <div
+        className="pointer-events-none absolute inset-0 z-50 opacity-15 mix-blend-overlay"
         style={{
           backgroundImage:
             "repeating-linear-gradient(0deg, rgba(0,0,0,0.6) 0 2px, transparent 2px 4px)",
