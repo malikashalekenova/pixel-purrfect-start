@@ -101,7 +101,7 @@ export function VitalsHUD({ location, paused, onCrash }: Props) {
     return () => clearInterval(id);
   }, [location, paused, onCrash]);
 
-  const minVal = Math.min(v.health, v.energy, v.stability, v.psyche, v.social);
+  const minVal = Math.min(v.health, v.energy, v.stability, v.social);
   const danger = minVal < 30;
   const critical = minVal < 15;
 
