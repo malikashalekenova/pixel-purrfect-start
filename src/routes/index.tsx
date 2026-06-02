@@ -343,6 +343,37 @@ function Index() {
             "repeating-linear-gradient(0deg, rgba(0,0,0,0.6) 0 2px, transparent 2px 4px)",
         }}
       />
+
+      {/* Vitals HUD — правило 30% */}
+      {showVitals && !crashed && (
+        <VitalsHUD
+          location={isStreet ? "street" : "home"}
+          paused={shopOpen || profileOpen || leaderboardOpen}
+          onCrash={() => setCrashed(true)}
+        />
+      )}
+
+      {/* System crash overlay */}
+      {crashed && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-black text-center font-mono text-red-400">
+          <div className="text-xs uppercase tracking-[0.4em] text-red-500/80">system failure</div>
+          <h2 className="text-2xl sm:text-4xl">⚠ ПРОЦЕСС КОТИКА СЛОМАН</h2>
+          <p className="max-w-md text-sm text-red-300/70">
+            Один из показателей упал до 0%. Поведение нестабилизировано. Перезапустите процесс.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setVitals(FULL_VITALS);
+              setCrashed(false);
+              window.location.reload();
+            }}
+            className="mt-4 border-2 border-red-500 px-6 py-2 text-red-300 hover:bg-red-500/10"
+          >
+            ПЕРЕЗАПУСТИТЬ
+          </button>
+        </div>
+      )}
     </main>
   );
 }
