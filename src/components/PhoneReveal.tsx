@@ -134,29 +134,15 @@ export function PhoneReveal({ onComplete }: Props) {
         setTimeout(() => setHint(null), 500);
         return;
       }
-      if (target === "blocked") {
-        setHint("отказ доступа: сектор заражен");
-        setTimeout(() => setHint(null), 800);
-        return;
-      }
       lastStepRef.current = now;
       setPos({ r: nr, c: nc });
 
-      if (target === "glitch") {
-        setGlitch(true);
-        setTimeout(() => setGlitch(false), 200);
-        lastStepRef.current = now + 200;
-      }
-      if (target === "hazard") {
-        setHint("-стабильность");
-        setTimeout(() => setHint(null), 600);
-      }
       if (target === "cafe") {
         setArrived(true);
         setTimeout(() => onComplete(), 1400);
       }
     },
-    [frame, arrived, pos, onComplete],
+    [frame, arrived, pos, onComplete, cellAt],
   );
 
   useEffect(() => {
@@ -164,16 +150,13 @@ export function PhoneReveal({ onComplete }: Props) {
     const around: Array<[number, number]> = [
       [0, 0], [-1, 0], [1, 0], [0, -1], [0, 1],
     ];
-    let npc = false;
     let cafe = false;
     for (const [dr, dc] of around) {
       const c = cellAt(pos.r + dr, pos.c + dc);
-      if (c === "npc") npc = true;
       if (c === "cafe") cafe = true;
     }
-    setNearNpc(npc);
     setNearCafe(cafe);
-  }, [pos, frame]);
+  }, [pos, frame, cellAt]);
 
   useEffect(() => {
     if (frame !== 7) return;
@@ -194,15 +177,12 @@ export function PhoneReveal({ onComplete }: Props) {
 
   const tileBg = (c: Cell) => {
     switch (c) {
-      case "wall": return "#1a2740";
-      case "glitch": return "#7c3aed";
-      case "hazard": return "#7f1d1d";
-      case "blocked": return "#3a1f1f";
+      case "wall": return "#0e1a2e";
       case "cafe": return "#fbbf24";
-      case "npc": return "#34d399";
-      default: return "#06101c";
+      default: return "#f5f5f0";
     }
   };
+
 
   const unstable = minVital < 30;
   const visionRadius = unstable ? 3 : 99;
