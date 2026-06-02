@@ -5,6 +5,7 @@ export type Vitals = {
   energy: number;
   stability: number;
   psyche: number;
+  social: number;
 };
 
 export const FULL_VITALS: Vitals = {
@@ -12,6 +13,7 @@ export const FULL_VITALS: Vitals = {
   energy: 100,
   stability: 100,
   psyche: 100,
+  social: 100,
 };
 
 type Props = {
@@ -30,6 +32,7 @@ const STATS: Array<{
   { key: "energy", label: "Энергия", icon: "⚡", color: "#facc15" },
   { key: "stability", label: "Стабильность", icon: "🧠", color: "#22d3ee" },
   { key: "psyche", label: "Психика", icon: "🧩", color: "#a78bfa" },
+  { key: "social", label: "Общение", icon: "💬", color: "#34d399" },
 ];
 
 // Singleton store so any scene can read/modify vitals
