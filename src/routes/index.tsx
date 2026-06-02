@@ -35,6 +35,35 @@ function Index() {
   const [coins, setCoins] = useState(0);
   const [xp, setXp] = useState(0);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  // Load profile on mount + on auth changes (autosave / login restore)
+  useEffect(() => {
+    let active = true;
+    getCurrentProfile().then((p) => {
+      if (!active) return;
+      if (p) {
+        setProfile(p);
+        setCoins(p.coins);
+        setXp(p.xp);
+      }
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      getCurrentProfile().then((p) => {
+        if (!active) return;
+        if (p) {
+          setProfile(p);
+          setCoins(p.coins);
+          setXp(p.xp);
+        }
+      });
+    });
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handlePlay = () => {
     setStage("zooming");
@@ -49,13 +78,32 @@ function Index() {
     setTimeout(() => setStage("workshop"), 2200);
   };
 
-  const handleWorkshopComplete = () => {
-    setCoins((c) => c + 50);
-    setXp((x) => x + 25);
+  const handleWorkshopComplete = async () => {
+    const newCoins = coins + 50;
+    const newXp = xp + 25;
+    setCoins(newCoins);
+    setXp(newXp);
     setStage("done");
     toast("Контракт выполнен!", {
       description: "+50 монет · +25 опыта",
     });
+    // Autosave (only if registered)
+    if (profile) {
+      const newLevel = levelFromXp(newXp);
+      const updated = await updateMyProfile({
+        coins: newCoins,
+        xp: newXp,
+        total_earned: profile.total_earned + 50,
+        contracts_completed: profile.contracts_completed + 1,
+        level: newLevel,
+      });
+      if (updated) {
+        setProfile(updated);
+        if (newLevel > profile.level) {
+          toast(`Новый уровень: ${newLevel}!`, { description: "Прогресс сохранён." });
+        }
+      }
+    }
     setTimeout(() => setStage("room-after"), 1800);
   };
 
@@ -63,13 +111,28 @@ function Index() {
     setStage("street");
   };
 
-
-  const handleCommunicate = (xpGain: number) => {
-    setXp((x) => x + xpGain);
+  const handleCommunicate = async (xpGain: number) => {
+    const newXp = xp + xpGain;
+    setXp(newXp);
+    if (profile) {
+      const newLevel = levelFromXp(newXp);
+      const updated = await updateMyProfile({
+        xp: newXp,
+        level: newLevel,
+      });
+      if (updated) setProfile(updated);
+    }
   };
 
   const handleDiscoverCafe = () => {
     // marker added to city map (future feature)
+  };
+
+  const handleProfileCreated = (p: Profile) => {
+    setProfile(p);
+    setCoins(p.coins);
+    setXp(p.xp);
+    toast("Прогресс будет сохраняться автоматически.");
   };
 
   // Monitor approximate center in the background image (percent of image)
