@@ -3,6 +3,7 @@ import { useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
 import { Workshop } from "@/components/Workshop";
+import { Street } from "@/components/Street";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Stage = "menu" | "zooming" | "desktop" | "mission" | "workshop" | "done";
+type Stage = "menu" | "zooming" | "desktop" | "mission" | "workshop" | "done" | "street";
 
 function Index() {
   const [stage, setStage] = useState<Stage>("menu");
@@ -41,6 +42,18 @@ function Index() {
     setCoins((c) => c + 50);
     setXp((x) => x + 25);
     setStage("done");
+    toast("Контракт выполнен!", {
+      description: "Выходим на улицу...",
+    });
+    setTimeout(() => setStage("street"), 1800);
+  };
+
+  const handleCommunicate = (xpGain: number) => {
+    setXp((x) => x + xpGain);
+  };
+
+  const handleDiscoverCafe = () => {
+    // marker added to city map (future feature)
   };
 
   // Monitor approximate center in the background image (percent of image)
@@ -134,8 +147,16 @@ function Index() {
         <Workshop onComplete={handleWorkshopComplete} />
       )}
 
+      {/* Street scene after first contract */}
+      {stage === "street" && (
+        <Street
+          onCommunicate={handleCommunicate}
+          onDiscoverCafe={handleDiscoverCafe}
+        />
+      )}
+
       {/* HUD: coins / xp */}
-      {(stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done") && (
+      {(stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done" || stage === "street") && (
         <div className="pointer-events-none absolute right-3 top-3 z-[60] flex items-center gap-2 text-xs">
           <span className="rounded-full bg-black/60 px-2.5 py-1 text-amber-300 ring-1 ring-white/10 backdrop-blur">
             🪙 {coins}
