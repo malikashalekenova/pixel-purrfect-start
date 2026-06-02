@@ -238,8 +238,6 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const handleProfileCreated = (profile: Profile) => {
     setShowCreation(false);
     onProfileCreated(profile);
-    // Cinematic phone reveal → map mission to cafe
-    setTimeout(() => setShowPhone(true), 500);
   };
 
   const handlePhoneComplete = () => {
