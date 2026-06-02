@@ -172,7 +172,22 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
     }
   }, [social, lonely]);
 
+  // Track global social vital for mood reactivity
+  const [globalSocial, setGlobalSocial] = useState(getVitals().social);
+  useEffect(() => {
+    const id = setInterval(() => setGlobalSocial(getVitals().social), 600);
+    return () => clearInterval(id);
+  }, []);
+
+  const moodPushok = moodFromScore(relPushok, globalSocial);
+  const moodRyzhik = moodFromScore(relRyzhik, globalSocial);
+
   const openDialog = (npc: NpcId) => {
+    const tier = npc === "pushok" ? moodPushok : moodRyzhik;
+    if (tier === "hate") {
+      toast("NPC игнорирует тебя", { description: "Подними 💬 Общение, чтобы вернуть доверие." });
+      return;
+    }
     setActiveNpc(npc);
     setReply(null);
   };
@@ -181,6 +196,8 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
     if (!activeNpc) return;
     setReply(c.reply);
     setSocial((s) => Math.min(100, s + c.comm));
+    // Push to global Общение vital (rude answers drain it)
+    modVitals({ social: c.rel < 0 ? -15 : c.comm * 0.4 });
     onCommunicate(c.xp);
 
     if (activeNpc === "pushok") {
