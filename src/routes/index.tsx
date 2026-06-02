@@ -41,6 +41,11 @@ function Index() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [purchases, setPurchases] = useState<ShopItem[]>([]);
+  const [crashed, setCrashed] = useState(false);
+
+  const isHome = stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done" || stage === "room-after";
+  const isStreet = stage === "street";
+  const showVitals = isHome || isStreet;
 
   const handleBuy = async (item: ShopItem) => {
     const newCoins = coins - item.price;
