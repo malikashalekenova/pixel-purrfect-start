@@ -251,14 +251,31 @@ function Index() {
         </div>
       )}
 
-      {/* Leaderboard trigger — always available */}
-      <button
-        type="button"
-        onClick={() => setLeaderboardOpen(true)}
-        className="absolute left-3 top-3 z-[60] rounded-full bg-black/60 px-3 py-1.5 text-xs text-cyan-200 ring-1 ring-cyan-400/30 backdrop-blur hover:bg-cyan-400/10 hover:text-cyan-100 transition"
-      >
-        🏆 Рейтинг
-      </button>
+      {/* Leaderboard + Profile triggers */}
+      <div className="absolute left-3 top-3 z-[60] flex gap-2">
+        <button
+          type="button"
+          onClick={() => setLeaderboardOpen(true)}
+          className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-cyan-200 ring-1 ring-cyan-400/30 backdrop-blur hover:bg-cyan-400/10 hover:text-cyan-100 transition"
+        >
+          🏆 Рейтинг
+        </button>
+        {profile && (
+          <button
+            type="button"
+            onClick={() => setProfileOpen(true)}
+            className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-amber-200 ring-1 ring-amber-400/30 backdrop-blur hover:bg-amber-400/10 hover:text-amber-100 transition"
+          >
+            👤 Профиль
+          </button>
+        )}
+      </div>
+
+      {profile && profileOpen && (
+        <ProfileWindow profile={profile} onClose={() => setProfileOpen(false)} />
+      )}
+
+
 
       <Leaderboard open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
 
