@@ -13,18 +13,21 @@ type Props = {
 // 0 = road, 1 = building (blocked), 2 = glitch (slow), 3 = stability hazard
 // N = npc, C = cafe
 // 11 cols × 11 rows. Cafe (C) sits on row 0 with road below; start at bottom-left.
+// Harder maze: 13 rows × 13 cols, twisting corridors, dead-ends, hazards & glitches
 const MAP: string[] = [
-  "11111C11111",
-  "10000003001",
-  "10111110101",
-  "10100010101",
-  "10101010101",
-  "1010N010101",
-  "10101010101",
-  "10101110101",
-  "10100020001",
-  "10000000001",
-  "11111111111",
+  "11111111C1111",
+  "1000000000001",
+  "1011111110101",
+  "1010003000101",
+  "10101110N0101",
+  "1010100010111",
+  "1010101110001",
+  "1000101000101",
+  "1110101011101",
+  "10002000300N1",
+  "1011111111101",
+  "1000000000001",
+  "1111111111111",
 ];
 
 const ROWS = MAP.length;
@@ -42,7 +45,7 @@ function cellAt(r: number, c: number): Cell {
   return "road";
 }
 
-const START = { r: 9, c: 1 };
+const START = { r: 11, c: 1 };
 
 export function PhoneReveal({ onComplete }: Props) {
   const [frame, setFrame] = useState<Frame>(1);
@@ -194,16 +197,12 @@ export function PhoneReveal({ onComplete }: Props) {
   };
 
   const arrowDisabledClass = minVital < 30 ? "animate-pulse" : "";
-  const screenJitter = minVital < 15 ? "vitals-glitch-mini" : "";
 
   return (
     <div
-      className="fixed inset-0 z-[95] flex items-center justify-center bg-black/80 backdrop-blur-sm"
-      style={{
-        filter: glitch ? "hue-rotate(80deg) contrast(1.4)" : undefined,
-        transition: "filter 120ms",
-      }}
+      className="fixed inset-0 z-[95] flex items-center justify-center bg-black/80"
     >
+
       <div className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.95)_100%)]" />
 
       {/* Frames 1-4 — cinematic */}
@@ -241,7 +240,7 @@ export function PhoneReveal({ onComplete }: Props) {
 
       {/* Phone UI */}
       {frame >= 5 && (
-        <div className={`relative h-[640px] w-[320px] rounded-[28px] border-2 border-cyan-300/60 bg-[#0a1322] p-3 shadow-[0_0_60px_rgba(127,231,255,0.6)] animate-scale-in ${screenJitter}`}>
+        <div className="relative h-[640px] w-[320px] rounded-[28px] border-2 border-cyan-300/60 bg-[#0a1322] p-3 shadow-[0_0_60px_rgba(127,231,255,0.6)] animate-scale-in">
           <div className="mx-auto mb-2 h-1.5 w-16 rounded-full bg-white/20" />
           <div className="mb-2 flex items-center justify-between px-2 font-mono text-[10px] text-cyan-200/80">
             <span>NEKO_OS v1.0</span>
