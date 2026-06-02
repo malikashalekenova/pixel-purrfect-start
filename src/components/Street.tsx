@@ -1,7 +1,39 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CharacterCreation } from "@/components/CharacterCreation";
+import { modVitals, getVitals } from "@/components/VitalsHUD";
 import type { Profile } from "@/lib/profile";
+
+type MoodTier = "friend" | "neutral" | "negative" | "hate";
+
+function moodFromScore(rel: number, social: number): MoodTier {
+  // Combine local relationship (-N..+N) with global social vital (0..100)
+  const score = rel * 8 + (social - 50);
+  if (score >= 20) return "friend";
+  if (score >= -10) return "neutral";
+  if (score >= -35) return "negative";
+  return "hate";
+}
+
+const MOOD_META: Record<MoodTier, { icon: string; ring: string; label: string; line: string }> = {
+  friend:   { icon: "💚", ring: "ring-emerald-400 bg-emerald-500/20", label: "Дружелюбие", line: "Привет! Рад тебя видеть!" },
+  neutral:  { icon: "😐", ring: "ring-zinc-400 bg-zinc-500/20",       label: "Нейтрально", line: "..." },
+  negative: { icon: "😾", ring: "ring-rose-500 bg-rose-500/20",       label: "Негатив",    line: "Я тебе не доверяю..." },
+  hate:     { icon: "🚫", ring: "ring-red-600 bg-red-900/40",         label: "Отказ",      line: "Уйди." },
+};
+
+function MoodBadge({ tier }: { tier: MoodTier }) {
+  const m = MOOD_META[tier];
+  return (
+    <div
+      className={`absolute -top-16 left-1/2 -translate-x-1/2 flex h-7 w-7 items-center justify-center rounded-full ring-2 ${m.ring} backdrop-blur text-sm shadow-lg`}
+      title={m.label}
+      style={{ animation: tier === "hate" ? "vitals-flicker 0.4s steps(2) infinite" : undefined }}
+    >
+      {m.icon}
+    </div>
+  );
+}
 
 type Props = {
   onCommunicate: (delta: number) => void;
