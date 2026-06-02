@@ -7,6 +7,7 @@ import { Street } from "@/components/Street";
 import { Room } from "@/components/Room";
 import { Leaderboard } from "@/components/Leaderboard";
 import { ProfileWindow } from "@/components/ProfileWindow";
+import { ShopWindow, type ShopItem } from "@/components/ShopWindow";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getCurrentProfile,
