@@ -48,6 +48,7 @@ export function setVitals(patch: Partial<Vitals>) {
     energy: clamp((patch.energy ?? _vitals.energy)),
     stability: clamp((patch.stability ?? _vitals.stability)),
     psyche: clamp((patch.psyche ?? _vitals.psyche)),
+    social: clamp((patch.social ?? _vitals.social)),
   };
   _listeners.forEach((l) => l(_vitals));
 }
@@ -57,6 +58,7 @@ export function modVitals(delta: Partial<Vitals>) {
     energy: _vitals.energy + (delta.energy ?? 0),
     stability: _vitals.stability + (delta.stability ?? 0),
     psyche: _vitals.psyche + (delta.psyche ?? 0),
+    social: _vitals.social + (delta.social ?? 0),
   });
 }
 function clamp(n: number) {
