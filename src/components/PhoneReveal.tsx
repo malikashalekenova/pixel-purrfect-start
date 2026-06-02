@@ -12,19 +12,20 @@ type Props = {
 // Tile types
 // 0 = road, 1 = building (blocked), 2 = glitch (slow), 3 = stability hazard
 // N = npc, C = cafe
+// 11 cols × 11 rows. Cafe (C) sits on row 0 with road below; start at bottom-left.
 const MAP: string[] = [
-  "1111111111C1",
-  "10000000001 1",
-  "1011110111011",
-  "1010002010001",
-  "1010111010111",
-  "100N003010001",
-  "1011111011101",
-  "1000000300001",
-  "1011101111101",
-  "10000010000 1",
-  "1111111111111",
-].map((r) => r.replace(/\s+/g, ""));
+  "11111C11111",
+  "10000003001",
+  "10111110101",
+  "10100010101",
+  "10101010101",
+  "1010N010101",
+  "10101010101",
+  "10101110101",
+  "10100020001",
+  "10000000001",
+  "11111111111",
+];
 
 const ROWS = MAP.length;
 const COLS = MAP[0].length;
