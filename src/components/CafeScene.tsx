@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { getVitals, modVitals } from "./VitalsHUD";
+import { getVitals, modVitals, type Vitals } from "./VitalsHUD";
 import { CatSprite } from "./CatSprite";
 
+type Props = {
+  onExit: () => void;
+  coins: number;
+  onSpend: (amount: number) => boolean;
+};
 
-type Props = { onExit: () => void };
 type Mood = "friendly" | "neutral" | "negative";
 type Behavior = "laughing" | "alone" | "system" | "watching" | "chatting";
 
@@ -11,7 +15,7 @@ type Npc = {
   id: string;
   name: string;
   emoji: string;
-  seat: string; // tailwind position classes
+  seat: string;
   behavior: Behavior;
   story: string;
   intro: string;
@@ -23,7 +27,7 @@ const GUESTS: Npc[] = [
     id: "mila",
     name: "Мила",
     emoji: "🐱",
-    seat: "left-[10%] top-[40%]",
+    seat: "left-[8%] top-[42%]",
     behavior: "chatting",
     story: "Художница. Рисует портреты котов прямо за столиком.",
     intro: "Ты впервые здесь? У тебя интересная мордочка — нарисую как-нибудь.",
@@ -37,7 +41,7 @@ const GUESTS: Npc[] = [
     id: "tomas",
     name: "Томас",
     emoji: "😼",
-    seat: "right-[12%] top-[36%]",
+    seat: "right-[10%] top-[38%]",
     behavior: "system",
     story: "Старый системщик. Уверяет, что NEKO_OS «дышит» по ночам.",
     intro: "Слышал, система опять глючит по ночам… ты тоже это чувствуешь?",
@@ -51,7 +55,7 @@ const GUESTS: Npc[] = [
     id: "kira",
     name: "Кира",
     emoji: "🐈‍⬛",
-    seat: "left-[42%] top-[60%]",
+    seat: "left-[40%] top-[62%]",
     behavior: "alone",
     story: "Тихо пьёт чай у окна. Любит смотреть на город.",
     intro: "У тебя усталый вид. Всё ок?",
@@ -65,7 +69,7 @@ const GUESTS: Npc[] = [
     id: "rex",
     name: "Рекс",
     emoji: "🐯",
-    seat: "right-[34%] top-[62%]",
+    seat: "right-[32%] top-[64%]",
     behavior: "laughing",
     story: "Компанейский кот. Травит байки за столиком с друзьями.",
     intro: "Ха-ха, ты бы видел его морду! А ты кто такой? Присядешь?",
@@ -79,7 +83,7 @@ const GUESTS: Npc[] = [
     id: "noir",
     name: "Нуар",
     emoji: "🐈",
-    seat: "left-[60%] top-[28%]",
+    seat: "left-[58%] top-[30%]",
     behavior: "watching",
     story: "Молчит и смотрит. Кажется, наблюдает именно за тобой.",
     intro: "…Я тебя уже видел. В другом районе. Любопытно.",
@@ -99,33 +103,92 @@ const AMBIENT_LINES: Record<Behavior, string[]> = {
   chatting: ["…и тогда я говорю…", "ты понял?", "это смешно"],
 };
 
+// ---------- MENU ----------
+type Category = "drink" | "food" | "dessert" | "special" | "secret";
+
+type MenuItem = {
+  id: string;
+  icon: string;
+  name: string;
+  desc: string;
+  price: number;
+  cat: Category;
+  // direct vital changes
+  effect: Partial<Vitals>;
+  // optional special effect description / flag
+  flavor?: string;
+  // gated by social >= N (for secret menu)
+  gateSocial?: number;
+  // special runtime effect kind
+  kind?: "glitch-soda" | "memory-soup" | "espresso";
+};
+
+const MENU: MenuItem[] = [
+  // Drinks
+  { id: "milk", icon: "🥛", name: "Тёплое молоко котика", desc: "Базовое восстановление.", price: 15, cat: "drink", effect: { energy: 20, stability: 5 } },
+  { id: "espresso", icon: "☕", name: "Эспрессо «System Boost»", desc: "+40% энергия, −5% стабильность. Ускоряет движение.", price: 25, cat: "drink", effect: { energy: 40, stability: -5 }, kind: "espresso", flavor: "⚡ ускорение в мини-игре" },
+  { id: "tea", icon: "🍵", name: "Чай «Calm Process»", desc: "+25% стабильность. Снижает эффект глитча.", price: 20, cat: "drink", effect: { stability: 25 }, flavor: "🧠 меньше глитчей" },
+
+  // Food
+  { id: "fish-burger", icon: "🐟", name: "Рыбный бургер", desc: "+30% жизнь, +10% энергия.", price: 30, cat: "food", effect: { health: 30, energy: 10 } },
+  { id: "chicken", icon: "🍗", name: "Куриные кусочки «Debug Meal»", desc: "+35% энергия, +5% общение.", price: 35, cat: "food", effect: { energy: 35, social: 5 } },
+  { id: "cheese", icon: "🧀", name: "Сырная тарелка «Neon Cheese»", desc: "+20% стабильность, +20% общение.", price: 40, cat: "food", effect: { stability: 20, social: 20 } },
+
+  // Desserts
+  { id: "pixel-cake", icon: "🍰", name: "Пиксельный торт", desc: "+40% стабильность, +10% жизнь. Мир кажется мягче.", price: 50, cat: "dessert", effect: { stability: 40, health: 10 }, flavor: "🧠 меньше глитчей" },
+  { id: "pudding", icon: "🍮", name: "Кремовый пудинг «Soft Data»", desc: "+30% ко всем датчикам (слабый универсальный бафф).", price: 45, cat: "dessert", effect: { health: 30, energy: 30, stability: 30, social: 30 } },
+
+  // Special
+  { id: "glitch-soda", icon: "⚡", name: "«Glitch Soda»", desc: "+50% энергия. Случайный эффект.", price: 70, cat: "special", effect: { energy: 50 }, kind: "glitch-soda", flavor: "🎲 случайный баг" },
+  { id: "memory-soup", icon: "🧠", name: "«Memory Soup»", desc: "+40% стабильность. Открывает скрытые диалоги NPC.", price: 80, cat: "special", effect: { stability: 40 }, kind: "memory-soup", flavor: "🔓 скрытые диалоги" },
+
+  // Secret (requires social >= 70)
+  { id: "mafia-fish", icon: "🐟", name: "Рыба от мафии котов", desc: "+50% жизнь, +20% общение. Закрытое блюдо.", price: 120, cat: "secret", effect: { health: 50, social: 20 }, gateSocial: 70, flavor: "🐱 от мафии" },
+  { id: "shadow-coffee", icon: "🖤", name: "Теневой кофе банды", desc: "+60% энергия, +20% стабильность.", price: 110, cat: "secret", effect: { energy: 60, stability: 20 }, gateSocial: 70, flavor: "🐾 для своих" },
+];
+
+const CAT_TABS: Array<{ key: Category; label: string; icon: string }> = [
+  { key: "drink", label: "Напитки", icon: "☕" },
+  { key: "food", label: "Еда", icon: "🍔" },
+  { key: "dessert", label: "Десерты", icon: "🍰" },
+  { key: "special", label: "Особые", icon: "💥" },
+  { key: "secret", label: "Секретное", icon: "🐾" },
+];
+
 function moodFor(social: number, rel: number): Mood {
   const score = social * 0.6 + rel;
   if (score < 30) return "negative";
   if (score < 60) return "neutral";
   return "friendly";
 }
-function moodIcon(m: Mood) {
-  return m === "friendly" ? "💚" : m === "neutral" ? "😐" : "😾";
-}
-function moodRing(m: Mood) {
-  return m === "friendly"
+const moodIcon = (m: Mood) => (m === "friendly" ? "💚" : m === "neutral" ? "😐" : "😾");
+const moodRing = (m: Mood) =>
+  m === "friendly"
     ? "ring-emerald-300/70 bg-emerald-400/15"
     : m === "neutral"
       ? "ring-zinc-300/40 bg-zinc-300/10"
       : "ring-rose-400/70 bg-rose-500/15";
-}
-function behaviorTag(b: Behavior) {
-  switch (b) {
-    case "laughing": return "😂 смеётся";
-    case "alone": return "🌧 один";
-    case "system": return "🛠 о системе";
-    case "watching": return "👁 наблюдает";
-    case "chatting": return "💬 болтает";
-  }
+const behaviorTag = (b: Behavior) =>
+  b === "laughing" ? "😂 смеётся" : b === "alone" ? "🌧 один" : b === "system" ? "🛠 о системе" : b === "watching" ? "👁 наблюдает" : "💬 болтает";
+
+// Apply effect with 30% rule: scale down if any vital is critical
+function applyEffect(effect: Partial<Vitals>, scale: number) {
+  const scaled: Partial<Vitals> = {};
+  (Object.keys(effect) as Array<keyof Vitals>).forEach((k) => {
+    const val = effect[k];
+    if (typeof val === "number") scaled[k] = Math.round(val * scale);
+  });
+  modVitals(scaled);
 }
 
-export function CafeScene({ onExit }: Props) {
+// Price drift below 30%: ±30%
+function driftPrice(base: number, broken: boolean) {
+  if (!broken) return base;
+  const sign = Math.random() < 0.5 ? -1 : 1;
+  return Math.max(1, Math.round(base + sign * base * (0.1 + Math.random() * 0.3)));
+}
+
+export function CafeScene({ onExit, coins, onSpend }: Props) {
   const [active, setActive] = useState<Npc | null>(null);
   const [reply, setReply] = useState<string | null>(null);
   const [rel, setRel] = useState<Record<string, number>>(
@@ -133,21 +196,34 @@ export function CafeScene({ onExit }: Props) {
   );
   const [baristaOpen, setBaristaOpen] = useState(false);
   const [baristaMsg, setBaristaMsg] = useState<string | null>(null);
+  const [tab, setTab] = useState<Category>("drink");
   const [questDone, setQuestDone] = useState(false);
+  const [secretUnlocked, setSecretUnlocked] = useState(false);
+  const [memoryActive, setMemoryActive] = useState(false);
   const [tick, force] = useState(0);
 
-  // Refresh on vitals tick + rotate ambient lines
   useEffect(() => {
     const id = setInterval(() => force((n) => n + 1), 1800);
     return () => clearInterval(id);
   }, []);
 
   const v = getVitals();
-  const lowSocial = v.social < 30;
-  const lowStability = v.stability < 30;
-  const cold = lowSocial || lowStability;
+  const minVital = Math.min(v.health, v.energy, v.stability, v.social);
+  const broken = minVital < 30; // ⚠️ Связь с правилом 30%
+  const effectScale = broken ? 0.5 : 1;
+  const cold = v.social < 30 || v.stability < 30;
 
-  // Pick a random ambient line per NPC, refreshed each tick
+  // Secret menu unlocks at high social
+  const canSeeSecret = v.social >= 70 || secretUnlocked;
+
+  // Stable drifted prices per render of the menu (re-roll on tick to feel alive)
+  const priceTable = useMemo(() => {
+    const t: Record<string, number> = {};
+    for (const m of MENU) t[m.id] = driftPrice(m.price, broken);
+    return t;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [broken, tick]);
+
   const ambient = useMemo(() => {
     const m: Record<string, string> = {};
     for (const g of GUESTS) {
@@ -157,10 +233,14 @@ export function CafeScene({ onExit }: Props) {
     return m;
   }, [tick]);
 
+  const showFlash = (text: string, ms = 1900) => {
+    setBaristaMsg(text);
+    setTimeout(() => setBaristaMsg(null), ms);
+  };
+
   const openNpc = (npc: Npc) => {
     if (cold && Math.random() < 0.5) {
-      setBaristaMsg(`${npc.name} отворачивается — ты сейчас не интересен.`);
-      setTimeout(() => setBaristaMsg(null), 1800);
+      showFlash(`${npc.name} отворачивается — ты сейчас не интересен.`);
       return;
     }
     setActive(npc);
@@ -174,43 +254,88 @@ export function CafeScene({ onExit }: Props) {
     setRel((r) => ({ ...r, [active.id]: Math.max(0, Math.min(100, r[active.id] + c.social)) }));
   };
 
-  const orderDrink = (kind: "coffee" | "tea" | "cream") => {
-    if (cold) {
-      setBaristaMsg("Бариста: «Сегодня без обслуживания. Зайди, когда придёшь в себя.»");
-      setTimeout(() => setBaristaMsg(null), 2200);
+  const buyItem = (item: MenuItem) => {
+    if (item.gateSocial && v.social < item.gateSocial && !secretUnlocked) {
+      showFlash("🚫 Слишком мало доверия. Нужно общение ≥ 70%.");
       return;
     }
-    if (kind === "coffee") {
-      modVitals({ energy: 25, stability: 5 });
-      setBaristaMsg("☕ Кофе. +Энергия");
-    } else if (kind === "tea") {
-      modVitals({ energy: 10, stability: 15 });
-      setBaristaMsg("🍵 Чай. +Стабильность");
-    } else {
-      modVitals({ health: 15, social: 5 });
-      setBaristaMsg("🥛 Молоко со сливками. +Жизнь");
+    if (cold) {
+      showFlash("Бариста: «Сегодня без обслуживания. Зайди, когда придёшь в себя.»");
+      return;
     }
-    setTimeout(() => setBaristaMsg(null), 1800);
+    const price = priceTable[item.id] ?? item.price;
+    if (!onSpend(price)) {
+      showFlash(`Не хватает монет: нужно 🪙 ${price}`);
+      return;
+    }
+    applyEffect(item.effect, effectScale);
+
+    // special effects
+    if (item.kind === "glitch-soda") {
+      const r = Math.random();
+      if (r < 0.34) {
+        showFlash("⚡ Ускорение! Движение бустится.", 2200);
+        modVitals({ energy: 10 });
+      } else if (r < 0.67) {
+        showFlash("🌀 Микро-телепорт! Реальность дёрнулась.", 2200);
+        modVitals({ stability: -5 });
+      } else {
+        showFlash("🐛 Баг управления… немного штормит.", 2200);
+        modVitals({ stability: -10 });
+      }
+    } else if (item.kind === "memory-soup") {
+      setMemoryActive(true);
+      showFlash("🧠 Память коту прояснилась. Откроются скрытые диалоги.", 2400);
+    } else if (item.kind === "espresso") {
+      showFlash("☕ +Энергия, бариста подмигивает. Лёгкий перегруз.");
+    } else {
+      const desc = broken
+        ? `${item.icon} ${item.name} (эффект ослаблен −50% — система ниже 30%)`
+        : `${item.icon} ${item.name}. Эффект применён.`;
+      showFlash(desc, 2100);
+    }
+
+    // friendly purchases warm up social link
+    if ((item.effect.social ?? 0) > 0) {
+      setRel((r) => {
+        const next = { ...r };
+        for (const k of Object.keys(next)) next[k] = Math.min(100, next[k] + 2);
+        return next;
+      });
+    }
+
+    // chance to unlock secret menu after high-tier purchase
+    if (!secretUnlocked && v.social >= 65 && item.price >= 40) {
+      if (Math.random() < 0.35) {
+        setSecretUnlocked(true);
+        showFlash("🐾 Бариста шепчет: «Загляни в секретное меню…»", 2600);
+      }
+    }
   };
 
   const acceptQuest = () => {
     if (cold) {
-      setBaristaMsg("Бариста: «Не до квестов сейчас. Сначала приди в себя.»");
-      setTimeout(() => setBaristaMsg(null), 2000);
+      showFlash("Бариста: «Не до квестов сейчас. Сначала приди в себя.»");
       return;
     }
     setQuestDone(true);
     modVitals({ social: 12, stability: 5 });
-    setBaristaMsg("📝 Квест взят: «Передай привет Нуару». +Общение");
-    setTimeout(() => setBaristaMsg(null), 2200);
+    showFlash("📝 Квест взят: «Передай привет Нуару». +Общение", 2200);
   };
+
+  // ---------- render ----------
+  const visibleItems = MENU.filter((m) => {
+    if (m.cat !== tab) return false;
+    if (m.cat === "secret" && !canSeeSecret) return false;
+    return true;
+  });
+  const secretTabVisible = canSeeSecret;
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 animate-fade-in">
       <div className="pointer-events-none absolute inset-0 bg-white/40 animate-[cafe-enter_900ms_ease-out_forwards]" />
 
-      <div className="relative h-[90vh] w-[min(980px,95vw)] overflow-hidden rounded-2xl border border-amber-300/40 bg-gradient-to-b from-[#241712] via-[#2c1c14] to-[#1a100c] shadow-[0_0_80px_rgba(251,191,36,0.25)]">
-        {/* warm vignette */}
+      <div className="relative h-[92vh] w-[min(1000px,96vw)] overflow-hidden rounded-2xl border border-amber-300/40 bg-gradient-to-b from-[#241712] via-[#2c1c14] to-[#1a100c] shadow-[0_0_80px_rgba(251,191,36,0.25)]">
         <div className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_at_top,rgba(251,191,36,0.18),transparent_60%)]" />
 
         {/* header */}
@@ -218,8 +343,10 @@ export function CafeScene({ onExit }: Props) {
           <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-amber-200">
             ☕ Pixel Cat Cafe
           </div>
-          <div className="font-mono text-[10px] text-amber-100/50">
-            {GUESTS.length} гостей · бариста на смене
+          <div className="flex items-center gap-3 font-mono text-[10px] text-amber-100/70">
+            <span>🪙 {coins}</span>
+            <span>{GUESTS.length} гостей</span>
+            {memoryActive && <span className="text-cyan-300">🧠 память активна</span>}
           </div>
           <button
             type="button"
@@ -230,49 +357,43 @@ export function CafeScene({ onExit }: Props) {
           </button>
         </div>
 
-        {/* ambient line */}
-        <div className="px-4 pt-2 font-mono text-[10px] text-amber-100/60">
-          *звон чашек, мягкая lo-fi, тихие разговоры за столиками*
-        </div>
-
-        {/* room */}
-        <div className="relative h-[calc(100%-170px)] w-full">
-          {/* windows — city view */}
+        {/* room (compact) */}
+        <div className="relative h-[44%] w-full overflow-hidden border-b border-amber-300/15">
+          {/* windows */}
           <div className="absolute inset-x-6 top-2 flex gap-3">
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="flex-1 h-12 rounded-md border border-amber-200/20 bg-gradient-to-b from-[#0a1a2a] to-[#1a3552] shadow-[inset_0_0_15px_rgba(127,231,255,0.15)] overflow-hidden"
+                className="flex-1 h-10 rounded-md border border-amber-200/20 bg-gradient-to-b from-[#0a1a2a] to-[#1a3552] shadow-[inset_0_0_15px_rgba(127,231,255,0.15)] overflow-hidden"
               >
                 <div className="flex h-full items-end justify-around px-1 opacity-60">
+                  <div className="h-5 w-2 bg-[#7fe7ff]/40" />
+                  <div className="h-7 w-2 bg-[#a78bfa]/40" />
+                  <div className="h-4 w-2 bg-[#fbbf24]/40" />
                   <div className="h-6 w-2 bg-[#7fe7ff]/40" />
-                  <div className="h-8 w-2 bg-[#a78bfa]/40" />
-                  <div className="h-5 w-2 bg-[#fbbf24]/40" />
-                  <div className="h-7 w-2 bg-[#7fe7ff]/40" />
-                  <div className="h-9 w-2 bg-[#34d399]/40" />
-                  <div className="h-4 w-2 bg-[#f472b6]/40" />
+                  <div className="h-8 w-2 bg-[#34d399]/40" />
+                  <div className="h-3 w-2 bg-[#f472b6]/40" />
                 </div>
               </div>
             ))}
           </div>
 
           {/* counter (barista) */}
-          <div className="absolute left-1/2 top-[88px] flex -translate-x-1/2 flex-col items-center">
-            <div className="rounded-md border border-amber-300/40 bg-amber-900/40 px-6 py-2 text-center shadow-[0_0_20px_rgba(251,191,36,0.25)]">
-              <div className="text-2xl">🧑‍🍳</div>
-              <div className="font-mono text-[10px] text-amber-200">БАРИСТА</div>
+          <div className="absolute left-1/2 top-[60px] flex -translate-x-1/2 flex-col items-center">
+            <div className="rounded-md border border-amber-300/40 bg-amber-900/40 px-5 py-1.5 text-center shadow-[0_0_20px_rgba(251,191,36,0.25)]">
+              <div className="text-xl">🧑‍🍳</div>
+              <div className="font-mono text-[9px] text-amber-200">БАРИСТА</div>
             </div>
-            <div className="mt-1 h-3 w-40 rounded-b bg-amber-950/60 border-x border-b border-amber-300/30" />
             <button
               type="button"
               onClick={() => setBaristaOpen(true)}
-              className="mt-2 rounded bg-amber-400/90 px-3 py-1 text-[11px] font-bold text-[#2a1a08] hover:bg-amber-300"
+              className="mt-1 rounded bg-amber-400/90 px-2.5 py-0.5 text-[10px] font-bold text-[#2a1a08] hover:bg-amber-300"
             >
-              Подойти к стойке
+              Квесты / о кафе
             </button>
           </div>
 
-          {/* tables / guests */}
+          {/* guests */}
           {GUESTS.map((g) => {
             const m = moodFor(v.social, rel[g.id]);
             const muted = cold;
@@ -283,40 +404,117 @@ export function CafeScene({ onExit }: Props) {
                 onClick={() => openNpc(g)}
                 className={`absolute ${g.seat} flex flex-col items-center transition hover:scale-105 ${muted ? "opacity-60" : ""}`}
               >
-                {/* speech bubble */}
-                <div className="mb-1 max-w-[120px] truncate rounded-md border border-amber-200/20 bg-black/60 px-2 py-0.5 text-[10px] text-amber-100/80">
+                <div className="mb-0.5 max-w-[110px] truncate rounded border border-amber-200/20 bg-black/60 px-1.5 py-0.5 text-[9px] text-amber-100/80">
                   {ambient[g.id]}
                 </div>
-                {/* mood */}
-                <div className={`mb-1 rounded-full px-2 py-0.5 text-[10px] ring-1 ${moodRing(m)}`}>
+                <div className={`mb-0.5 rounded-full px-1.5 py-0 text-[9px] ring-1 ${moodRing(m)}`}>
                   {moodIcon(m)} {Math.round(rel[g.id])}
                 </div>
-                {/* cat at table */}
-                <div className="rounded-md border border-amber-200/20 bg-amber-950/40 px-3 py-2 flex flex-col items-center">
-                  <div className="animate-[cat-idle_2.4s_ease-in-out_infinite]"><CatSprite size="sm" /></div>
-                  <div className="font-mono text-[10px] text-amber-100/80 mt-1">{g.name}</div>
+                <div className="rounded-md border border-amber-200/20 bg-amber-950/40 px-2 py-1 flex flex-col items-center">
+                  <div className="animate-[cat-idle_2.4s_ease-in-out_infinite]"><CatSprite size="xs" /></div>
+                  <div className="font-mono text-[9px] text-amber-100/80 mt-0.5">{g.name}</div>
                 </div>
-
-                {/* table */}
-                <div className="-mt-0.5 h-1.5 w-16 rounded-b bg-amber-900/70" />
-                <div className="mt-0.5 text-[9px] text-amber-200/50">{behaviorTag(g.behavior)}</div>
+                <div className="-mt-0.5 h-1 w-12 rounded-b bg-amber-900/70" />
+                <div className="mt-0.5 text-[8px] text-amber-200/50">{behaviorTag(g.behavior)}</div>
               </button>
             );
           })}
+        </div>
 
-          {baristaMsg && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-md border border-amber-300/30 bg-black/85 px-3 py-1 text-[11px] text-amber-100 animate-fade-in">
-              {baristaMsg}
+        {/* MENU */}
+        <div className="flex h-[calc(56%-40px)] flex-col">
+          <div className="flex items-center gap-1 border-b border-amber-300/15 bg-black/30 px-3 py-2">
+            {CAT_TABS.filter((c) => c.key !== "secret" || secretTabVisible).map((c) => (
+              <button
+                key={c.key}
+                type="button"
+                onClick={() => setTab(c.key)}
+                className={`rounded-md px-2.5 py-1 text-[11px] font-mono transition ${
+                  tab === c.key
+                    ? "bg-amber-400 text-[#1b110a]"
+                    : "border border-amber-300/30 text-amber-200/80 hover:bg-amber-400/10"
+                }`}
+              >
+                {c.icon} {c.label}
+              </button>
+            ))}
+            <div className="ml-auto text-[10px] text-amber-100/60">
+              {broken ? "⚠ Система <30% — цены плавают, эффекты −50%" : "Меню стабильно"}
             </div>
-          )}
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-3 py-2">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+              {visibleItems.map((m) => {
+                const price = priceTable[m.id] ?? m.price;
+                const drifted = price !== m.price;
+                const canAfford = coins >= price;
+                const locked = m.gateSocial ? v.social < m.gateSocial && !secretUnlocked : false;
+                return (
+                  <div
+                    key={m.id}
+                    className={`flex items-start gap-2 rounded-md border bg-amber-950/30 p-2 ${
+                      locked ? "border-rose-400/30 opacity-60" : "border-amber-300/20"
+                    }`}
+                  >
+                    <div className="text-2xl leading-none">{m.icon}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="truncate font-mono text-[12px] text-amber-100">{m.name}</div>
+                        <div
+                          className={`font-mono text-[11px] ${
+                            drifted ? "text-rose-300 animate-pulse" : "text-amber-300"
+                          }`}
+                          title={drifted ? `базовая цена ${m.price}` : ""}
+                        >
+                          🪙 {price}
+                        </div>
+                      </div>
+                      <div className="mt-0.5 text-[10px] text-amber-100/70">{m.desc}</div>
+                      {m.flavor && (
+                        <div className="mt-0.5 text-[10px] text-cyan-200/80">{m.flavor}</div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => buyItem(m)}
+                        disabled={locked || !canAfford}
+                        className={`mt-1.5 rounded px-2 py-1 text-[10px] font-bold transition ${
+                          locked
+                            ? "cursor-not-allowed bg-rose-900/30 text-rose-200/60"
+                            : canAfford
+                              ? "bg-amber-400 text-[#1b110a] hover:bg-amber-300"
+                              : "cursor-not-allowed bg-white/10 text-white/40"
+                        }`}
+                      >
+                        {locked ? `🔒 нужно 💬 ${m.gateSocial}%` : canAfford ? "Заказать" : "Не хватает 🪙"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              {visibleItems.length === 0 && (
+                <div className="col-span-full rounded-md border border-amber-300/20 bg-black/30 p-4 text-center text-[11px] text-amber-100/60">
+                  Здесь пусто. Подними общение, чтобы открыть секретное меню.
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* footer hint */}
         <div className="border-t border-amber-300/20 bg-black/40 px-4 py-2 text-[10px] text-amber-100/60">
           {cold
-            ? "⚠ Общение/Стабильность ниже 30% — коты холоднее, бариста может отказать."
-            : "Подойди к коту, чтобы заговорить. У бариста есть заказ и квест."}
+            ? "⚠ Общение/Стабильность ниже 30% — бариста может отказать, эффекты ослаблены."
+            : canSeeSecret
+              ? "🐾 Секретное меню разблокировано. Мафия котов уважает."
+              : "Подойди к коту, чтобы заговорить. Закажи у бариста — еда влияет на датчики."}
         </div>
+
+        {baristaMsg && (
+          <div className="pointer-events-none absolute bottom-12 left-1/2 -translate-x-1/2 rounded-md border border-amber-300/30 bg-black/85 px-3 py-1 text-[11px] text-amber-100 animate-fade-in">
+            {baristaMsg}
+          </div>
+        )}
       </div>
 
       {/* NPC dialog modal */}
@@ -335,6 +533,11 @@ export function CafeScene({ onExit }: Props) {
             {!reply ? (
               <>
                 <p className="mb-3 text-[13px] text-amber-100/90">«{active.intro}»</p>
+                {memoryActive && (
+                  <p className="mb-2 rounded border border-cyan-400/30 bg-cyan-500/10 px-2 py-1 text-[11px] text-cyan-200">
+                    🧠 *Memory Soup открывает скрытый слой мыслей этого кота…*
+                  </p>
+                )}
                 <div className="space-y-1.5">
                   {active.choices.map((c, i) => (
                     <button
@@ -370,47 +573,21 @@ export function CafeScene({ onExit }: Props) {
         </div>
       )}
 
-      {/* Barista modal */}
+      {/* Barista modal (quests / info) */}
       {baristaOpen && (
         <div className="absolute inset-0 z-[120] flex items-center justify-center bg-black/60 animate-fade-in">
-          <div className="w-[min(440px,92vw)] rounded-xl border border-amber-300/40 bg-[#1b110a] p-4">
+          <div className="w-[min(460px,92vw)] rounded-xl border border-amber-300/40 bg-[#1b110a] p-4">
             <div className="mb-3 flex items-center gap-2">
               <span className="text-2xl">🧑‍🍳</span>
               <span className="font-mono text-sm text-amber-200">Бариста</span>
+              <span className="ml-auto font-mono text-[10px] text-amber-100/60">🪙 {coins}</span>
             </div>
             <p className="mb-3 text-[13px] text-amber-100/90">
-              «Что закажешь? Свежий кофе, ромашковый чай и молоко со сливками.»
+              «Меню перед тобой. Если будешь много заказывать — открою секретное.»
             </p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => orderDrink("coffee")}
-                className="rounded-md border border-amber-300/40 bg-amber-900/40 px-2 py-2 text-[11px] text-amber-100 hover:bg-amber-800/50"
-              >
-                ☕ Кофе
-                <div className="text-[9px] text-amber-200/70">+Энергия</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => orderDrink("tea")}
-                className="rounded-md border border-emerald-300/40 bg-emerald-900/30 px-2 py-2 text-[11px] text-emerald-100 hover:bg-emerald-800/40"
-              >
-                🍵 Чай
-                <div className="text-[9px] text-emerald-200/70">+Стабильность</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => orderDrink("cream")}
-                className="rounded-md border border-rose-300/40 bg-rose-900/30 px-2 py-2 text-[11px] text-rose-100 hover:bg-rose-800/40"
-              >
-                🥛 Сливки
-                <div className="text-[9px] text-rose-200/70">+Жизнь</div>
-              </button>
-            </div>
 
-            {/* mini quest */}
-            <div className="mt-3 rounded-md border border-amber-300/30 bg-amber-950/40 p-2 text-[11px] text-amber-100/90">
-              <div className="mb-1 font-mono text-[10px] uppercase text-amber-300/80">📝 Заказ от бариста</div>
+            <div className="rounded-md border border-amber-300/30 bg-amber-950/40 p-2 text-[11px] text-amber-100/90">
+              <div className="mb-1 font-mono text-[10px] uppercase text-amber-300/80">📝 Квест бариста</div>
               {questDone ? (
                 <div className="text-emerald-200">Квест активен: «Передай привет Нуару».</div>
               ) : (
@@ -425,6 +602,11 @@ export function CafeScene({ onExit }: Props) {
                   </button>
                 </>
               )}
+            </div>
+
+            <div className="mt-3 rounded-md border border-cyan-400/30 bg-cyan-500/10 p-2 text-[11px] text-cyan-100">
+              <div className="font-mono text-[10px] uppercase text-cyan-300/80">ℹ Правило 30%</div>
+              Если любой датчик ниже 30% — эффекты еды режутся вдвое, цены плавают, особые блюда могут быть недоступны.
             </div>
 
             <button
