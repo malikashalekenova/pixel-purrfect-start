@@ -1,11 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
 import { Workshop } from "@/components/Workshop";
 import { Street } from "@/components/Street";
 import { Room } from "@/components/Room";
 import { Leaderboard } from "@/components/Leaderboard";
+import { ProfileWindow } from "@/components/ProfileWindow";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  getCurrentProfile,
+  levelFromXp,
+  updateMyProfile,
+  type Profile,
+} from "@/lib/profile";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -27,6 +35,35 @@ function Index() {
   const [coins, setCoins] = useState(0);
   const [xp, setXp] = useState(0);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  // Load profile on mount + on auth changes (autosave / login restore)
+  useEffect(() => {
+    let active = true;
+    getCurrentProfile().then((p) => {
+      if (!active) return;
+      if (p) {
+        setProfile(p);
+        setCoins(p.coins);
+        setXp(p.xp);
+      }
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      getCurrentProfile().then((p) => {
+        if (!active) return;
+        if (p) {
+          setProfile(p);
+          setCoins(p.coins);
+          setXp(p.xp);
+        }
+      });
+    });
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handlePlay = () => {
     setStage("zooming");
@@ -41,13 +78,32 @@ function Index() {
     setTimeout(() => setStage("workshop"), 2200);
   };
 
-  const handleWorkshopComplete = () => {
-    setCoins((c) => c + 50);
-    setXp((x) => x + 25);
+  const handleWorkshopComplete = async () => {
+    const newCoins = coins + 50;
+    const newXp = xp + 25;
+    setCoins(newCoins);
+    setXp(newXp);
     setStage("done");
     toast("Контракт выполнен!", {
       description: "+50 монет · +25 опыта",
     });
+    // Autosave (only if registered)
+    if (profile) {
+      const newLevel = levelFromXp(newXp);
+      const updated = await updateMyProfile({
+        coins: newCoins,
+        xp: newXp,
+        total_earned: profile.total_earned + 50,
+        contracts_completed: profile.contracts_completed + 1,
+        level: newLevel,
+      });
+      if (updated) {
+        setProfile(updated);
+        if (newLevel > profile.level) {
+          toast(`Новый уровень: ${newLevel}!`, { description: "Прогресс сохранён." });
+        }
+      }
+    }
     setTimeout(() => setStage("room-after"), 1800);
   };
 
@@ -55,13 +111,28 @@ function Index() {
     setStage("street");
   };
 
-
-  const handleCommunicate = (xpGain: number) => {
-    setXp((x) => x + xpGain);
+  const handleCommunicate = async (xpGain: number) => {
+    const newXp = xp + xpGain;
+    setXp(newXp);
+    if (profile) {
+      const newLevel = levelFromXp(newXp);
+      const updated = await updateMyProfile({
+        xp: newXp,
+        level: newLevel,
+      });
+      if (updated) setProfile(updated);
+    }
   };
 
   const handleDiscoverCafe = () => {
     // marker added to city map (future feature)
+  };
+
+  const handleProfileCreated = (p: Profile) => {
+    setProfile(p);
+    setCoins(p.coins);
+    setXp(p.xp);
+    toast("Прогресс будет сохраняться автоматически.");
   };
 
   // Monitor approximate center in the background image (percent of image)
@@ -163,6 +234,8 @@ function Index() {
         <Street
           onCommunicate={handleCommunicate}
           onDiscoverCafe={handleDiscoverCafe}
+          hasProfile={!!profile}
+          onProfileCreated={handleProfileCreated}
         />
       )}
 
@@ -178,14 +251,31 @@ function Index() {
         </div>
       )}
 
-      {/* Leaderboard trigger — always available */}
-      <button
-        type="button"
-        onClick={() => setLeaderboardOpen(true)}
-        className="absolute left-3 top-3 z-[60] rounded-full bg-black/60 px-3 py-1.5 text-xs text-cyan-200 ring-1 ring-cyan-400/30 backdrop-blur hover:bg-cyan-400/10 hover:text-cyan-100 transition"
-      >
-        🏆 Рейтинг
-      </button>
+      {/* Leaderboard + Profile triggers */}
+      <div className="absolute left-3 top-3 z-[60] flex gap-2">
+        <button
+          type="button"
+          onClick={() => setLeaderboardOpen(true)}
+          className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-cyan-200 ring-1 ring-cyan-400/30 backdrop-blur hover:bg-cyan-400/10 hover:text-cyan-100 transition"
+        >
+          🏆 Рейтинг
+        </button>
+        {profile && (
+          <button
+            type="button"
+            onClick={() => setProfileOpen(true)}
+            className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-amber-200 ring-1 ring-amber-400/30 backdrop-blur hover:bg-amber-400/10 hover:text-amber-100 transition"
+          >
+            👤 Профиль
+          </button>
+        )}
+      </div>
+
+      {profile && profileOpen && (
+        <ProfileWindow profile={profile} onClose={() => setProfileOpen(false)} />
+      )}
+
+
 
       <Leaderboard open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
 

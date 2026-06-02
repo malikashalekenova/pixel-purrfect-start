@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { CharacterCreation } from "@/components/CharacterCreation";
+import type { Profile } from "@/lib/profile";
 
 type Props = {
   onCommunicate: (delta: number) => void;
   onDiscoverCafe: () => void;
+  hasProfile: boolean;
+  onProfileCreated: (profile: Profile) => void;
 };
+
 
 type DialogChoice = {
   id: 1 | 2 | 3 | 4;
@@ -95,7 +100,7 @@ const RYZHIK_CHOICES: DialogChoice[] = [
 ];
 
 
-export function Street({ onCommunicate, onDiscoverCafe }: Props) {
+export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCreated }: Props) {
   // Needs bars
   const [thirst, setThirst] = useState(82);
   const [hunger, setHunger] = useState(78);
@@ -109,6 +114,10 @@ export function Street({ onCommunicate, onDiscoverCafe }: Props) {
   const [relRyzhik, setRelRyzhik] = useState(0);
   const [metPushok, setMetPushok] = useState(false);
   const [metRyzhik, setMetRyzhik] = useState(false);
+
+  // Character creation flow
+  const [showCreation, setShowCreation] = useState(false);
+  const [pushokFarewell, setPushokFarewell] = useState(false);
 
   // Stats appear gradually
   useEffect(() => {
@@ -165,8 +174,24 @@ export function Street({ onCommunicate, onDiscoverCafe }: Props) {
   };
 
   const closeDialog = () => {
+    const wasPushok = activeNpc === "pushok";
+    const justMetPushok = wasPushok && metPushok && !hasProfile && !showCreation && !pushokFarewell;
     setActiveNpc(null);
     setReply(null);
+    // After first Пушок dialog, if player has no profile yet — open character creation
+    if (justMetPushok) {
+      setTimeout(() => setShowCreation(true), 400);
+    }
+  };
+
+  const handleProfileCreated = (profile: Profile) => {
+    setShowCreation(false);
+    onProfileCreated(profile);
+    // Final farewell line from Пушок
+    setTimeout(() => {
+      setPushokFarewell(true);
+      setTimeout(() => setPushokFarewell(false), 5000);
+    }, 600);
   };
 
   const currentChoices = activeNpc === "pushok" ? PUSHOK_CHOICES : RYZHIK_CHOICES;
@@ -242,14 +267,23 @@ export function Street({ onCommunicate, onDiscoverCafe }: Props) {
         aria-label="Поговорить с Пушком"
         className="group absolute left-[28%] bottom-[20%] cursor-pointer focus:outline-none"
       >
-        <div className="absolute -top-10 left-1/2 -translate-x-1/2 animate-bounce text-2xl drop-shadow-[0_0_8px_rgba(253,224,71,0.7)]">
-          👋
-        </div>
+        {pushokFarewell && (
+          <div className="absolute -top-20 left-1/2 z-10 w-56 -translate-x-1/2 rounded-2xl bg-white px-3 py-2 text-[11px] leading-snug text-stone-800 shadow-2xl ring-1 ring-black/10 animate-fade-in">
+            «Надеюсь, тебе понравится в нашем городе!»
+            <div className="absolute -bottom-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white" />
+          </div>
+        )}
+        {!pushokFarewell && (
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 animate-bounce text-2xl drop-shadow-[0_0_8px_rgba(253,224,71,0.7)]">
+            👋
+          </div>
+        )}
         <PushokSprite />
         <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-yellow-200">
           ПУШОК
         </div>
       </button>
+
 
       {/* NPC: Рыжик */}
       <button
@@ -322,6 +356,9 @@ export function Street({ onCommunicate, onDiscoverCafe }: Props) {
           </div>
         </div>
       )}
+
+      {/* Character creation after meeting Пушок */}
+      {showCreation && <CharacterCreation onCreated={handleProfileCreated} />}
     </div>
   );
 }
