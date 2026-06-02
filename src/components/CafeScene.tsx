@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getVitals, modVitals } from "./VitalsHUD";
+import { CatSprite } from "./CatSprite";
+
 
 type Props = { onExit: () => void };
 type Mood = "friendly" | "neutral" | "negative";
