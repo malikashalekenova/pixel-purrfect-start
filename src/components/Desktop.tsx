@@ -36,7 +36,19 @@ function useClock() {
   return { time, date };
 }
 
-export function Desktop({ onStartMission }: { onStartMission: () => void }) {
+export function Desktop({
+  onStartMission,
+  onOpenShop,
+  onOpenLeaderboard,
+  onOpenProfile,
+  hasProfile,
+}: {
+  onStartMission: () => void;
+  onOpenShop?: () => void;
+  onOpenLeaderboard?: () => void;
+  onOpenProfile?: () => void;
+  hasProfile?: boolean;
+}) {
   const { time, date } = useClock();
   const [notif, setNotif] = useState(false);
   const [openMessages, setOpenMessages] = useState(false);
@@ -50,6 +62,15 @@ export function Desktop({ onStartMission }: { onStartMission: () => void }) {
   const openMail = () => {
     setOpenMessages(true);
     setNotif(false);
+  };
+
+  const handleIconClick = (key: IconKey) => {
+    if (key === "messages") return openMail();
+    if (key === "shop") return onOpenShop?.();
+    if (key === "leaderboard") return onOpenLeaderboard?.();
+    if (key === "profile") {
+      if (hasProfile) onOpenProfile?.();
+    }
   };
 
   return (
