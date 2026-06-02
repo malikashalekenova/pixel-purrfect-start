@@ -227,7 +227,13 @@ function Index() {
       )}
 
       {/* Room scene — after first contract, before going outside */}
-      {stage === "room-after" && <Room onExit={handleLeaveRoom} />}
+      {stage === "room-after" && (
+        <Room
+          onExit={handleLeaveRoom}
+          onRestart={() => window.location.reload()}
+          onLoad={() => window.location.reload()}
+        />
+      )}
 
       {/* Street scene after first contract */}
       {stage === "street" && (
