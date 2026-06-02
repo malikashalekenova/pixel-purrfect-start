@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
-import { DesktopLevel } from "@/components/DesktopLevel";
 import { Workshop } from "@/components/Workshop";
 import { Street } from "@/components/Street";
 import { Room } from "@/components/Room";
