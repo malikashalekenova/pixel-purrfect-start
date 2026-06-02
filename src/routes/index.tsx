@@ -7,6 +7,7 @@ import { Street } from "@/components/Street";
 import { Room } from "@/components/Room";
 import { Leaderboard } from "@/components/Leaderboard";
 import { ProfileWindow } from "@/components/ProfileWindow";
+import { ShopWindow, type ShopItem } from "@/components/ShopWindow";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getCurrentProfile,
@@ -37,6 +38,19 @@ function Index() {
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
+  const [purchases, setPurchases] = useState<ShopItem[]>([]);
+
+  const handleBuy = async (item: ShopItem) => {
+    const newCoins = coins - item.price;
+    setCoins(newCoins);
+    setPurchases((prev) => [...prev, item]);
+    toast(`Куплено: ${item.name}`, { description: `−${item.price} DC` });
+    if (profile) {
+      const updated = await updateMyProfile({ coins: newCoins });
+      if (updated) setProfile(updated);
+    }
+  };
 
   // Load profile on mount + on auth changes (autosave / login restore)
   useEffect(() => {
@@ -275,13 +289,26 @@ function Index() {
             👤 Профиль
           </button>
         )}
+        <button
+          type="button"
+          onClick={() => setShopOpen(true)}
+          className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-emerald-200 ring-1 ring-emerald-400/30 backdrop-blur hover:bg-emerald-400/10 hover:text-emerald-100 transition"
+        >
+          🛒 Магазин
+        </button>
       </div>
 
       {profile && profileOpen && (
         <ProfileWindow profile={profile} onClose={() => setProfileOpen(false)} />
       )}
 
-
+      <ShopWindow
+        open={shopOpen}
+        onClose={() => setShopOpen(false)}
+        coins={coins}
+        onBuy={handleBuy}
+        purchaseCount={purchases.length}
+      />
 
       <Leaderboard open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
 
