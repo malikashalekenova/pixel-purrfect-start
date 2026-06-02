@@ -314,7 +314,7 @@ export function Desktop({
           {ICONS.slice(0, 6).map((ic) => (
             <button
               key={`dock-${ic.key}`}
-              onClick={ic.key === "messages" ? openMail : undefined}
+              onClick={() => handleIconClick(ic.key)}
               className="group relative flex h-10 w-10 items-center justify-center rounded-xl text-lg transition-transform hover:-translate-y-1"
               style={{
                 background:
