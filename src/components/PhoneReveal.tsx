@@ -289,8 +289,7 @@ export function PhoneReveal({ onComplete }: Props) {
                   📍 <b>добраться до кафе</b> {arrived && "✅"}
                 </div>
 
-                {/* Tile map */}
-                <div className="relative flex-1 overflow-hidden rounded-md bg-[#06101c] p-1">
+                <div className={`relative flex-1 overflow-hidden rounded-md bg-[#06101c] p-1 ${unstable ? "vitals-glitch-mini" : ""}`}>
                   <div
                     className="grid h-full w-full gap-[1px]"
                     style={{
@@ -302,19 +301,22 @@ export function PhoneReveal({ onComplete }: Props) {
                       Array.from({ length: COLS }).map((_, c) => {
                         const cell = cellAt(r, c);
                         const isCat = pos.r === r && pos.c === c;
+                        const visible = isVisible(r, c);
                         return (
                           <div
                             key={`${r}-${c}`}
                             className="relative flex items-center justify-center"
                             style={{
-                              background: tileBg(cell),
-                              boxShadow: cell === "cafe" ? "0 0 8px #fbbf24" : undefined,
+                              background: visible ? tileBg(cell) : "#02060c",
+                              boxShadow: cell === "cafe" && visible ? "0 0 8px #fbbf24" : undefined,
+                              opacity: visible ? 1 : 0.25,
                             }}
                           >
-                            {cell === "cafe" && <span className="text-[8px]">☕</span>}
-                            {cell === "npc" && <span className="text-[8px]">🐱</span>}
-                            {cell === "glitch" && <span className="text-[7px] text-white/70">⚡</span>}
-                            {cell === "hazard" && <span className="text-[7px]">🧠</span>}
+                            {visible && cell === "cafe" && <span className="text-[8px]">☕</span>}
+                            {visible && cell === "npc" && <span className="text-[8px]">🐱</span>}
+                            {visible && cell === "glitch" && <span className="text-[7px] text-white/70">⚡</span>}
+                            {visible && cell === "hazard" && <span className="text-[7px]">🧠</span>}
+                            {visible && cell === "blocked" && <span className="text-[7px]">⛔</span>}
                             {isCat && (
                               <span
                                 className="absolute inset-0 flex items-center justify-center text-[10px] transition-transform"
