@@ -197,16 +197,12 @@ export function PhoneReveal({ onComplete }: Props) {
   };
 
   const arrowDisabledClass = minVital < 30 ? "animate-pulse" : "";
-  const screenJitter = minVital < 15 ? "vitals-glitch-mini" : "";
 
   return (
     <div
-      className="fixed inset-0 z-[95] flex items-center justify-center bg-black/80 backdrop-blur-sm"
-      style={{
-        filter: glitch ? "hue-rotate(80deg) contrast(1.4)" : undefined,
-        transition: "filter 120ms",
-      }}
+      className="fixed inset-0 z-[95] flex items-center justify-center bg-black/80"
     >
+
       <div className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.95)_100%)]" />
 
       {/* Frames 1-4 — cinematic */}
