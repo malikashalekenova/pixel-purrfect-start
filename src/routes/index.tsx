@@ -8,6 +8,7 @@ import { Room } from "@/components/Room";
 import { Leaderboard } from "@/components/Leaderboard";
 import { ProfileWindow } from "@/components/ProfileWindow";
 import { ShopWindow, type ShopItem } from "@/components/ShopWindow";
+import { VitalsHUD, modVitals, setVitals, FULL_VITALS } from "@/components/VitalsHUD";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getCurrentProfile,
@@ -40,12 +41,26 @@ function Index() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [purchases, setPurchases] = useState<ShopItem[]>([]);
+  const [crashed, setCrashed] = useState(false);
+
+  const isHome = stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done" || stage === "room-after";
+  const isStreet = stage === "street";
+  const showVitals = isHome || isStreet;
 
   const handleBuy = async (item: ShopItem) => {
     const newCoins = coins - item.price;
     setCoins(newCoins);
     setPurchases((prev) => [...prev, item]);
     toast(`Куплено: ${item.name}`, { description: `−${item.price} монет` });
+
+    // Apply item effect on vitals (30% rule items)
+    const n = item.name.toLowerCase();
+    if (n.includes("анти") || n.includes("патч")) modVitals({ stability: 25 });
+    else if (n.includes("защит") || n.includes("firewall") || n.includes("shield")) modVitals({ health: 20, stability: 10 });
+    else if (n.includes("энерг") || n.includes("energy") || n.includes("coffee") || n.includes("кофе")) modVitals({ energy: 40 });
+    else if (n.includes("резерв")) modVitals({ health: 30, psyche: 20 });
+    else modVitals({ psyche: 10 });
+
     if (profile) {
       const updated = await updateMyProfile({ coins: newCoins });
       if (updated) setProfile(updated);
@@ -328,6 +343,37 @@ function Index() {
             "repeating-linear-gradient(0deg, rgba(0,0,0,0.6) 0 2px, transparent 2px 4px)",
         }}
       />
+
+      {/* Vitals HUD — правило 30% */}
+      {showVitals && !crashed && (
+        <VitalsHUD
+          location={isStreet ? "street" : "home"}
+          paused={shopOpen || profileOpen || leaderboardOpen}
+          onCrash={() => setCrashed(true)}
+        />
+      )}
+
+      {/* System crash overlay */}
+      {crashed && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-black text-center font-mono text-red-400">
+          <div className="text-xs uppercase tracking-[0.4em] text-red-500/80">system failure</div>
+          <h2 className="text-2xl sm:text-4xl">⚠ ПРОЦЕСС КОТИКА СЛОМАН</h2>
+          <p className="max-w-md text-sm text-red-300/70">
+            Один из показателей упал до 0%. Поведение нестабилизировано. Перезапустите процесс.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setVitals(FULL_VITALS);
+              setCrashed(false);
+              window.location.reload();
+            }}
+            className="mt-4 border-2 border-red-500 px-6 py-2 text-red-300 hover:bg-red-500/10"
+          >
+            ПЕРЕЗАПУСТИТЬ
+          </button>
+        </div>
+      )}
     </main>
   );
 }
