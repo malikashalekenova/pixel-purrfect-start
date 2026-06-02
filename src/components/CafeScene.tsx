@@ -549,15 +549,9 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
                       key={i}
                       type="button"
                       onClick={() => choose(c)}
-                      className={`w-full rounded-md px-3 py-2 text-left text-[12px] ring-1 transition hover:bg-white/5 ${
-                        c.tone === "good"
-                          ? "ring-emerald-400/50 text-emerald-100"
-                          : c.tone === "mid"
-                            ? "ring-zinc-300/30 text-zinc-100"
-                            : "ring-rose-400/50 text-rose-100"
-                      }`}
+                      className="w-full rounded-md px-3 py-2 text-left text-[12px] text-amber-100 ring-1 ring-amber-200/30 transition hover:bg-white/5"
                     >
-                      {c.tone === "good" ? "🟢" : c.tone === "mid" ? "🟡" : "🔴"} {c.label}
+                      {c.label}
                     </button>
                   ))}
                 </div>
