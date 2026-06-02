@@ -116,11 +116,14 @@ export function Desktop({
         <div className="relative grid w-fit grid-cols-3 gap-x-4 gap-y-5 sm:grid-cols-4 sm:gap-x-6 sm:gap-y-7">
           {ICONS.map((ic) => {
             const isMail = ic.key === "messages";
+            const disabled = ic.key === "profile" && !hasProfile;
             return (
               <button
                 key={ic.key}
-                onClick={isMail ? openMail : undefined}
-                className="group relative flex w-20 flex-col items-center gap-2 rounded-xl p-2 text-center transition-all hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-cyan-400/60 sm:w-24"
+                onClick={() => handleIconClick(ic.key)}
+                disabled={disabled}
+                title={disabled ? "Профиль появится после регистрации" : ic.label}
+                className="group relative flex w-20 flex-col items-center gap-2 rounded-xl p-2 text-center transition-all hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-cyan-400/60 sm:w-24 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <div
                   className="relative flex h-14 w-14 items-center justify-center rounded-2xl text-2xl text-white sm:h-16 sm:w-16 sm:text-[28px] transition-transform group-hover:-translate-y-0.5"
