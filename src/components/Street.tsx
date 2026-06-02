@@ -347,21 +347,6 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
       </button>
 
 
-      {/* NPC: Рыжик */}
-      <button
-        type="button"
-        onClick={() => openDialog("ryzhik")}
-        aria-label="Поговорить с Рыжиком"
-        className="group absolute left-[68%] bottom-[22%] -translate-x-1/2 cursor-pointer focus:outline-none"
-      >
-        <div className="absolute -top-10 left-1/2 -translate-x-1/2 animate-bounce text-2xl drop-shadow-[0_0_8px_rgba(127,231,255,0.7)]">
-          💬
-        </div>
-        <CatSprite />
-        <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-orange-300">
-          РЫЖИК
-        </div>
-      </button>
 
       {/* Dialog modal */}
       {activeNpc && (
