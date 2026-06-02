@@ -4,18 +4,20 @@ type IconKey =
   | "contracts"
   | "messages"
   | "map"
-  | "contacts"
+  | "shop"
+  | "leaderboard"
+  | "profile"
   | "bank"
-  | "inventory"
   | "settings";
 
 const ICONS: { key: IconKey; label: string; glyph: string; accent: string }[] = [
   { key: "contracts", label: "Контракты", glyph: "📋", accent: "#7fe7ff" },
   { key: "messages", label: "Сообщения", glyph: "✉", accent: "#a78bfa" },
-  { key: "map", label: "Карта города", glyph: "🗺", accent: "#34d399" },
-  { key: "contacts", label: "Контакты", glyph: "👥", accent: "#fbbf24" },
-  { key: "bank", label: "Банк", glyph: "💳", accent: "#22d3ee" },
-  { key: "inventory", label: "Инвентарь", glyph: "🎒", accent: "#f472b6" },
+  { key: "shop", label: "Магазин", glyph: "🛒", accent: "#34d399" },
+  { key: "leaderboard", label: "Рейтинг", glyph: "🏆", accent: "#fbbf24" },
+  { key: "profile", label: "Профиль", glyph: "👤", accent: "#f472b6" },
+  { key: "map", label: "Карта города", glyph: "🗺", accent: "#22d3ee" },
+  { key: "bank", label: "Банк", glyph: "💳", accent: "#60a5fa" },
   { key: "settings", label: "Настройки", glyph: "⚙", accent: "#94a3b8" },
 ];
 
