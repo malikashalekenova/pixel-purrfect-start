@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
+import { Workshop } from "@/components/Workshop";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -16,10 +17,12 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Stage = "menu" | "zooming" | "desktop" | "mission";
+type Stage = "menu" | "zooming" | "desktop" | "mission" | "workshop" | "done";
 
 function Index() {
   const [stage, setStage] = useState<Stage>("menu");
+  const [coins, setCoins] = useState(0);
+  const [xp, setXp] = useState(0);
 
   const handlePlay = () => {
     setStage("zooming");
@@ -28,9 +31,16 @@ function Index() {
 
   const handleStartMission = () => {
     setStage("mission");
-    toast("Контракт принят. Направляйся по адресу.", {
-      description: "Управление персонажем активировано.",
+    toast("Контракт принят. Направляйся в мастерскую.", {
+      description: "Соседняя улица · NPC-механик ждёт.",
     });
+    setTimeout(() => setStage("workshop"), 2200);
+  };
+
+  const handleWorkshopComplete = () => {
+    setCoins((c) => c + 50);
+    setXp((x) => x + 25);
+    setStage("done");
   };
 
   // Monitor approximate center in the background image (percent of image)
@@ -98,30 +108,41 @@ function Index() {
       )}
 
       {/* Desktop OS appears after zoom */}
-      {(stage === "desktop" || stage === "mission") && (
+      {(stage === "desktop" || stage === "mission" || stage === "done") && (
         <Desktop onStartMission={handleStartMission} />
       )}
 
-      {/* Mission overlay */}
+      {/* Mission travel overlay */}
       {stage === "mission" && (
         <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/85 animate-fade-in">
-          <div className="max-w-md px-6 text-center font-['Press_Start_2P']">
-            <p className="text-[10px] leading-loose text-[#7fe7ff] sm:text-xs">
-              ГЛАВА 1
+          <div className="max-w-md px-6 text-center">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/80">
+              Глава 1 · В пути
             </p>
-            <h2
-              className="mt-4 text-2xl text-white sm:text-3xl"
-              style={{ textShadow: "3px 3px 0 #0a1a26" }}
-            >
-              ПЕРВЫЙ КОНТРАКТ
+            <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">
+              Мастерская на соседней улице
             </h2>
-            <p className="mt-6 text-[9px] leading-loose text-white/70 sm:text-[10px]">
-              Используй WASD чтобы двигаться. Найди адрес из сообщения.
+            <p className="mt-4 text-sm text-white/60">
+              Загрузка локации...
             </p>
-            <div className="mt-8 inline-block animate-pulse text-[9px] text-[#9be37f]">
-              ▶ Загрузка локации...
-            </div>
           </div>
+        </div>
+      )}
+
+      {/* Workshop minigame */}
+      {stage === "workshop" && (
+        <Workshop onComplete={handleWorkshopComplete} />
+      )}
+
+      {/* HUD: coins / xp */}
+      {(stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done") && (
+        <div className="pointer-events-none absolute right-3 top-3 z-[60] flex items-center gap-2 text-xs">
+          <span className="rounded-full bg-black/60 px-2.5 py-1 text-amber-300 ring-1 ring-white/10 backdrop-blur">
+            🪙 {coins}
+          </span>
+          <span className="rounded-full bg-black/60 px-2.5 py-1 text-cyan-300 ring-1 ring-white/10 backdrop-blur">
+            ✦ {xp} XP
+          </span>
         </div>
       )}
 
