@@ -314,22 +314,35 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
         type="button"
         onClick={() => openDialog("pushok")}
         aria-label="Поговорить с Пушком"
-        className="group absolute left-[28%] bottom-[20%] cursor-pointer focus:outline-none"
+        className="group absolute left-[28%] bottom-[20%] cursor-pointer focus:outline-none transition-opacity"
+        style={{ opacity: moodPushok === "hate" ? 0.35 : 1 }}
       >
+        <MoodBadge tier={moodPushok} />
         {pushokFarewell && (
-          <div className="absolute -top-20 left-1/2 z-10 w-56 -translate-x-1/2 rounded-2xl bg-white px-3 py-2 text-[11px] leading-snug text-stone-800 shadow-2xl ring-1 ring-black/10 animate-fade-in">
+          <div className="absolute -top-28 left-1/2 z-10 w-56 -translate-x-1/2 rounded-2xl bg-white px-3 py-2 text-[11px] leading-snug text-stone-800 shadow-2xl ring-1 ring-black/10 animate-fade-in">
             «Надеюсь, тебе понравится в нашем городе!»
             <div className="absolute -bottom-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white" />
-          </div>
-        )}
-        {!pushokFarewell && (
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 animate-bounce text-2xl drop-shadow-[0_0_8px_rgba(253,224,71,0.7)]">
-            👋
           </div>
         )}
         <PushokSprite />
         <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-yellow-200">
           ПУШОК
+        </div>
+      </button>
+
+
+      {/* NPC: Рыжик */}
+      <button
+        type="button"
+        onClick={() => openDialog("ryzhik")}
+        aria-label="Поговорить с Рыжиком"
+        className="group absolute left-[68%] bottom-[22%] -translate-x-1/2 cursor-pointer focus:outline-none transition-opacity"
+        style={{ opacity: moodRyzhik === "hate" ? 0.35 : 1 }}
+      >
+        <MoodBadge tier={moodRyzhik} />
+        <CatSprite />
+        <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-orange-300">
+          РЫЖИК
         </div>
       </button>
 
