@@ -3,6 +3,7 @@ import { useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
 import { Workshop } from "@/components/Workshop";
+import { Street } from "@/components/Street";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
