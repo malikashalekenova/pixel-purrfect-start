@@ -240,7 +240,7 @@ export function PhoneReveal({ onComplete }: Props) {
 
       {/* Phone UI */}
       {frame >= 5 && (
-        <div className={`relative h-[640px] w-[320px] rounded-[28px] border-2 border-cyan-300/60 bg-[#0a1322] p-3 shadow-[0_0_60px_rgba(127,231,255,0.6)] animate-scale-in ${screenJitter}`}>
+        <div className="relative h-[640px] w-[320px] rounded-[28px] border-2 border-cyan-300/60 bg-[#0a1322] p-3 shadow-[0_0_60px_rgba(127,231,255,0.6)] animate-scale-in">
           <div className="mx-auto mb-2 h-1.5 w-16 rounded-full bg-white/20" />
           <div className="mb-2 flex items-center justify-between px-2 font-mono text-[10px] text-cyan-200/80">
             <span>NEKO_OS v1.0</span>
