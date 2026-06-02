@@ -238,8 +238,6 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const handleProfileCreated = (profile: Profile) => {
     setShowCreation(false);
     onProfileCreated(profile);
-    // Cinematic phone reveal → map mission to cafe
-    setTimeout(() => setShowPhone(true), 500);
   };
 
   const handlePhoneComplete = () => {
@@ -416,6 +414,15 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
 
       {/* Cinematic phone reveal → opens map mission to cafe */}
       {showPhone && <PhoneReveal onComplete={handlePhoneComplete} />}
+
+      {/* Pull phone from pocket button */}
+      <button
+        type="button"
+        onClick={() => setShowPhone(true)}
+        className="absolute right-4 bottom-4 z-30 rounded-full bg-cyan-400/20 px-4 py-2 text-xs font-bold text-cyan-100 ring-1 ring-cyan-300/50 backdrop-blur hover:bg-cyan-400/40 transition animate-pulse"
+      >
+        📱 Вытащить телефон
+      </button>
     </div>
   );
 }
