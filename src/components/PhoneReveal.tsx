@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getVitals } from "./VitalsHUD";
 
 type Frame = 1 | 2 | 3 | 4 | 5 | 6 | 7;
@@ -9,58 +9,67 @@ type Props = {
   onComplete: () => void;
 };
 
-// Tile types
-// 0 = road, 1 = wall, 2 = glitch (slow), 3 = hazard (-stability)
-// B = blocked sector (отказ доступа), N = npc, C = cafe
-// 15x15 labyrinth
-const MAP: string[] = [
-  "11111111C111111",
-  "100000000000001",
-  "101110110111101",
-  "101N101000B0101",
-  "101010101110101",
-  "100010001300101",
-  "101111101111101",
-  "100020001000001",
-  "101011111101111",
-  "100000000030001",
-  "10111B111111101",
-  "10100000N100101",
-  "101011111110101",
-  "100000020000001",
-  "111111111111111",
-];
+type Cell = "road" | "wall" | "cafe";
 
-const ROWS = MAP.length;
-const COLS = MAP[0].length;
+// Dense maze generated via randomized DFS on an odd-sized grid.
+// Walls are 1-cell thick — looks like the reference labyrinth.
+const ROWS = 25;
+const COLS = 21;
 
-type Cell = "road" | "wall" | "glitch" | "hazard" | "blocked" | "npc" | "cafe";
-function cellAt(r: number, c: number): Cell {
-  if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return "wall";
-  const ch = MAP[r][c];
-  if (ch === "1") return "wall";
-  if (ch === "2") return "glitch";
-  if (ch === "3") return "hazard";
-  if (ch === "B") return "blocked";
-  if (ch === "N") return "npc";
-  if (ch === "C") return "cafe";
-  return "road";
+function generateMaze(rows: number, cols: number): Cell[][] {
+  const grid: Cell[][] = Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => "wall" as Cell),
+  );
+  const stack: Array<[number, number]> = [[1, 1]];
+  grid[1][1] = "road";
+  const dirs: Array<[number, number]> = [
+    [-2, 0], [2, 0], [0, -2], [0, 2],
+  ];
+  while (stack.length) {
+    const [r, c] = stack[stack.length - 1];
+    const shuffled = [...dirs].sort(() => Math.random() - 0.5);
+    let carved = false;
+    for (const [dr, dc] of shuffled) {
+      const nr = r + dr;
+      const nc = c + dc;
+      if (nr > 0 && nc > 0 && nr < rows - 1 && nc < cols - 1 && grid[nr][nc] === "wall") {
+        grid[r + dr / 2][c + dc / 2] = "road";
+        grid[nr][nc] = "road";
+        stack.push([nr, nc]);
+        carved = true;
+        break;
+      }
+    }
+    if (!carved) stack.pop();
+  }
+  // Cafe at bottom-right corner
+  grid[rows - 2][cols - 2] = "cafe";
+  return grid;
 }
 
-const START = { r: 13, c: 1 };
+const START = { r: 1, c: 1 };
 
 export function PhoneReveal({ onComplete }: Props) {
   const [frame, setFrame] = useState<Frame>(1);
   const [tab, setTab] = useState<Tab>("map");
   const [glitch, setGlitch] = useState(false);
 
+  const maze = useMemo(() => generateMaze(ROWS, COLS), []);
+  const cellAt = useCallback(
+    (r: number, c: number): Cell => {
+      if (r < 0 || c < 0 || r >= ROWS || c >= COLS) return "wall";
+      return maze[r][c];
+    },
+    [maze],
+  );
+
   const [pos, setPos] = useState(START);
   const [face, setFace] = useState<Dir>("up");
   const [arrived, setArrived] = useState(false);
-  const [nearNpc, setNearNpc] = useState(false);
   const [nearCafe, setNearCafe] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
   const lastStepRef = useRef(0);
+
 
   useEffect(() => {
     const timings: Record<Frame, number> = {
@@ -125,29 +134,15 @@ export function PhoneReveal({ onComplete }: Props) {
         setTimeout(() => setHint(null), 500);
         return;
       }
-      if (target === "blocked") {
-        setHint("отказ доступа: сектор заражен");
-        setTimeout(() => setHint(null), 800);
-        return;
-      }
       lastStepRef.current = now;
       setPos({ r: nr, c: nc });
 
-      if (target === "glitch") {
-        setGlitch(true);
-        setTimeout(() => setGlitch(false), 200);
-        lastStepRef.current = now + 200;
-      }
-      if (target === "hazard") {
-        setHint("-стабильность");
-        setTimeout(() => setHint(null), 600);
-      }
       if (target === "cafe") {
         setArrived(true);
         setTimeout(() => onComplete(), 1400);
       }
     },
-    [frame, arrived, pos, onComplete],
+    [frame, arrived, pos, onComplete, cellAt],
   );
 
   useEffect(() => {
@@ -155,16 +150,13 @@ export function PhoneReveal({ onComplete }: Props) {
     const around: Array<[number, number]> = [
       [0, 0], [-1, 0], [1, 0], [0, -1], [0, 1],
     ];
-    let npc = false;
     let cafe = false;
     for (const [dr, dc] of around) {
       const c = cellAt(pos.r + dr, pos.c + dc);
-      if (c === "npc") npc = true;
       if (c === "cafe") cafe = true;
     }
-    setNearNpc(npc);
     setNearCafe(cafe);
-  }, [pos, frame]);
+  }, [pos, frame, cellAt]);
 
   useEffect(() => {
     if (frame !== 7) return;
@@ -185,15 +177,12 @@ export function PhoneReveal({ onComplete }: Props) {
 
   const tileBg = (c: Cell) => {
     switch (c) {
-      case "wall": return "#1a2740";
-      case "glitch": return "#7c3aed";
-      case "hazard": return "#7f1d1d";
-      case "blocked": return "#3a1f1f";
+      case "wall": return "#0e1a2e";
       case "cafe": return "#fbbf24";
-      case "npc": return "#34d399";
-      default: return "#06101c";
+      default: return "#f5f5f0";
     }
   };
+
 
   const unstable = minVital < 30;
   const visionRadius = unstable ? 3 : 99;
@@ -300,10 +289,7 @@ export function PhoneReveal({ onComplete }: Props) {
                             }}
                           >
                             {visible && cell === "cafe" && <div className="h-2 w-2 rounded-sm bg-amber-400 ring-1 ring-amber-200/60" />}
-                            {visible && cell === "npc" && <div className="h-2 w-2 rounded-full bg-emerald-400 ring-1 ring-emerald-200/60" />}
-                            {visible && cell === "glitch" && <div className="h-1.5 w-1.5 rounded-full bg-violet-400 shadow-[0_0_4px_#a78bfa]" />}
-                            {visible && cell === "hazard" && <div className="h-1.5 w-1.5 rotate-45 bg-red-500 ring-1 ring-red-300/60" />}
-                            {visible && cell === "blocked" && <div className="h-2 w-0.5 bg-red-800 rotate-45" />}
+
                             {isCat && (
                               <div
                                 className="absolute inset-0 flex items-center justify-center text-[10px] transition-transform"
@@ -339,13 +325,7 @@ export function PhoneReveal({ onComplete }: Props) {
                 {frame === 7 && (
                   <>
                     <div className="flex gap-1">
-                      {nearNpc && (
-                        <button type="button"
-                          className="flex-1 rounded bg-emerald-500/30 px-2 py-1 text-[10px] text-emerald-100 ring-1 ring-emerald-300/60"
-                          onClick={() => { setHint("+общение"); setTimeout(() => setHint(null), 700); }}>
-                          Разговор
-                        </button>
-                      )}
+
                       {nearCafe && !arrived && (
                         <button type="button"
                           className="flex-1 rounded bg-amber-400/30 px-2 py-1 text-[10px] text-amber-100 ring-1 ring-amber-300/60 animate-pulse"
