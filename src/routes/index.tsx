@@ -68,7 +68,17 @@ function Index() {
 
   const handlePlay = () => {
     setStage("zooming");
-    setTimeout(() => setStage("desktop"), 2200);
+    setTimeout(() => setStage("level1"), 2200);
+  };
+
+  const handleLevel1Exit = () => {
+    toast("Выход из системы...", { description: "Загрузка рабочего стола." });
+    setStage("desktop");
+  };
+
+  const handleLevel1Stay = () => {
+    toast("Остаёмся в процессе.", { description: "Система продолжает работу в фоне." });
+    setStage("desktop");
   };
 
   const handleStartMission = () => {
