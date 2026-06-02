@@ -27,9 +27,7 @@ const STATS: Array<{
   color: string;
 }> = [
   { key: "health", label: "Жизнь", icon: "❤️", color: "#ef4444" },
-  { key: "energy", label: "Энергия", icon: "⚡", color: "#facc15" },
   { key: "stability", label: "Стабильность", icon: "🧠", color: "#22d3ee" },
-  { key: "social", label: "Общение", icon: "💬", color: "#34d399" },
 ];
 
 // Singleton store so any scene can read/modify vitals
