@@ -369,9 +369,10 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
         <div className="absolute inset-0 z-30 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center">
           <div className={`m-4 w-full max-w-xl rounded-xl border ${currentBorder} bg-[#0a0e1a]/95 p-5 shadow-2xl ring-1 ring-white/5`}>
             <div className="mb-3 flex items-center gap-3">
-              <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${currentAccent} text-lg`}>
-                🐱
+              <div className={`flex h-12 w-10 items-center justify-center rounded-md bg-gradient-to-br ${currentAccent}`}>
+                <CatSprite size="xs" />
               </div>
+
               <div>
                 <div className={`font-['Press_Start_2P'] text-[10px] ${currentLabelColor}`}>
                   {currentName}
