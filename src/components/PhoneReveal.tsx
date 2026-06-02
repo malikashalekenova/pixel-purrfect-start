@@ -12,7 +12,7 @@ type Props = {
 // Tile types
 // 0 = road, 1 = wall, 2 = glitch (slow), 3 = hazard (-stability)
 // B = blocked sector (отказ доступа), N = npc, C = cafe
-// 15×15 labyrinth: несколько маршрутов, тупики, ложные пути, глитч-зоны
+// 15x15 labyrinth
 const MAP: string[] = [
   "11111111C111111",
   "100000000000001",
@@ -54,7 +54,6 @@ export function PhoneReveal({ onComplete }: Props) {
   const [tab, setTab] = useState<Tab>("map");
   const [glitch, setGlitch] = useState(false);
 
-  // Mini-cat position + facing
   const [pos, setPos] = useState(START);
   const [face, setFace] = useState<Dir>("up");
   const [arrived, setArrived] = useState(false);
@@ -63,7 +62,6 @@ export function PhoneReveal({ onComplete }: Props) {
   const [hint, setHint] = useState<string | null>(null);
   const lastStepRef = useRef(0);
 
-  // Auto-advance cinematic frames 1 → 6
   useEffect(() => {
     const timings: Record<Frame, number> = {
       1: 900, 2: 1000, 3: 1100, 4: 1000, 5: 900, 6: 0, 7: 0,
@@ -85,7 +83,6 @@ export function PhoneReveal({ onComplete }: Props) {
     setFace("up");
   };
 
-  // Minimum vital — controls degradation
   const minVital = (() => {
     const v = getVitals();
     return Math.min(v.health, v.energy, v.stability, v.social);
@@ -97,20 +94,18 @@ export function PhoneReveal({ onComplete }: Props) {
       const v = getVitals();
       const minV = Math.min(v.health, v.energy, v.stability, v.social);
 
-      // Degradation: delay between accepted steps
       const now = Date.now();
       let cooldown = 120;
       if (minV < 30) cooldown = 280;
       if (minV < 15) cooldown = 520;
       if (now - lastStepRef.current < cooldown) return;
 
-      // Random skip when critical
       if (minV < 15 && Math.random() < 0.35) {
-        setHint("… стрелка не сработала");
+        setHint("... стрелка не сработала");
         setTimeout(() => setHint(null), 700);
         return;
       }
-      // Drunken miss-step when low
+
       let actualDir = dir;
       if (minV < 30 && Math.random() < 0.18) {
         const sides: Dir[] = dir === "up" || dir === "down" ? ["left", "right"] : ["up", "down"];
@@ -126,26 +121,25 @@ export function PhoneReveal({ onComplete }: Props) {
       const nc = pos.c + dc;
       const target = cellAt(nr, nc);
       if (target === "wall") {
-        setHint("🚧 проход закрыт");
+        setHint("проход закрыт");
         setTimeout(() => setHint(null), 500);
         return;
       }
       if (target === "blocked") {
-        setHint("⛔ отказ доступа: сектор заражён");
+        setHint("отказ доступа: сектор заражен");
         setTimeout(() => setHint(null), 800);
         return;
       }
       lastStepRef.current = now;
       setPos({ r: nr, c: nc });
 
-      // Effects on arrival
       if (target === "glitch") {
         setGlitch(true);
         setTimeout(() => setGlitch(false), 200);
         lastStepRef.current = now + 200;
       }
       if (target === "hazard") {
-        setHint("🧠 -стабильность");
+        setHint("-стабильность");
         setTimeout(() => setHint(null), 600);
       }
       if (target === "cafe") {
@@ -156,7 +150,6 @@ export function PhoneReveal({ onComplete }: Props) {
     [frame, arrived, pos, onComplete],
   );
 
-  // Proximity checks for NPC/cafe button
   useEffect(() => {
     if (frame !== 7) return;
     const around: Array<[number, number]> = [
@@ -173,7 +166,6 @@ export function PhoneReveal({ onComplete }: Props) {
     setNearCafe(cafe);
   }, [pos, frame]);
 
-  // Keyboard support
   useEffect(() => {
     if (frame !== 7) return;
     const onKey = (e: KeyboardEvent) => {
@@ -191,7 +183,6 @@ export function PhoneReveal({ onComplete }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [frame, step]);
 
-  // Cell visuals
   const tileBg = (c: Cell) => {
     switch (c) {
       case "wall": return "#1a2740";
@@ -204,7 +195,6 @@ export function PhoneReveal({ onComplete }: Props) {
     }
   };
 
-  // Fog-of-war: visibility радиус. Под 30% — карта дрожит и часть тайлов скрыта.
   const unstable = minVital < 30;
   const visionRadius = unstable ? 3 : 99;
   const isVisible = (r: number, c: number) => {
@@ -216,31 +206,28 @@ export function PhoneReveal({ onComplete }: Props) {
   const arrowDisabledClass = minVital < 30 ? "animate-pulse" : "";
 
   return (
-    <div
-      className="fixed inset-0 z-[95] flex items-center justify-center bg-black/80"
-    >
-
+    <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/80">
       <div className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.95)_100%)]" />
 
-      {/* Frames 1-4 — cinematic */}
+      {/* Cinematic frames */}
       {frame === 1 && (
         <div className="relative flex flex-col items-center gap-4 animate-fade-in">
-          <div className="text-7xl">🐱</div>
+          <div className="text-7xl font-mono text-cyan-300">NEKO</div>
           <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-cyan-300/80">
-            system • pause • beep
+            system pause beep
           </div>
         </div>
       )}
       {frame === 2 && (
         <div className="relative flex flex-col items-center gap-3 animate-fade-in">
-          <div className="text-7xl">🐱</div>
+          <div className="text-7xl font-mono text-cyan-300">NEKO</div>
           <div className="absolute -bottom-3 left-1/2 h-8 w-8 -translate-x-1/2 rounded-full bg-cyan-300/70 blur-md animate-pulse" />
           <div className="font-mono text-[10px] text-cyan-200/70">// accessing pocket.sys</div>
         </div>
       )}
       {frame === 3 && (
         <div className="relative flex flex-col items-center gap-3 animate-scale-in">
-          <div className="text-6xl">🐱</div>
+          <div className="text-6xl font-mono text-cyan-300">NEKO</div>
           <div className="h-24 w-14 rounded-md border-2 border-cyan-300 bg-[#0a1322] shadow-[0_0_30px_rgba(127,231,255,0.7)]">
             <div className="m-1 h-[calc(100%-8px)] rounded-sm bg-cyan-400/30 animate-pulse" />
           </div>
@@ -261,12 +248,12 @@ export function PhoneReveal({ onComplete }: Props) {
           <div className="mx-auto mb-2 h-1.5 w-16 rounded-full bg-white/20" />
           <div className="mb-2 flex items-center justify-between px-2 font-mono text-[10px] text-cyan-200/80">
             <span>NEKO_OS v1.0</span>
-            <span>●●●●</span>
+            <span>****</span>
           </div>
 
           <div className="mb-2 grid grid-cols-3 gap-1 rounded-lg bg-black/40 p-1">
             {(["map", "messages", "settings"] as Tab[]).map((t) => {
-              const icon = t === "map" ? "🗺" : t === "messages" ? "💬" : "⚙";
+              const icon = t === "map" ? "MAP" : t === "messages" ? "MSG" : "SET";
               const label = t === "map" ? "Карта" : t === "messages" ? "Чат" : "Настр.";
               const active = tab === t;
               const pulseMap = t === "map" && frame === 6;
@@ -275,7 +262,7 @@ export function PhoneReveal({ onComplete }: Props) {
                   className={`rounded-md px-2 py-1.5 text-[11px] transition ${
                     active ? "bg-cyan-400/20 text-cyan-100 ring-1 ring-cyan-300/60" : "text-white/60 hover:text-white"
                   } ${pulseMap ? "animate-pulse ring-2 ring-cyan-300" : ""}`}>
-                  <div className="text-lg leading-none">{icon}</div>
+                  <div className="text-xs font-bold leading-none">{icon}</div>
                   <div>{label}</div>
                 </button>
               );
@@ -286,7 +273,7 @@ export function PhoneReveal({ onComplete }: Props) {
             {tab === "map" && (
               <div className="flex h-full flex-col gap-2">
                 <div className="rounded-md border border-cyan-300/40 bg-cyan-400/10 px-2 py-1 text-[10px] text-cyan-100">
-                  📍 <b>добраться до кафе</b> {arrived && "✅"}
+                  <b>добраться до кафе</b> {arrived && "[OK]"}
                 </div>
 
                 <div className={`relative flex-1 overflow-hidden rounded-md bg-[#06101c] p-1 ${unstable ? "vitals-glitch-mini" : ""}`}>
@@ -345,44 +332,42 @@ export function PhoneReveal({ onComplete }: Props) {
                 {frame === 6 && (
                   <button type="button" onClick={startMission}
                     className="rounded-md bg-cyan-400 px-3 py-1.5 text-xs font-bold text-[#0a1322] hover:bg-cyan-300">
-                    ▶ ЗАПУСТИТЬ МАРШРУТ
+                    [>] ЗАПУСТИТЬ МАРШРУТ
                   </button>
                 )}
 
                 {frame === 7 && (
                   <>
-                    {/* Action buttons */}
                     <div className="flex gap-1">
                       {nearNpc && (
                         <button type="button"
                           className="flex-1 rounded bg-emerald-500/30 px-2 py-1 text-[10px] text-emerald-100 ring-1 ring-emerald-300/60"
-                          onClick={() => { setHint("💬 +общение"); setTimeout(() => setHint(null), 700); }}>
-                          💬 Разговор
+                          onClick={() => { setHint("+общение"); setTimeout(() => setHint(null), 700); }}>
+                          Разговор
                         </button>
                       )}
                       {nearCafe && !arrived && (
                         <button type="button"
                           className="flex-1 rounded bg-amber-400/30 px-2 py-1 text-[10px] text-amber-100 ring-1 ring-amber-300/60 animate-pulse"
                           onClick={() => { setArrived(true); setTimeout(() => onComplete(), 1000); }}>
-                          ☕ Войти
+                          Войти
                         </button>
                       )}
                     </div>
 
-                    {/* D-pad */}
                     <div className="mx-auto grid grid-cols-3 grid-rows-3 gap-1" style={{ width: 150 }}>
                       <div />
                       <button type="button" onClick={() => step("up")}
-                        className={`rounded bg-cyan-400/20 py-2 text-sm text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>⬆️</button>
+                        className={`rounded bg-cyan-400/20 py-2 text-xs text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>^</button>
                       <div />
                       <button type="button" onClick={() => step("left")}
-                        className={`rounded bg-cyan-400/20 py-2 text-sm text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>⬅️</button>
+                        className={`rounded bg-cyan-400/20 py-2 text-xs text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>&lt;</button>
                       <div className="flex items-center justify-center text-[9px] text-white/40">{pos.r},{pos.c}</div>
                       <button type="button" onClick={() => step("right")}
-                        className={`rounded bg-cyan-400/20 py-2 text-sm text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>➡️</button>
+                        className={`rounded bg-cyan-400/20 py-2 text-xs text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>&gt;</button>
                       <div />
                       <button type="button" onClick={() => step("down")}
-                        className={`rounded bg-cyan-400/20 py-2 text-sm text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>⬇️</button>
+                        className={`rounded bg-cyan-400/20 py-2 text-xs text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>v</button>
                       <div />
                     </div>
                   </>
