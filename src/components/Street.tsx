@@ -119,6 +119,9 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const [showCreation, setShowCreation] = useState(false);
   const [pushokFarewell, setPushokFarewell] = useState(false);
 
+  // Stats appear gradually
+  useEffect(() => {
+    const id = setInterval(() => {
       setThirst((v) => Math.max(0, v - 0.6));
       setHunger((v) => Math.max(0, v - 0.45));
       setSocial((v) => Math.max(0, v - 0.8));
