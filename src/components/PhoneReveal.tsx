@@ -130,7 +130,11 @@ export function PhoneReveal({ onComplete }: Props) {
         setTimeout(() => setHint(null), 500);
         return;
       }
-      lastStepRef.current = now;
+      if (target === "blocked") {
+        setHint("⛔ отказ доступа: сектор заражён");
+        setTimeout(() => setHint(null), 800);
+        return;
+      }
       setPos({ r: nr, c: nc });
 
       // Effects on arrival
