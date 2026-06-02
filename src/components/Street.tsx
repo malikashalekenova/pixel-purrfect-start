@@ -103,10 +103,12 @@ export function Street({ onCommunicate, onDiscoverCafe }: Props) {
   const [lonely, setLonely] = useState(false);
 
   // Dialog state
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [activeNpc, setActiveNpc] = useState<NpcId | null>(null);
   const [reply, setReply] = useState<string | null>(null);
-  const [relation, setRelation] = useState(0);
-  const [met, setMet] = useState(false);
+  const [relPushok, setRelPushok] = useState(0);
+  const [relRyzhik, setRelRyzhik] = useState(0);
+  const [metPushok, setMetPushok] = useState(false);
+  const [metRyzhik, setMetRyzhik] = useState(false);
 
   // Stats appear gradually
   useEffect(() => {
@@ -129,31 +131,55 @@ export function Street({ onCommunicate, onDiscoverCafe }: Props) {
     }
   }, [social, lonely]);
 
-  const openDialog = () => {
-    setDialogOpen(true);
+  const openDialog = (npc: NpcId) => {
+    setActiveNpc(npc);
     setReply(null);
   };
 
   const choose = (c: DialogChoice) => {
+    if (!activeNpc) return;
     setReply(c.reply);
-    setRelation((r) => r + c.rel);
     setSocial((s) => Math.min(100, s + c.comm));
     onCommunicate(c.xp);
-    if (!met) {
-      setMet(true);
-      setTimeout(() => {
-        onDiscoverCafe();
-        toast("Новая отметка на карте", {
-          description: "Кафе «Ленивая Лапка» добавлено в карту города.",
+
+    if (activeNpc === "pushok") {
+      setRelPushok((r) => r + c.rel);
+      if (!metPushok) {
+        setMetPushok(true);
+        toast("Новый знакомый: Пушок", {
+          description: "💬 +5 Общение. Пушок будет иногда встречаться в районе.",
         });
-      }, 1400);
+      }
+    } else {
+      setRelRyzhik((r) => r + c.rel);
+      if (!metRyzhik) {
+        setMetRyzhik(true);
+        setTimeout(() => {
+          onDiscoverCafe();
+          toast("Новая отметка на карте", {
+            description: "Кафе «Ленивая Лапка» добавлено в карту города.",
+          });
+        }, 1400);
+      }
     }
   };
 
   const closeDialog = () => {
-    setDialogOpen(false);
+    setActiveNpc(null);
     setReply(null);
   };
+
+  const currentChoices = activeNpc === "pushok" ? PUSHOK_CHOICES : RYZHIK_CHOICES;
+  const currentIntro = activeNpc === "pushok" ? PUSHOK_INTRO : RYZHIK_INTRO;
+  const currentName = activeNpc === "pushok" ? "ПУШОК" : "РЫЖИК";
+  const currentRel = activeNpc === "pushok" ? relPushok : relRyzhik;
+  const currentAccent =
+    activeNpc === "pushok" ? "from-amber-200 to-yellow-400" : "from-orange-400 to-amber-600";
+  const currentBorder =
+    activeNpc === "pushok" ? "border-yellow-300/40" : "border-orange-400/30";
+  const currentLabelColor =
+    activeNpc === "pushok" ? "text-yellow-200" : "text-orange-300";
+
 
   return (
     <div className="absolute inset-0 z-20 overflow-hidden">
