@@ -58,8 +58,8 @@ function Index() {
     if (n.includes("анти") || n.includes("патч")) modVitals({ stability: 25 });
     else if (n.includes("защит") || n.includes("firewall") || n.includes("shield")) modVitals({ health: 20, stability: 10 });
     else if (n.includes("энерг") || n.includes("energy") || n.includes("coffee") || n.includes("кофе")) modVitals({ energy: 40 });
-    else if (n.includes("резерв")) modVitals({ health: 30, psyche: 20 });
-    else modVitals({ psyche: 10 });
+    else if (n.includes("резерв")) modVitals({ health: 30, social: 20 });
+    else modVitals({ social: 10 });
 
     if (profile) {
       const updated = await updateMyProfile({ coins: newCoins });
