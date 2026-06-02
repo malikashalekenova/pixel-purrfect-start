@@ -3,8 +3,10 @@ import { toast } from "sonner";
 import { CharacterCreation } from "@/components/CharacterCreation";
 import { PhoneReveal } from "@/components/PhoneReveal";
 import { CafeScene } from "@/components/CafeScene";
+import { CatSprite } from "@/components/CatSprite";
 import { modVitals, getVitals } from "@/components/VitalsHUD";
 import type { Profile } from "@/lib/profile";
+
 
 type MoodTier = "friend" | "neutral" | "negative" | "hate";
 
