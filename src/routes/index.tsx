@@ -17,10 +17,12 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Stage = "menu" | "zooming" | "desktop" | "mission";
+type Stage = "menu" | "zooming" | "desktop" | "mission" | "workshop" | "done";
 
 function Index() {
   const [stage, setStage] = useState<Stage>("menu");
+  const [coins, setCoins] = useState(0);
+  const [xp, setXp] = useState(0);
 
   const handlePlay = () => {
     setStage("zooming");
@@ -29,9 +31,16 @@ function Index() {
 
   const handleStartMission = () => {
     setStage("mission");
-    toast("Контракт принят. Направляйся по адресу.", {
-      description: "Управление персонажем активировано.",
+    toast("Контракт принят. Направляйся в мастерскую.", {
+      description: "Соседняя улица · NPC-механик ждёт.",
     });
+    setTimeout(() => setStage("workshop"), 2200);
+  };
+
+  const handleWorkshopComplete = () => {
+    setCoins((c) => c + 50);
+    setXp((x) => x + 25);
+    setStage("done");
   };
 
   // Monitor approximate center in the background image (percent of image)
