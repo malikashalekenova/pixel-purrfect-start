@@ -215,7 +215,13 @@ function Index() {
 
       {/* Desktop OS appears after zoom */}
       {(stage === "desktop" || stage === "mission" || stage === "done") && (
-        <Desktop onStartMission={handleStartMission} />
+        <Desktop
+          onStartMission={handleStartMission}
+          onOpenShop={() => setShopOpen(true)}
+          onOpenLeaderboard={() => setLeaderboardOpen(true)}
+          onOpenProfile={() => setProfileOpen(true)}
+          hasProfile={!!profile}
+        />
       )}
 
       {/* Mission travel overlay */}
