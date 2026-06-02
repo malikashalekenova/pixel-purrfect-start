@@ -4,7 +4,6 @@ export type Vitals = {
   health: number;
   energy: number;
   stability: number;
-  psyche: number;
   social: number;
 };
 
@@ -12,7 +11,6 @@ export const FULL_VITALS: Vitals = {
   health: 100,
   energy: 100,
   stability: 100,
-  psyche: 100,
   social: 100,
 };
 
@@ -31,7 +29,6 @@ const STATS: Array<{
   { key: "health", label: "Жизнь", icon: "❤️", color: "#ef4444" },
   { key: "energy", label: "Энергия", icon: "⚡", color: "#facc15" },
   { key: "stability", label: "Стабильность", icon: "🧠", color: "#22d3ee" },
-  { key: "psyche", label: "Психика", icon: "🧩", color: "#a78bfa" },
   { key: "social", label: "Общение", icon: "💬", color: "#34d399" },
 ];
 
@@ -47,7 +44,6 @@ export function setVitals(patch: Partial<Vitals>) {
     health: clamp((patch.health ?? _vitals.health)),
     energy: clamp((patch.energy ?? _vitals.energy)),
     stability: clamp((patch.stability ?? _vitals.stability)),
-    psyche: clamp((patch.psyche ?? _vitals.psyche)),
     social: clamp((patch.social ?? _vitals.social)),
   };
   _listeners.forEach((l) => l(_vitals));
@@ -57,7 +53,6 @@ export function modVitals(delta: Partial<Vitals>) {
     health: _vitals.health + (delta.health ?? 0),
     energy: _vitals.energy + (delta.energy ?? 0),
     stability: _vitals.stability + (delta.stability ?? 0),
-    psyche: _vitals.psyche + (delta.psyche ?? 0),
     social: _vitals.social + (delta.social ?? 0),
   });
 }
