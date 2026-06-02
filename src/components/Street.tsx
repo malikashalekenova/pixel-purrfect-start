@@ -423,6 +423,9 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
       {/* Cinematic phone reveal → opens map mission to cafe */}
       {showPhone && <PhoneReveal onComplete={handlePhoneComplete} />}
 
+      {/* Cafe interior */}
+      {showCafe && <CafeScene onExit={handleCafeExit} />}
+
       {/* Pull phone from pocket button */}
       <button
         type="button"
