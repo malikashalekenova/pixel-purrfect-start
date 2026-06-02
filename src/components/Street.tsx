@@ -245,10 +245,16 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const handlePhoneComplete = () => {
     setShowPhone(false);
     onDiscoverCafe();
-    toast("📍 Кафе отмечено на карте", { description: "Маршрут построен." });
+    setShowCafe(true);
+  };
+
+  const handleCafeExit = () => {
+    setShowCafe(false);
+    toast("📍 Кафе отмечено на карте", { description: "Ты вышел обратно в город." });
     setPushokFarewell(true);
     setTimeout(() => setPushokFarewell(false), 5000);
   };
+
 
   const currentChoices = activeNpc === "pushok" ? PUSHOK_CHOICES : RYZHIK_CHOICES;
   const currentIntro = activeNpc === "pushok" ? PUSHOK_INTRO : RYZHIK_INTRO;
