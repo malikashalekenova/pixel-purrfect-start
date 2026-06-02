@@ -45,7 +45,7 @@ function Index() {
     const newCoins = coins - item.price;
     setCoins(newCoins);
     setPurchases((prev) => [...prev, item]);
-    toast(`Куплено: ${item.name}`, { description: `−${item.price} DC` });
+    toast(`Куплено: ${item.name}`, { description: `−${item.price} монет` });
     if (profile) {
       const updated = await updateMyProfile({ coins: newCoins });
       if (updated) setProfile(updated);
