@@ -413,6 +413,9 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
 
       {/* Character creation after meeting Пушок */}
       {showCreation && <CharacterCreation onCreated={handleProfileCreated} />}
+
+      {/* Cinematic phone reveal → opens map mission to cafe */}
+      {showPhone && <PhoneReveal onComplete={handlePhoneComplete} />}
     </div>
   );
 }
