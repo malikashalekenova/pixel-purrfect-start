@@ -325,13 +325,7 @@ export function PhoneReveal({ onComplete }: Props) {
                 {frame === 7 && (
                   <>
                     <div className="flex gap-1">
-                      {nearNpc && (
-                        <button type="button"
-                          className="flex-1 rounded bg-emerald-500/30 px-2 py-1 text-[10px] text-emerald-100 ring-1 ring-emerald-300/60"
-                          onClick={() => { setHint("+общение"); setTimeout(() => setHint(null), 700); }}>
-                          Разговор
-                        </button>
-                      )}
+
                       {nearCafe && !arrived && (
                         <button type="button"
                           className="flex-1 rounded bg-amber-400/30 px-2 py-1 text-[10px] text-amber-100 ring-1 ring-amber-300/60 animate-pulse"
