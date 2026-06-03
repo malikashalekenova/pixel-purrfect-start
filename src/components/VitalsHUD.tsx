@@ -27,7 +27,8 @@ const STATS: Array<{
   color: string;
 }> = [
   { key: "health", label: "Жизнь", icon: "❤️", color: "#ef4444" },
-  { key: "stability", label: "Стабильность", icon: "🧠", color: "#22d3ee" },
+  { key: "stability", label: "Ум", icon: "🧠", color: "#22d3ee" },
+  { key: "social", label: "Общение", icon: "💬", color: "#a78bfa" },
 ];
 
 // Singleton store so any scene can read/modify vitals
@@ -90,7 +91,7 @@ export function VitalsHUD({ location, paused, onCrash }: Props) {
       _vitals = next;
       _listeners.forEach((fn) => fn(next));
 
-      const anyZero = next.health <= 0 || next.energy <= 0 || next.stability <= 0;
+      const anyZero = next.health <= 0 || next.stability <= 0 || next.social <= 0;
       if (anyZero && !crashedRef.current) {
         crashedRef.current = true;
         onCrash?.();
@@ -99,7 +100,7 @@ export function VitalsHUD({ location, paused, onCrash }: Props) {
     return () => clearInterval(id);
   }, [location, paused, onCrash]);
 
-  const minVal = Math.min(v.health, v.stability);
+  const minVal = Math.min(v.health, v.stability, v.social);
   const danger = minVal < 30;
   const critical = minVal < 15;
 
