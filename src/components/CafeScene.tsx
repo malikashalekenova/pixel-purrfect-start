@@ -389,7 +389,7 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
 
           {/* guests */}
           {GUESTS.map((g) => {
-            const m = moodFor(v.social, rel[g.id]);
+            const m = moodFor(rel[g.id]);
             const muted = cold;
             return (
               <button
