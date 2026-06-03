@@ -10,14 +10,19 @@ type Props = {
 };
 
 export function ProfileWindow({ profile, onClose }: Props) {
-  const [confirming, setConfirming] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [stage, setStage] = useState<"idle" | "askDelete" | "confirmDelete">("idle");
+  const [working, setWorking] = useState(false);
+
+  const handleSignOutOnly = async () => {
+    setWorking(true);
+    await supabase.auth.signOut();
+    toast("Вы вышли из аккаунта.");
+    setTimeout(() => window.location.reload(), 500);
+  };
 
   const handleDelete = async () => {
-    setDeleting(true);
+    setWorking(true);
     try {
-      // Try to remove profile row (will only succeed if a delete policy exists);
-      // either way we sign the player out so another person can log in.
       await supabase.from("profiles").delete().eq("user_id", profile.user_id);
     } catch {
       // ignore — sign-out is the important part
