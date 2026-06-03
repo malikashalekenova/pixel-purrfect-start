@@ -347,6 +347,18 @@ function Index() {
 
       <Leaderboard open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
 
+      <AdminPanel
+        stage={stage}
+        onSkipIntro={handleIntroFinish}
+        onSkipWorkshop={handleWorkshopComplete}
+        onJump={(s) => {
+          setCrashed(false);
+          setStage(s);
+        }}
+        onAddCoins={(n) => setCoins((c) => c + n)}
+        onAddXp={(n) => setXp((x) => x + n)}
+      />
+
       {/* Global CRT scanlines */}
       <div
         className="pointer-events-none absolute inset-0 z-50 opacity-15 mix-blend-overlay"
