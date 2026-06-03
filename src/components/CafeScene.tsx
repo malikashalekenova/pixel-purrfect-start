@@ -468,16 +468,14 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
                       <button
                         type="button"
                         onClick={() => buyItem(m)}
-                        disabled={locked || !canAfford}
+                        disabled={!canAfford}
                         className={`mt-1.5 rounded px-2 py-1 text-[10px] font-bold transition ${
-                          locked
-                            ? "cursor-not-allowed bg-rose-900/30 text-rose-200/60"
-                            : canAfford
-                              ? "bg-amber-400 text-[#1b110a] hover:bg-amber-300"
-                              : "cursor-not-allowed bg-white/10 text-white/40"
+                          canAfford
+                            ? "bg-amber-400 text-[#1b110a] hover:bg-amber-300"
+                            : "cursor-not-allowed bg-white/10 text-white/40"
                         }`}
                       >
-                        {locked ? `🔒 нужно 💬 ${m.gateSocial}%` : canAfford ? "Заказать" : "Не хватает 🪙"}
+                        {canAfford ? "Заказать" : "Не хватает 🪙"}
                       </button>
                     </div>
                   </div>
@@ -485,7 +483,7 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
               })}
               {visibleItems.length === 0 && (
                 <div className="col-span-full rounded-md border border-amber-300/20 bg-black/30 p-4 text-center text-[11px] text-amber-100/60">
-                  Здесь пусто. Подними общение, чтобы открыть секретное меню.
+                  Секретное меню пока недоступно.
                 </div>
               )}
             </div>
