@@ -10,9 +10,8 @@ import type { Profile } from "@/lib/profile";
 
 type MoodTier = "friend" | "neutral" | "negative" | "hate";
 
-function moodFromScore(rel: number, social: number): MoodTier {
-  // Combine local relationship (-N..+N) with global social vital (0..100)
-  const score = rel * 8 + (social - 50);
+function moodFromScore(rel: number): MoodTier {
+  const score = rel * 8;
   if (score >= 20) return "friend";
   if (score >= -10) return "neutral";
   if (score >= -35) return "negative";
