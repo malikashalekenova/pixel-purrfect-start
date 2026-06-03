@@ -118,7 +118,7 @@ function Index() {
     const newXp = xp + 25;
     setCoins(newCoins);
     setXp(newXp);
-    setStage("done");
+    setStage("room-after");
     toast("Контракт выполнен!", {
       description: "+50 монет · +25 опыта",
     });
@@ -139,7 +139,6 @@ function Index() {
         }
       }
     }
-    setTimeout(() => setStage("room-after"), 1800);
   };
 
   const handleLeaveRoom = () => {
