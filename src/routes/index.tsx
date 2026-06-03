@@ -9,6 +9,7 @@ import { Room } from "@/components/Room";
 import { Leaderboard } from "@/components/Leaderboard";
 import { ProfileWindow } from "@/components/ProfileWindow";
 import { ShopWindow, type ShopItem } from "@/components/ShopWindow";
+import { AdminPanel } from "@/components/AdminPanel";
 import { VitalsHUD, modVitals, setVitals, FULL_VITALS } from "@/components/VitalsHUD";
 import { supabase } from "@/integrations/supabase/client";
 import {
