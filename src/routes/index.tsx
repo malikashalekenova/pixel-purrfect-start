@@ -329,13 +329,6 @@ function Index() {
               👤 Профиль
             </button>
           )}
-          <button
-            type="button"
-            onClick={() => setShopOpen(true)}
-            className="rounded-full bg-black/60 px-3 py-1.5 text-xs text-emerald-200 ring-1 ring-emerald-400/30 backdrop-blur hover:bg-emerald-400/10 hover:text-emerald-100 transition"
-          >
-            🛒 Магазин
-          </button>
         </div>
       )}
 
