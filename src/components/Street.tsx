@@ -138,12 +138,6 @@ const RYZHIK_CHOICES: DialogChoice[] = [
 
 
 export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCreated, coins, onSpend }: Props) {
-  // Needs bars
-  const [thirst, setThirst] = useState(82);
-  const [hunger, setHunger] = useState(78);
-  const [social, setSocial] = useState(70);
-  const [lonely, setLonely] = useState(false);
-
   // Dialog state
   const [activeNpc, setActiveNpc] = useState<NpcId | null>(null);
   const [reply, setReply] = useState<string | null>(null);
@@ -158,36 +152,8 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const [showPhone, setShowPhone] = useState(false);
   const [showCafe, setShowCafe] = useState(false);
 
-  // Stats appear gradually
-  useEffect(() => {
-    const id = setInterval(() => {
-      setThirst((v) => Math.max(0, v - 0.6));
-      setHunger((v) => Math.max(0, v - 0.45));
-      setSocial((v) => Math.max(0, v - 0.8));
-    }, 1500);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    if (social < 25 && !lonely) {
-      setLonely(true);
-      toast("Ты чувствуешь одиночество...", {
-        description: "−5 к настроению. Поговори с кем-нибудь.",
-      });
-    } else if (social > 40 && lonely) {
-      setLonely(false);
-    }
-  }, [social, lonely]);
-
-  // Track global social vital for mood reactivity
-  const [globalSocial, setGlobalSocial] = useState(getVitals().social);
-  useEffect(() => {
-    const id = setInterval(() => setGlobalSocial(getVitals().social), 600);
-    return () => clearInterval(id);
-  }, []);
-
-  const moodPushok = moodFromScore(relPushok, globalSocial);
-  const moodRyzhik = moodFromScore(relRyzhik, globalSocial);
+  const moodPushok = moodFromScore(relPushok);
+  const moodRyzhik = moodFromScore(relRyzhik);
 
   const openDialog = (npc: NpcId) => {
     const tier = npc === "pushok" ? moodPushok : moodRyzhik;
