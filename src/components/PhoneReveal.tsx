@@ -94,7 +94,7 @@ export function PhoneReveal({ onComplete }: Props) {
 
   const minVital = (() => {
     const v = getVitals();
-    return Math.min(v.health, v.energy, v.stability, v.social);
+    return Math.min(v.health, v.energy, v.stability);
   })();
 
   const step = useCallback(
