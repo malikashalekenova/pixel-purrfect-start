@@ -1,4 +1,8 @@
+import { useState } from "react";
 import { FUR_COLORS, EYE_COLORS, CLOTHING, type Profile } from "@/lib/profile";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
 
 type Props = {
   profile: Profile;
@@ -6,6 +10,23 @@ type Props = {
 };
 
 export function ProfileWindow({ profile, onClose }: Props) {
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      // Try to remove profile row (will only succeed if a delete policy exists);
+      // either way we sign the player out so another person can log in.
+      await supabase.from("profiles").delete().eq("user_id", profile.user_id);
+    } catch {
+      // ignore — sign-out is the important part
+    }
+    await supabase.auth.signOut();
+    toast("Профиль удалён. Можно войти под другим аккаунтом.");
+    setTimeout(() => window.location.reload(), 600);
+  };
+
   const fur = FUR_COLORS.find((c) => c.id === profile.fur_color);
   const eyes = EYE_COLORS.find((c) => c.id === profile.eye_color);
   const clothing = CLOTHING.find((c) => c.id === profile.clothing);
@@ -59,6 +80,43 @@ export function ProfileWindow({ profile, onClose }: Props) {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Delete profile / switch account */}
+        <div className="border-t border-white/10 px-5 py-4">
+          {!confirming ? (
+            <button
+              type="button"
+              onClick={() => setConfirming(true)}
+              className="w-full rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-medium text-red-300 transition hover:bg-red-500/20 hover:text-red-100"
+            >
+              🗑 Удалить профиль и выйти
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-center text-xs text-white/70">
+                Профиль будет удалён, и сюда сможет зайти другой игрок. Действие необратимо.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirming(false)}
+                  disabled={deleting}
+                  className="flex-1 rounded-lg border border-white/15 px-4 py-2 text-sm text-white/70 hover:bg-white/5 disabled:opacity-50"
+                >
+                  Отмена
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50"
+                >
+                  {deleting ? "Удаляю..." : "Да, удалить"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
