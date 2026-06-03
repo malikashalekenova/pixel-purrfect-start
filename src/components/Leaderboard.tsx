@@ -27,8 +27,8 @@ export function Leaderboard({ open, onClose }: Props) {
     let active = true;
     setLoading(true);
     setErr(null);
-    supabase
-      .from("profiles")
+    (supabase as any)
+      .from("leaderboard")
       .select("id, username, xp, contracts_completed, total_earned")
       .order(sortBy, { ascending: false })
       .limit(100)
