@@ -97,7 +97,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          contracts_completed: number | null
+          display_name: string | null
+          id: string | null
+          level: number | null
+          total_earned: number | null
+          username: string | null
+          xp: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
