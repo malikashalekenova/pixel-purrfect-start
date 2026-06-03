@@ -313,7 +313,11 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
               <div className="absolute -bottom-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white" />
             </div>
           )}
-          <CatSprite size="md" />
+          <img
+            src={pushokImg}
+            alt="Пушок"
+            className="h-24 w-24 sm:h-28 sm:w-28 object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.5)]"
+          />
           <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-yellow-200">
             ПУШОК
           </div>
