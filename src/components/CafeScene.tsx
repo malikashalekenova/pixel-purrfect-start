@@ -19,7 +19,7 @@ type Npc = {
   behavior: Behavior;
   story: string;
   intro: string;
-  choices: Array<{ label: string; reply: string; social: number }>;
+  choices: Array<{ label: string; reply: string; rel: number }>;
 };
 
 const GUESTS: Npc[] = [
@@ -32,10 +32,10 @@ const GUESTS: Npc[] = [
     story: "Художница. Рисует портреты котов прямо за столиком.",
     intro: "Ты впервые здесь? У тебя интересная мордочка — нарисую как-нибудь.",
     choices: [
-      { label: "С удовольствием, спасибо", reply: "Договорились. Заходи почаще.", social: 8 },
-      { label: "Может быть, как-нибудь", reply: "Окей, не настаиваю.", social: 1 },
-      { label: "А что ты обычно рисуешь?", reply: "Котов, неон, пустые улицы. Всё, что молчит красиво.", social: 5 },
-      { label: "Не лезь ко мне", reply: "Поняла. Извини.", social: -10 },
+      { label: "С удовольствием, спасибо", reply: "Договорились. Заходи почаще.", rel: 8 },
+      { label: "Может быть, как-нибудь", reply: "Окей, не настаиваю.", rel: 1 },
+      { label: "А что ты обычно рисуешь?", reply: "Котов, неон, пустые улицы. Всё, что молчит красиво.", rel: 5 },
+      { label: "Не лезь ко мне", reply: "Поняла. Извини.", rel: -10 },
     ],
   },
   {
@@ -47,10 +47,10 @@ const GUESTS: Npc[] = [
     story: "Старый системщик. Уверяет, что NEKO_OS «дышит» по ночам.",
     intro: "Слышал, система опять глючит по ночам… ты тоже это чувствуешь?",
     choices: [
-      { label: "Да, что-то странное есть", reply: "Значит не один я. Спасибо, брат.", social: 7 },
-      { label: "Не замечал такого", reply: "Мм. Может, показалось.", social: 0 },
-      { label: "Расскажи подробнее", reply: "Гул в три ночи. И коты замолкают одновременно.", social: 4 },
-      { label: "Это бред параноика", reply: "Понял. Разговор окончен.", social: -8 },
+      { label: "Да, что-то странное есть", reply: "Значит не один я. Спасибо, брат.", rel: 7 },
+      { label: "Не замечал такого", reply: "Мм. Может, показалось.", rel: 0 },
+      { label: "Расскажи подробнее", reply: "Гул в три ночи. И коты замолкают одновременно.", rel: 4 },
+      { label: "Это бред параноика", reply: "Понял. Разговор окончен.", rel: -8 },
     ],
   },
   {
@@ -62,10 +62,10 @@ const GUESTS: Npc[] = [
     story: "Тихо пьёт чай у окна. Любит смотреть на город.",
     intro: "У тебя усталый вид. Всё ок?",
     choices: [
-      { label: "Бывает по-разному", reply: "Держись. Здесь можно отдохнуть.", social: 6 },
-      { label: "Норм, не парься", reply: "Ну ок.", social: 0 },
-      { label: "А ты что тут делаешь одна?", reply: "Смотрю на город. Он тише, когда на него смотришь.", social: 4 },
-      { label: "Отстань", reply: "…", social: -9 },
+      { label: "Бывает по-разному", reply: "Держись. Здесь можно отдохнуть.", rel: 6 },
+      { label: "Норм, не парься", reply: "Ну ок.", rel: 0 },
+      { label: "А ты что тут делаешь одна?", reply: "Смотрю на город. Он тише, когда на него смотришь.", rel: 4 },
+      { label: "Отстань", reply: "…", rel: -9 },
     ],
   },
   {
@@ -77,10 +77,10 @@ const GUESTS: Npc[] = [
     story: "Компанейский кот. Травит байки за столиком с друзьями.",
     intro: "Ха-ха, ты бы видел его морду! А ты кто такой? Присядешь?",
     choices: [
-      { label: "Давай послушаю", reply: "Вот это разговор! Свой кот.", social: 9 },
-      { label: "Может позже", reply: "Понял, заходи.", social: 1 },
-      { label: "Расскажи самую дикую историю", reply: "О-о-о, садись. Это надолго.", social: 6 },
-      { label: "Громко слишком", reply: "Эээ… ну окей.", social: -6 },
+      { label: "Давай послушаю", reply: "Вот это разговор! Свой кот.", rel: 9 },
+      { label: "Может позже", reply: "Понял, заходи.", rel: 1 },
+      { label: "Расскажи самую дикую историю", reply: "О-о-о, садись. Это надолго.", rel: 6 },
+      { label: "Громко слишком", reply: "Эээ… ну окей.", rel: -6 },
     ],
   },
   {
@@ -92,10 +92,10 @@ const GUESTS: Npc[] = [
     story: "Молчит и смотрит. Кажется, наблюдает именно за тобой.",
     intro: "…Я тебя уже видел. В другом районе. Любопытно.",
     choices: [
-      { label: "Возможно. Мир тесен", reply: "Хороший ответ. Запомню.", social: 5 },
-      { label: "Обознался", reply: "Возможно.", social: 0 },
-      { label: "И что ты обо мне думаешь?", reply: "Что ты ещё не решил, кем хочешь быть.", social: 3 },
-      { label: "Следишь за мной?", reply: "Не льсти себе.", social: -7 },
+      { label: "Возможно. Мир тесен", reply: "Хороший ответ. Запомню.", rel: 5 },
+      { label: "Обознался", reply: "Возможно.", rel: 0 },
+      { label: "И что ты обо мне думаешь?", reply: "Что ты ещё не решил, кем хочешь быть.", rel: 3 },
+      { label: "Следишь за мной?", reply: "Не льсти себе.", rel: -7 },
     ],
   },
 ];
@@ -122,8 +122,6 @@ type MenuItem = {
   effect: Partial<Vitals>;
   // optional special effect description / flag
   flavor?: string;
-  // gated by social >= N (for secret menu)
-  gateSocial?: number;
   // special runtime effect kind
   kind?: "glitch-soda" | "memory-soup" | "espresso";
 };
@@ -136,20 +134,20 @@ const MENU: MenuItem[] = [
 
   // Food
   { id: "fish-burger", icon: "🐟", name: "Рыбный бургер", desc: "+30% жизнь, +10% энергия.", price: 30, cat: "food", effect: { health: 30, energy: 10 } },
-  { id: "chicken", icon: "🍗", name: "Куриные кусочки «Debug Meal»", desc: "+35% энергия, +5% общение.", price: 35, cat: "food", effect: { energy: 35, social: 5 } },
-  { id: "cheese", icon: "🧀", name: "Сырная тарелка «Neon Cheese»", desc: "+20% стабильность, +20% общение.", price: 40, cat: "food", effect: { stability: 20, social: 20 } },
+  { id: "chicken", icon: "🍗", name: "Куриные кусочки «Debug Meal»", desc: "+35% энергия.", price: 35, cat: "food", effect: { energy: 35 } },
+  { id: "cheese", icon: "🧀", name: "Сырная тарелка «Neon Cheese»", desc: "+20% стабильность.", price: 40, cat: "food", effect: { stability: 20 } },
 
   // Desserts
   { id: "pixel-cake", icon: "🍰", name: "Пиксельный торт", desc: "+40% стабильность, +10% жизнь. Мир кажется мягче.", price: 50, cat: "dessert", effect: { stability: 40, health: 10 }, flavor: "🧠 меньше глитчей" },
-  { id: "pudding", icon: "🍮", name: "Кремовый пудинг «Soft Data»", desc: "+30% ко всем датчикам (слабый универсальный бафф).", price: 45, cat: "dessert", effect: { health: 30, energy: 30, stability: 30, social: 30 } },
+  { id: "pudding", icon: "🍮", name: "Кремовый пудинг «Soft Data»", desc: "+30% ко всем датчикам (слабый универсальный бафф).", price: 45, cat: "dessert", effect: { health: 30, energy: 30, stability: 30 } },
 
   // Special
   { id: "glitch-soda", icon: "⚡", name: "«Glitch Soda»", desc: "+50% энергия. Случайный эффект.", price: 70, cat: "special", effect: { energy: 50 }, kind: "glitch-soda", flavor: "🎲 случайный баг" },
   { id: "memory-soup", icon: "🧠", name: "«Memory Soup»", desc: "+40% стабильность. Открывает скрытые диалоги NPC.", price: 80, cat: "special", effect: { stability: 40 }, kind: "memory-soup", flavor: "🔓 скрытые диалоги" },
 
-  // Secret (requires social >= 70)
-  { id: "mafia-fish", icon: "🐟", name: "Рыба от мафии котов", desc: "+50% жизнь, +20% общение. Закрытое блюдо.", price: 120, cat: "secret", effect: { health: 50, social: 20 }, gateSocial: 70, flavor: "🐱 от мафии" },
-  { id: "shadow-coffee", icon: "🖤", name: "Теневой кофе банды", desc: "+60% энергия, +20% стабильность.", price: 110, cat: "secret", effect: { energy: 60, stability: 20 }, gateSocial: 70, flavor: "🐾 для своих" },
+  // Secret
+  { id: "mafia-fish", icon: "🐟", name: "Рыба от мафии котов", desc: "+50% жизнь. Закрытое блюдо.", price: 120, cat: "secret", effect: { health: 50 }, flavor: "🐱 от мафии" },
+  { id: "shadow-coffee", icon: "🖤", name: "Теневой кофе банды", desc: "+60% энергия, +20% стабильность.", price: 110, cat: "secret", effect: { energy: 60, stability: 20 }, flavor: "🐾 для своих" },
 ];
 
 const CAT_TABS: Array<{ key: Category; label: string; icon: string }> = [
@@ -160,10 +158,9 @@ const CAT_TABS: Array<{ key: Category; label: string; icon: string }> = [
   { key: "secret", label: "Секретное", icon: "🐾" },
 ];
 
-function moodFor(social: number, rel: number): Mood {
-  const score = social * 0.6 + rel;
-  if (score < 30) return "negative";
-  if (score < 60) return "neutral";
+function moodFor(rel: number): Mood {
+  if (rel < 30) return "negative";
+  if (rel < 60) return "neutral";
   return "friendly";
 }
 const moodIcon = (m: Mood) => (m === "friendly" ? "💚" : m === "neutral" ? "😐" : "😾");
