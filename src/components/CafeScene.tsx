@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getVitals, modVitals, type Vitals } from "./VitalsHUD";
 import { CatSprite } from "./CatSprite";
+import milaImg from "@/assets/mila.png";
 
 type Props = {
   onExit: () => void;
