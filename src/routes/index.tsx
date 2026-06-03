@@ -9,6 +9,7 @@ import { Room } from "@/components/Room";
 import { Leaderboard } from "@/components/Leaderboard";
 import { ProfileWindow } from "@/components/ProfileWindow";
 import { ShopWindow, type ShopItem } from "@/components/ShopWindow";
+import { AdminPanel } from "@/components/AdminPanel";
 import { VitalsHUD, modVitals, setVitals, FULL_VITALS } from "@/components/VitalsHUD";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -345,6 +346,18 @@ function Index() {
       />
 
       <Leaderboard open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
+
+      <AdminPanel
+        stage={stage}
+        onSkipIntro={handleIntroFinish}
+        onSkipWorkshop={handleWorkshopComplete}
+        onJump={(s) => {
+          setCrashed(false);
+          setStage(s);
+        }}
+        onAddCoins={(n) => setCoins((c) => c + n)}
+        onAddXp={(n) => setXp((x) => x + n)}
+      />
 
       {/* Global CRT scanlines */}
       <div
