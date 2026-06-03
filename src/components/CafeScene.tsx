@@ -291,14 +291,12 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
       showFlash(desc, 2100);
     }
 
-    // friendly purchases warm up social link
-    if ((item.effect.social ?? 0) > 0) {
-      setRel((r) => {
-        const next = { ...r };
-        for (const k of Object.keys(next)) next[k] = Math.min(100, next[k] + 2);
-        return next;
-      });
-    }
+    // friendly purchases warm up relationships
+    setRel((r) => {
+      const next = { ...r };
+      for (const k of Object.keys(next)) next[k] = Math.min(100, next[k] + 2);
+      return next;
+    });
 
     // chance to unlock secret menu after high-tier purchase
     if (!secretUnlocked && v.social >= 65 && item.price >= 40) {
