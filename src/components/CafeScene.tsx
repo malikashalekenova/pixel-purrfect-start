@@ -299,7 +299,7 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
     });
 
     // chance to unlock secret menu after high-tier purchase
-    if (!secretUnlocked && v.social >= 65 && item.price >= 40) {
+    if (!secretUnlocked && item.price >= 40) {
       if (Math.random() < 0.35) {
         setSecretUnlocked(true);
         showFlash("🐾 Бариста шепчет: «Загляни в секретное меню…»", 2600);
