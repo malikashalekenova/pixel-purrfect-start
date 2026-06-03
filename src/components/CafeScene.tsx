@@ -313,8 +313,8 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
       return;
     }
     setQuestDone(true);
-    modVitals({ social: 12, stability: 5 });
-    showFlash("📝 Квест взят: «Передай привет Нуару». +Общение", 2200);
+    modVitals({ stability: 5 });
+    showFlash("📝 Квест взят: «Передай привет Нуару».", 2200);
   };
 
   // ---------- render ----------
