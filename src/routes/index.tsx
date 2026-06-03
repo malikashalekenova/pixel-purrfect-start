@@ -96,6 +96,10 @@ function Index() {
   }, []);
 
   const handlePlay = () => {
+    setStage("intro");
+  };
+
+  const handleIntroFinish = () => {
     setStage("zooming");
     setTimeout(() => setStage("desktop"), 2200);
   };
