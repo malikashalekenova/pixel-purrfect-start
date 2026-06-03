@@ -32,7 +32,7 @@ export function Leaderboard({ open, onClose }: Props) {
       .select("id, username, xp, contracts_completed, total_earned")
       .order(sortBy, { ascending: false })
       .limit(100)
-      .then(({ data, error }) => {
+      .then(({ data, error }: { data: Row[] | null; error: { message: string } | null }) => {
         if (!active) return;
         if (error) setErr(error.message);
         else setRows((data ?? []) as Row[]);
