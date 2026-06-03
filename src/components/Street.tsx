@@ -152,6 +152,8 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const [pushokFarewell, setPushokFarewell] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
   const [showCafe, setShowCafe] = useState(false);
+  const [showReturnMaze, setShowReturnMaze] = useState(false);
+  const [cafeVisited, setCafeVisited] = useState(false);
 
   const moodPushok = moodFromScore(relPushok);
   const moodRyzhik = moodFromScore(relRyzhik);
