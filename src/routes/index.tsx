@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
+import { GameIntro } from "@/components/GameIntro";
 import { Workshop } from "@/components/Workshop";
 import { Street } from "@/components/Street";
 import { Room } from "@/components/Room";
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Stage = "menu" | "zooming" | "desktop" | "mission" | "workshop" | "done" | "room-after" | "street";
+type Stage = "menu" | "intro" | "zooming" | "desktop" | "mission" | "workshop" | "done" | "room-after" | "street";
 
 function Index() {
   const [stage, setStage] = useState<Stage>("menu");
@@ -95,6 +96,10 @@ function Index() {
   }, []);
 
   const handlePlay = () => {
+    setStage("intro");
+  };
+
+  const handleIntroFinish = () => {
     setStage("zooming");
     setTimeout(() => setStage("desktop"), 2200);
   };
@@ -227,6 +232,9 @@ function Index() {
           </div>
         </>
       )}
+
+      {/* AI-generated intro before game starts */}
+      {stage === "intro" && <GameIntro onFinish={handleIntroFinish} />}
 
       {/* Desktop OS appears after zoom */}
       {(stage === "desktop" || stage === "mission" || stage === "done") && (
