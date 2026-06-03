@@ -443,13 +443,10 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
                 const price = priceTable[m.id] ?? m.price;
                 const drifted = price !== m.price;
                 const canAfford = coins >= price;
-                const locked = m.gateSocial ? v.social < m.gateSocial && !secretUnlocked : false;
                 return (
                   <div
                     key={m.id}
-                    className={`flex items-start gap-2 rounded-md border bg-amber-950/30 p-2 ${
-                      locked ? "border-rose-400/30 opacity-60" : "border-amber-300/20"
-                    }`}
+                    className="flex items-start gap-2 rounded-md border border-amber-300/20 bg-amber-950/30 p-2"
                   >
                     <div className="text-2xl leading-none">{m.icon}</div>
                     <div className="min-w-0 flex-1">
