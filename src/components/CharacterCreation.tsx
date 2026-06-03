@@ -16,6 +16,15 @@ type Props = {
 
 type Mode = "signup" | "login";
 
+async function waitForSession(maxTries = 6, delayMs = 250) {
+  for (let i = 0; i < maxTries; i++) {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) return data.session;
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+  return null;
+}
+
 export function CharacterCreation({ onCreated }: Props) {
   const [mode, setMode] = useState<Mode>("signup");
   const [name, setName] = useState("");
@@ -35,87 +44,110 @@ export function CharacterCreation({ onCreated }: Props) {
 
     if (!email.includes("@")) return setErr("Введите корректный email.");
     if (password.length < 6) return setErr("Пароль минимум 6 символов.");
+    if (mode === "signup" && !name.trim()) return setErr("Введите имя персонажа.");
 
     setLoading(true);
-
-    if (mode === "login") {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error || !data.user) {
-        setErr(error?.message ?? "Не удалось войти.");
-        setLoading(false);
+    try {
+      if (mode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          setErr(error.message);
+          return;
+        }
+        const profile = await getCurrentProfile();
+        if (!profile) {
+          setErr("Профиль не найден.");
+          return;
+        }
+        setSuccess(true);
+        setTimeout(() => onCreated(profile), 1000);
         return;
       }
-      const profile = await getCurrentProfile();
+
+      // signup
+      const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { username: name, display_name: name },
+        },
+      });
+
+      if (signUpErr) {
+        if (/registered|exists/i.test(signUpErr.message)) {
+          setErr("Этот email уже занят. Нажмите «Войти в аккаунт» ниже.");
+        } else {
+          setErr(signUpErr.message);
+        }
+        return;
+      }
+      if (!signUpData?.user) {
+        setErr("Не удалось создать аккаунт.");
+        return;
+      }
+
+      // Wait for session (auto-confirm should give one immediately)
+      const session = await waitForSession();
+      if (!session) {
+        setErr("Аккаунт создан, но сессия не получена. Попробуйте войти.");
+        return;
+      }
+
+      // Profile is auto-created by trigger; customize it
+      const updated = await updateMyProfile({
+        display_name: name,
+        fur_color: fur,
+        eye_color: eyes,
+        clothing,
+      });
+      const profile = updated ?? (await getCurrentProfile());
       if (!profile) {
-        setErr("Профиль не найден.");
-        setLoading(false);
+        setErr("Не удалось загрузить профиль.");
         return;
       }
       setSuccess(true);
-      setLoading(false);
       setTimeout(() => onCreated(profile), 1200);
-      return;
-    }
-
-    // signup mode
-    if (!name.trim()) {
-      setErr("Введите имя персонажа.");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Что-то пошло не так.");
+    } finally {
       setLoading(false);
-      return;
     }
+  };
 
-    const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { username: name, display_name: name },
-      },
-    });
-
-    if (signUpErr) {
-      if (/registered|exists/i.test(signUpErr.message)) {
-        setErr("Этот email уже занят. Нажмите «Войти в аккаунт» ниже.");
-      } else {
-        setErr(signUpErr.message);
+  const handleGoogle = async () => {
+    if (loading) return;
+    setErr(null);
+    setLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        setErr(result.error.message ?? "Не удалось войти через Google.");
+        return;
       }
+      if (result.redirected) return;
+      const profile = await getCurrentProfile();
+      if (!profile) {
+        setErr("Профиль не найден.");
+        return;
+      }
+      setSuccess(true);
+      setTimeout(() => onCreated(profile), 1000);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Ошибка Google входа.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    if (!signUpData?.user) {
-      setErr("Не удалось создать аккаунт.");
-      setLoading(false);
-      return;
-    }
-
-    const updated = await updateMyProfile({
-      display_name: name,
-      fur_color: fur,
-      eye_color: eyes,
-      clothing,
-    });
-
-    if (!updated) {
-      setErr("Не удалось сохранить профиль.");
-      setLoading(false);
-      return;
-    }
-
-    setSuccess(true);
-    setLoading(false);
-    setTimeout(() => onCreated(updated), 1600);
   };
 
   if (success) {
     return (
-      <div className="absolute inset-0 z-[80] flex items-center justify-center bg-black/90 animate-fade-in">
-        <div className="flex flex-col items-center gap-4 text-center">
+      <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/90 animate-fade-in">
+        <div className="flex flex-col items-center gap-4 text-center px-4">
           <div className="text-6xl animate-scale-in">✨</div>
-          <div className="font-['Press_Start_2P'] text-xl text-cyan-300 drop-shadow-[0_0_12px_rgba(127,231,255,0.6)]">
+          <div className="font-['Press_Start_2P'] text-base sm:text-xl text-cyan-300 drop-shadow-[0_0_12px_rgba(127,231,255,0.6)]">
             {mode === "login" ? "С ВОЗВРАЩЕНИЕМ" : "ПРОФИЛЬ СОЗДАН"}
           </div>
           <div className="text-sm text-white/60">Загружаем город...</div>
@@ -127,16 +159,16 @@ export function CharacterCreation({ onCreated }: Props) {
   const isLogin = mode === "login";
 
   return (
-    <div className="absolute inset-0 z-[80] flex items-center justify-center bg-black/85 backdrop-blur-sm p-3 sm:p-4 animate-fade-in overflow-y-auto">
+    <div className="fixed inset-0 z-[80] flex items-stretch sm:items-center justify-center bg-black/90 sm:bg-black/85 sm:backdrop-blur-sm overflow-y-auto animate-fade-in">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-lg rounded-2xl border border-cyan-400/20 bg-[#0a0f1a] p-5 text-white shadow-2xl my-4"
+        className="w-full sm:max-w-xl sm:my-6 sm:rounded-2xl rounded-none border-0 sm:border sm:border-cyan-400/20 bg-[#0a0f1a] p-4 sm:p-6 text-white shadow-2xl min-h-full sm:min-h-0 flex flex-col"
       >
         <div className="mb-4 text-center">
           <p className="text-[10px] uppercase tracking-[0.3em] text-cyan-300/80">
             Shadow District
           </p>
-          <h2 className="mt-1 text-2xl font-bold">
+          <h2 className="mt-1 text-xl sm:text-2xl font-bold">
             {isLogin ? "Вход в аккаунт" : "Создание персонажа"}
           </h2>
           <p className="mt-1 text-xs text-white/50">
@@ -146,33 +178,18 @@ export function CharacterCreation({ onCreated }: Props) {
           </p>
         </div>
 
-        {/* Tabs */}
         <div className="mb-4 grid grid-cols-2 gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1">
           <button
             type="button"
-            onClick={() => {
-              setMode("signup");
-              setErr(null);
-            }}
-            className={`rounded-md py-1.5 text-xs font-medium transition ${
-              !isLogin
-                ? "bg-cyan-400/20 text-cyan-100"
-                : "text-white/50 hover:text-white"
-            }`}
+            onClick={() => { setMode("signup"); setErr(null); }}
+            className={`rounded-md py-2 text-xs font-medium transition ${!isLogin ? "bg-cyan-400/20 text-cyan-100" : "text-white/50 hover:text-white"}`}
           >
             Новый персонаж
           </button>
           <button
             type="button"
-            onClick={() => {
-              setMode("login");
-              setErr(null);
-            }}
-            className={`rounded-md py-1.5 text-xs font-medium transition ${
-              isLogin
-                ? "bg-cyan-400/20 text-cyan-100"
-                : "text-white/50 hover:text-white"
-            }`}
+            onClick={() => { setMode("login"); setErr(null); }}
+            className={`rounded-md py-2 text-xs font-medium transition ${isLogin ? "bg-cyan-400/20 text-cyan-100" : "text-white/50 hover:text-white"}`}
           >
             Войти в аккаунт
           </button>
@@ -180,7 +197,6 @@ export function CharacterCreation({ onCreated }: Props) {
 
         {!isLogin && (
           <>
-            {/* Name */}
             <label className="block text-xs font-medium text-white/70">
               Имя персонажа
               <input
@@ -189,61 +205,44 @@ export function CharacterCreation({ onCreated }: Props) {
                 onChange={(e) => setName(e.target.value)}
                 maxLength={24}
                 placeholder="Например, Тень"
-                className="mt-1.5 w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-white placeholder-white/30 focus:border-cyan-400/50 focus:outline-none"
+                className="mt-1.5 w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 text-base sm:text-sm text-white placeholder-white/30 focus:border-cyan-400/50 focus:outline-none"
               />
             </label>
 
-            {/* Fur color */}
             <div className="mt-4">
               <div className="text-xs font-medium text-white/70">Цвет шерсти</div>
-              <div className="mt-1.5 flex gap-2">
+              <div className="mt-1.5 grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {FUR_COLORS.map((c) => (
                   <button
                     type="button"
                     key={c.id}
                     onClick={() => setFur(c.id)}
-                    className={`flex flex-1 flex-col items-center gap-1 rounded-lg p-2 ring-1 transition ${
-                      fur === c.id
-                        ? "ring-cyan-400 bg-cyan-400/10"
-                        : "ring-white/10 hover:ring-white/30"
-                    }`}
+                    className={`flex flex-col items-center gap-1 rounded-lg p-2 ring-1 transition ${fur === c.id ? "ring-cyan-400 bg-cyan-400/10" : "ring-white/10 hover:ring-white/30"}`}
                   >
-                    <span
-                      className="h-7 w-7 rounded-full ring-2 ring-black/40"
-                      style={{ background: c.hex }}
-                    />
+                    <span className="h-7 w-7 rounded-full ring-2 ring-black/40" style={{ background: c.hex }} />
                     <span className="text-[10px] text-white/70">{c.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Eye color */}
             <div className="mt-4">
               <div className="text-xs font-medium text-white/70">Цвет глаз</div>
-              <div className="mt-1.5 flex gap-2">
+              <div className="mt-1.5 grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {EYE_COLORS.map((c) => (
                   <button
                     type="button"
                     key={c.id}
                     onClick={() => setEyes(c.id)}
-                    className={`flex flex-1 flex-col items-center gap-1 rounded-lg p-2 ring-1 transition ${
-                      eyes === c.id
-                        ? "ring-cyan-400 bg-cyan-400/10"
-                        : "ring-white/10 hover:ring-white/30"
-                    }`}
+                    className={`flex flex-col items-center gap-1 rounded-lg p-2 ring-1 transition ${eyes === c.id ? "ring-cyan-400 bg-cyan-400/10" : "ring-white/10 hover:ring-white/30"}`}
                   >
-                    <span
-                      className="h-7 w-7 rounded-full ring-2 ring-black/40"
-                      style={{ background: c.hex }}
-                    />
+                    <span className="h-7 w-7 rounded-full ring-2 ring-black/40" style={{ background: c.hex }} />
                     <span className="text-[10px] text-white/70">{c.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Clothing */}
             <div className="mt-4">
               <div className="text-xs font-medium text-white/70">Стартовая одежда</div>
               <div className="mt-1.5 grid grid-cols-3 gap-2">
@@ -252,11 +251,7 @@ export function CharacterCreation({ onCreated }: Props) {
                     type="button"
                     key={c.id}
                     onClick={() => setClothing(c.id)}
-                    className={`flex flex-col items-center gap-1 rounded-lg p-3 ring-1 transition ${
-                      clothing === c.id
-                        ? "ring-cyan-400 bg-cyan-400/10"
-                        : "ring-white/10 hover:ring-white/30"
-                    }`}
+                    className={`flex flex-col items-center gap-1 rounded-lg p-3 ring-1 transition ${clothing === c.id ? "ring-cyan-400 bg-cyan-400/10" : "ring-white/10 hover:ring-white/30"}`}
                   >
                     <span className="text-2xl">{c.icon}</span>
                     <span className="text-[10px] text-white/70">{c.label}</span>
@@ -267,7 +262,6 @@ export function CharacterCreation({ onCreated }: Props) {
           </>
         )}
 
-        {/* Auth */}
         <div className="mt-5 rounded-lg border border-white/5 bg-white/[0.02] p-3">
           <div className="mb-2 text-[10px] uppercase tracking-wider text-white/40">
             {isLogin ? "Данные для входа" : "Сохранение прогресса"}
@@ -279,7 +273,7 @@ export function CharacterCreation({ onCreated }: Props) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
-              className="mt-1 w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm focus:border-cyan-400/50 focus:outline-none"
+              className="mt-1 w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-base sm:text-sm focus:border-cyan-400/50 focus:outline-none"
             />
           </label>
           <label className="mt-2 block text-xs font-medium text-white/70">
@@ -290,7 +284,7 @@ export function CharacterCreation({ onCreated }: Props) {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete={isLogin ? "current-password" : "new-password"}
               minLength={6}
-              className="mt-1 w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-1.5 text-sm focus:border-cyan-400/50 focus:outline-none"
+              className="mt-1 w-full rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-base sm:text-sm focus:border-cyan-400/50 focus:outline-none"
             />
           </label>
         </div>
@@ -307,12 +301,8 @@ export function CharacterCreation({ onCreated }: Props) {
           className="mt-5 w-full rounded-lg bg-gradient-to-r from-cyan-400 to-violet-400 px-4 py-3 font-['Press_Start_2P'] text-xs text-[#0a0e1a] shadow-[0_10px_30px_-10px_rgba(127,231,255,0.7)] transition hover:brightness-110 disabled:opacity-50"
         >
           {loading
-            ? isLogin
-              ? "Входим..."
-              : "Сохраняем..."
-            : isLogin
-              ? "ВОЙТИ →"
-              : "НАЧАТЬ ИСТОРИЮ →"}
+            ? isLogin ? "Входим..." : "Сохраняем..."
+            : isLogin ? "ВОЙТИ →" : "НАЧАТЬ ИСТОРИЮ →"}
         </button>
 
         <div className="my-4 flex items-center gap-3 text-[10px] uppercase tracking-wider text-white/30">
@@ -324,29 +314,8 @@ export function CharacterCreation({ onCreated }: Props) {
         <button
           type="button"
           disabled={loading}
-          onClick={async () => {
-            setErr(null);
-            setLoading(true);
-            const result = await lovable.auth.signInWithOAuth("google", {
-              redirect_uri: window.location.origin,
-            });
-            if (result.error) {
-              setErr(result.error.message ?? "Не удалось войти через Google.");
-              setLoading(false);
-              return;
-            }
-            if (result.redirected) return;
-            const profile = await getCurrentProfile();
-            if (!profile) {
-              setErr("Профиль не найден.");
-              setLoading(false);
-              return;
-            }
-            setSuccess(true);
-            setLoading(false);
-            setTimeout(() => onCreated(profile), 1000);
-          }}
-          className="flex w-full items-center justify-center gap-3 rounded-lg border border-white/15 bg-white px-4 py-2.5 text-sm font-medium text-[#0a0e1a] transition hover:bg-white/90 disabled:opacity-50"
+          onClick={handleGoogle}
+          className="flex w-full items-center justify-center gap-3 rounded-lg border border-white/15 bg-white px-4 py-3 text-sm font-medium text-[#0a0e1a] transition hover:bg-white/90 disabled:opacity-50"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
             <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
