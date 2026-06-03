@@ -251,8 +251,7 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
   const choose = (c: Npc["choices"][number]) => {
     if (!active) return;
     setReply(c.reply);
-    modVitals({ social: c.social });
-    setRel((r) => ({ ...r, [active.id]: Math.max(0, Math.min(100, r[active.id] + c.social)) }));
+    setRel((r) => ({ ...r, [active.id]: Math.max(0, Math.min(100, r[active.id] + c.rel)) }));
   };
 
   const buyItem = (item: MenuItem) => {
