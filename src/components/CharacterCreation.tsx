@@ -51,10 +51,19 @@ export function CharacterCreation({ onCreated }: Props) {
   const [err, setErr] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [existingProfile, setExistingProfile] = useState<Profile | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
 
   const finishWith = (p: Profile) => {
     setSuccess(true);
     setTimeout(() => onCreated(p), 800);
+  };
+
+  const handleGuestPlay = () => {
+    setErr(null);
+    setIsGuest(true);
+    setExistingProfile(null);
+    setName((n) => n || "Гость");
+    setStep("character");
   };
 
   const handleAuthSubmit = async (e: FormEvent) => {
