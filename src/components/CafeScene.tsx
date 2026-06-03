@@ -210,13 +210,12 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
   }, []);
 
   const v = getVitals();
-  const minVital = Math.min(v.health, v.energy, v.stability, v.social);
+  const minVital = Math.min(v.health, v.energy, v.stability);
   const broken = minVital < 30; // ⚠️ Связь с правилом 30%
   const effectScale = broken ? 0.5 : 1;
-  const cold = v.social < 30 || v.stability < 30;
+  const cold = v.stability < 30;
 
-  // Secret menu unlocks at high social
-  const canSeeSecret = v.social >= 70 || secretUnlocked;
+  const canSeeSecret = secretUnlocked;
 
   // Stable drifted prices per render of the menu (re-roll on tick to feel alive)
   const priceTable = useMemo(() => {
