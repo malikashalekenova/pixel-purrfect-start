@@ -101,7 +101,7 @@ export function PhoneReveal({ onComplete }: Props) {
     (dir: Dir) => {
       if (frame !== 7 || arrived) return;
       const v = getVitals();
-      const minV = Math.min(v.health, v.energy, v.stability, v.social);
+      const minV = Math.min(v.health, v.energy, v.stability);
 
       const now = Date.now();
       let cooldown = 120;
