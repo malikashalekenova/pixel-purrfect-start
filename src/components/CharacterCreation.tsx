@@ -51,10 +51,19 @@ export function CharacterCreation({ onCreated }: Props) {
   const [err, setErr] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [existingProfile, setExistingProfile] = useState<Profile | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
 
   const finishWith = (p: Profile) => {
     setSuccess(true);
     setTimeout(() => onCreated(p), 800);
+  };
+
+  const handleGuestPlay = () => {
+    setErr(null);
+    setIsGuest(true);
+    setExistingProfile(null);
+    setName((n) => n || "Гость");
+    setStep("character");
   };
 
   const handleAuthSubmit = async (e: FormEvent) => {
@@ -176,6 +185,29 @@ export function CharacterCreation({ onCreated }: Props) {
     if (loading) return;
     setErr(null);
     if (!name.trim()) return setErr("Введите имя персонажа.");
+
+    // Guest mode — fully local, no DB writes.
+    if (isGuest) {
+      finishWith({
+        id: `guest-${Date.now()}`,
+        user_id: "guest",
+        username: name.trim(),
+        display_name: name.trim(),
+        fur_color: fur,
+        eye_color: eyes,
+        clothing,
+        xp: 0,
+        level: 1,
+        coins: 50,
+        reputation: 0,
+        contracts_completed: 0,
+        total_earned: 0,
+        gang: null,
+        gang_leader: false,
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const updated = await withTimeout(
@@ -309,6 +341,18 @@ export function CharacterCreation({ onCreated }: Props) {
             </svg>
             Войти через Google
           </button>
+
+          <button
+            type="button"
+            disabled={loading}
+            onClick={handleGuestPlay}
+            className="mt-3 w-full rounded-lg border border-white/15 bg-white/[0.03] px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+          >
+            🐾 Играть как гость
+          </button>
+          <p className="mt-2 text-center text-[10px] text-white/40">
+            Без регистрации прогресс не сохранится между сессиями.
+          </p>
         </form>
       </div>
     );
