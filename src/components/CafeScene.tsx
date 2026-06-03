@@ -405,7 +405,7 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
                   {moodIcon(m)} {Math.round(rel[g.id])}
                 </div>
                 <div className="rounded-md border border-amber-200/20 bg-amber-950/40 px-2 py-1 flex flex-col items-center">
-                  <div className="animate-[cat-idle_2.4s_ease-in-out_infinite]"><CatSprite size={g.id === "noir" ? "md" : "xs"} variant={g.id === "tomas" ? "tomas" : g.id === "noir" ? "noir" : "cream"} /></div>
+                  <div className="animate-[cat-idle_2.4s_ease-in-out_infinite]"><CatSprite size="xs" variant={g.id === "tomas" ? "tomas" : g.id === "noir" ? "noir" : "cream"} /></div>
                   <div className="font-mono text-[9px] text-amber-100/80 mt-0.5">{g.name}</div>
                 </div>
                 <div className="-mt-0.5 h-1 w-12 rounded-b bg-amber-900/70" />
