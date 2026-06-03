@@ -185,6 +185,29 @@ export function CharacterCreation({ onCreated }: Props) {
     if (loading) return;
     setErr(null);
     if (!name.trim()) return setErr("Введите имя персонажа.");
+
+    // Guest mode — fully local, no DB writes.
+    if (isGuest) {
+      finishWith({
+        id: `guest-${Date.now()}`,
+        user_id: "guest",
+        username: name.trim(),
+        display_name: name.trim(),
+        fur_color: fur,
+        eye_color: eyes,
+        clothing,
+        xp: 0,
+        level: 1,
+        coins: 50,
+        reputation: 0,
+        contracts_completed: 0,
+        total_earned: 0,
+        gang: null,
+        gang_leader: false,
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const updated = await withTimeout(
