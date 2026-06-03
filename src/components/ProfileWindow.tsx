@@ -1,4 +1,8 @@
+import { useState } from "react";
 import { FUR_COLORS, EYE_COLORS, CLOTHING, type Profile } from "@/lib/profile";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
 
 type Props = {
   profile: Profile;
