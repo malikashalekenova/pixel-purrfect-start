@@ -50,8 +50,8 @@ function generateMaze(rows: number, cols: number): Cell[][] {
 
 const START = { r: 1, c: 1 };
 
-export function PhoneReveal({ onComplete }: Props) {
-  const [frame, setFrame] = useState<Frame>(1);
+export function PhoneReveal({ onComplete, skipIntro = false }: Props) {
+  const [frame, setFrame] = useState<Frame>(skipIntro ? 7 : 1);
   const [tab, setTab] = useState<Tab>("map");
   const [glitch, setGlitch] = useState(false);
 
