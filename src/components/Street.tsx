@@ -319,7 +319,11 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
         style={{ opacity: moodRyzhik === "hate" ? 0.35 : 1 }}
       >
         <MoodBadge tier={moodRyzhik} />
-        <CatSprite size="md" />
+        <img
+          src={ryzhikImg}
+          alt="Рыжик"
+          className="h-24 w-24 sm:h-28 sm:w-28 object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.5)]"
+        />
         <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-orange-300">
           РЫЖИК
         </div>
