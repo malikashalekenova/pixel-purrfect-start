@@ -410,7 +410,7 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
                     {g.id === "mila" ? (
                       <img src={milaImg} alt="Мила" className="h-10 w-10 object-contain drop-shadow-[0_3px_6px_rgba(0,0,0,0.5)]" />
                     ) : (
-                      <CatSprite size="xs" variant={g.id === "tomas" ? "tomas" : g.id === "noir" ? "noir" : "cream"} />
+                      <CatSprite size="xs" variant={g.id === "tomas" ? "tomas" : g.id === "noir" ? "noir" : g.id === "rex" ? "rex" : "cream"} />
                     )}
                   </div>
                   <div className="font-mono text-[9px] text-amber-100/80 mt-0.5">{g.name}</div>
