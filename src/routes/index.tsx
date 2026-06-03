@@ -399,6 +399,9 @@ function Index() {
           </button>
         </div>
       )}
+
+      {/* Registration gate — shown from the very start until the user finishes character creation */}
+      {!profile && <CharacterCreation onCreated={handleProfileCreated} />}
     </main>
   );
 }
