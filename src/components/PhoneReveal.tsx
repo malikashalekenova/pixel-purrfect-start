@@ -94,14 +94,14 @@ export function PhoneReveal({ onComplete }: Props) {
 
   const minVital = (() => {
     const v = getVitals();
-    return Math.min(v.health, v.energy, v.stability, v.social);
+    return Math.min(v.health, v.energy, v.stability);
   })();
 
   const step = useCallback(
     (dir: Dir) => {
       if (frame !== 7 || arrived) return;
       const v = getVitals();
-      const minV = Math.min(v.health, v.energy, v.stability, v.social);
+      const minV = Math.min(v.health, v.energy, v.stability);
 
       const now = Date.now();
       let cooldown = 120;

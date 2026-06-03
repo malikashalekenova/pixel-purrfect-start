@@ -10,9 +10,8 @@ import type { Profile } from "@/lib/profile";
 
 type MoodTier = "friend" | "neutral" | "negative" | "hate";
 
-function moodFromScore(rel: number, social: number): MoodTier {
-  // Combine local relationship (-N..+N) with global social vital (0..100)
-  const score = rel * 8 + (social - 50);
+function moodFromScore(rel: number): MoodTier {
+  const score = rel * 8;
   if (score >= 20) return "friend";
   if (score >= -10) return "neutral";
   if (score >= -35) return "negative";
@@ -139,12 +138,6 @@ const RYZHIK_CHOICES: DialogChoice[] = [
 
 
 export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCreated, coins, onSpend }: Props) {
-  // Needs bars
-  const [thirst, setThirst] = useState(82);
-  const [hunger, setHunger] = useState(78);
-  const [social, setSocial] = useState(70);
-  const [lonely, setLonely] = useState(false);
-
   // Dialog state
   const [activeNpc, setActiveNpc] = useState<NpcId | null>(null);
   const [reply, setReply] = useState<string | null>(null);
@@ -159,41 +152,13 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const [showPhone, setShowPhone] = useState(false);
   const [showCafe, setShowCafe] = useState(false);
 
-  // Stats appear gradually
-  useEffect(() => {
-    const id = setInterval(() => {
-      setThirst((v) => Math.max(0, v - 0.6));
-      setHunger((v) => Math.max(0, v - 0.45));
-      setSocial((v) => Math.max(0, v - 0.8));
-    }, 1500);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    if (social < 25 && !lonely) {
-      setLonely(true);
-      toast("Ты чувствуешь одиночество...", {
-        description: "−5 к настроению. Поговори с кем-нибудь.",
-      });
-    } else if (social > 40 && lonely) {
-      setLonely(false);
-    }
-  }, [social, lonely]);
-
-  // Track global social vital for mood reactivity
-  const [globalSocial, setGlobalSocial] = useState(getVitals().social);
-  useEffect(() => {
-    const id = setInterval(() => setGlobalSocial(getVitals().social), 600);
-    return () => clearInterval(id);
-  }, []);
-
-  const moodPushok = moodFromScore(relPushok, globalSocial);
-  const moodRyzhik = moodFromScore(relRyzhik, globalSocial);
+  const moodPushok = moodFromScore(relPushok);
+  const moodRyzhik = moodFromScore(relRyzhik);
 
   const openDialog = (npc: NpcId) => {
     const tier = npc === "pushok" ? moodPushok : moodRyzhik;
     if (tier === "hate") {
-      toast("NPC игнорирует тебя", { description: "Подними 💬 Общение, чтобы вернуть доверие." });
+      toast("NPC игнорирует тебя", { description: "Попробуй поговорить с другими котами." });
       return;
     }
     setActiveNpc(npc);
@@ -203,9 +168,6 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const choose = (c: DialogChoice) => {
     if (!activeNpc) return;
     setReply(c.reply);
-    setSocial((s) => Math.min(100, s + c.comm));
-    // Push to global Общение vital (rude answers drain it)
-    modVitals({ social: c.rel < 0 ? -15 : c.comm * 0.4 });
     onCommunicate(c.xp);
 
     if (activeNpc === "pushok") {
@@ -213,7 +175,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
       if (!metPushok) {
         setMetPushok(true);
         toast("Новый знакомый: Пушок", {
-          description: "💬 +5 Общение. Пушок будет иногда встречаться в районе.",
+          description: "Пушок будет иногда встречаться в районе.",
         });
       }
     } else {
@@ -324,7 +286,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
       </div>
 
       {/* Needs HUD — vertical bars with stickers */}
-      <NeedsHud thirst={thirst} hunger={hunger} social={social} lonely={lonely} />
+      
 
       {/* NPC: Пушок (первый знакомый) */}
       <button
@@ -445,53 +407,3 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
 }
 
 // Котики унифицированы — см. src/components/CatSprite.tsx
-
-
-function NeedsHud({
-  thirst,
-  hunger,
-  social,
-  lonely,
-}: {
-  thirst: number;
-  hunger: number;
-  social: number;
-  lonely: boolean;
-}) {
-  const bars = [
-    { icon: "🥤", label: "Жажда", v: thirst, color: "from-cyan-300 to-cyan-500" },
-    { icon: "🍔", label: "Голод", v: hunger, color: "from-amber-300 to-orange-500" },
-    {
-      icon: "💬",
-      label: "Общение",
-      v: social,
-      color: lonely
-        ? "from-rose-400 to-rose-600"
-        : "from-fuchsia-300 to-violet-500",
-    },
-  ];
-  return (
-    <div className="absolute left-3 top-3 z-[55] flex gap-2">
-      {bars.map((b) => (
-        <div
-          key={b.label}
-          className="flex w-12 flex-col items-center rounded-md border border-white/10 bg-black/55 p-1.5 backdrop-blur"
-        >
-          <div className="text-base leading-none">{b.icon}</div>
-          <div className="mt-1 text-[8px] uppercase tracking-wider text-white/60">
-            {b.label}
-          </div>
-          <div className="relative mt-1 h-20 w-2 overflow-hidden rounded-full bg-white/10">
-            <div
-              className={`absolute bottom-0 left-0 w-full bg-gradient-to-t ${b.color} transition-all duration-500`}
-              style={{ height: `${Math.max(0, Math.min(100, b.v))}%` }}
-            />
-          </div>
-          <div className="mt-1 text-[8px] tabular-nums text-white/50">
-            {Math.round(b.v)}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
