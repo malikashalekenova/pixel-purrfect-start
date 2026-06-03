@@ -10,14 +10,19 @@ type Props = {
 };
 
 export function ProfileWindow({ profile, onClose }: Props) {
-  const [confirming, setConfirming] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [stage, setStage] = useState<"idle" | "askDelete" | "confirmDelete">("idle");
+  const [working, setWorking] = useState(false);
+
+  const handleSignOutOnly = async () => {
+    setWorking(true);
+    await supabase.auth.signOut();
+    toast("Вы вышли из аккаунта.");
+    setTimeout(() => window.location.reload(), 500);
+  };
 
   const handleDelete = async () => {
-    setDeleting(true);
+    setWorking(true);
     try {
-      // Try to remove profile row (will only succeed if a delete policy exists);
-      // either way we sign the player out so another person can log in.
       await supabase.from("profiles").delete().eq("user_id", profile.user_id);
     } catch {
       // ignore — sign-out is the important part
@@ -82,37 +87,74 @@ export function ProfileWindow({ profile, onClose }: Props) {
           </table>
         </div>
 
-        {/* Delete profile / switch account */}
+        {/* Sign out / delete account */}
         <div className="border-t border-white/10 px-5 py-4">
-          {!confirming ? (
+          {stage === "idle" && (
             <button
               type="button"
-              onClick={() => setConfirming(true)}
-              className="w-full rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2.5 text-sm font-medium text-red-300 transition hover:bg-red-500/20 hover:text-red-100"
+              onClick={() => setStage("askDelete")}
+              disabled={working}
+              className="w-full rounded-lg border border-cyan-400/40 bg-cyan-400/10 px-4 py-2.5 text-sm font-medium text-cyan-200 transition hover:bg-cyan-400/20 hover:text-white disabled:opacity-50"
             >
-              🗑 Удалить профиль и выйти
+              ↪ Выйти из аккаунта
             </button>
-          ) : (
-            <div className="space-y-2">
+          )}
+
+          {stage === "askDelete" && (
+            <div className="space-y-3">
               <p className="text-center text-xs text-white/70">
-                Профиль будет удалён, и сюда сможет зайти другой игрок. Действие необратимо.
+                Удалить также профиль перед выходом? Другой игрок сможет начать с чистого листа.
               </p>
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setConfirming(false)}
-                  disabled={deleting}
+                  onClick={handleSignOutOnly}
+                  disabled={working}
+                  className="flex-1 rounded-lg border border-white/15 px-4 py-2 text-sm text-white/80 hover:bg-white/5 disabled:opacity-50"
+                >
+                  {working ? "Выхожу..." : "Нет, просто выйти"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStage("confirmDelete")}
+                  disabled={working}
+                  className="flex-1 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-300 hover:bg-red-500/20 hover:text-red-100 disabled:opacity-50"
+                >
+                  🗑 Удалить профиль
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStage("idle")}
+                disabled={working}
+                className="w-full text-center text-[11px] text-white/40 hover:text-white/70 disabled:opacity-50"
+              >
+                Отмена
+              </button>
+            </div>
+          )}
+
+          {stage === "confirmDelete" && (
+            <div className="space-y-2">
+              <p className="text-center text-xs text-white/70">
+                Профиль будет удалён безвозвратно. Подтвердить?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStage("askDelete")}
+                  disabled={working}
                   className="flex-1 rounded-lg border border-white/15 px-4 py-2 text-sm text-white/70 hover:bg-white/5 disabled:opacity-50"
                 >
-                  Отмена
+                  Назад
                 </button>
                 <button
                   type="button"
                   onClick={handleDelete}
-                  disabled={deleting}
+                  disabled={working}
                   className="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50"
                 >
-                  {deleting ? "Удаляю..." : "Да, удалить"}
+                  {working ? "Удаляю..." : "Да, удалить"}
                 </button>
               </div>
             </div>
