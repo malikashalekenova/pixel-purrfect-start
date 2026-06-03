@@ -255,10 +255,6 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
   };
 
   const buyItem = (item: MenuItem) => {
-    if (item.gateSocial && v.social < item.gateSocial && !secretUnlocked) {
-      showFlash("🚫 Слишком мало доверия. Нужно общение ≥ 70%.");
-      return;
-    }
     if (cold) {
       showFlash("Бариста: «Сегодня без обслуживания. Зайди, когда придёшь в себя.»");
       return;
