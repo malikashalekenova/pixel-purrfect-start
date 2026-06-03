@@ -410,6 +410,9 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
       {/* Cafe interior */}
       {showCafe && <CafeScene onExit={handleCafeExit} coins={coins} onSpend={onSpend} />}
 
+      {/* Return labyrinth — different maze on the way back */}
+      {showReturnMaze && <PhoneReveal onComplete={handleReturnMazeComplete} skipIntro />}
+
       {/* Pull phone from pocket button */}
       <button
         type="button"
