@@ -175,7 +175,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
       if (!metPushok) {
         setMetPushok(true);
         toast("Новый знакомый: Пушок", {
-          description: "💬 +5 Общение. Пушок будет иногда встречаться в районе.",
+          description: "Пушок будет иногда встречаться в районе.",
         });
       }
     } else {
