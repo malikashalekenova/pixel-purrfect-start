@@ -233,6 +233,9 @@ function Index() {
         </>
       )}
 
+      {/* AI-generated intro before game starts */}
+      {stage === "intro" && <GameIntro onFinish={handleIntroFinish} />}
+
       {/* Desktop OS appears after zoom */}
       {(stage === "desktop" || stage === "mission" || stage === "done") && (
         <Desktop
