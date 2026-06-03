@@ -58,6 +58,41 @@ export async function getCurrentProfile(): Promise<Profile | null> {
   return data as Profile | null;
 }
 
+/** Make sure the current user has a profile row. If the auth trigger didn't
+ * fire (or hasn't finished), insert one from the client using RLS. */
+export async function ensureCurrentProfile(): Promise<Profile | null> {
+  const { data: userRes } = await supabase.auth.getUser();
+  const user = userRes.user;
+  if (!user) return null;
+
+  const existing = await getCurrentProfile();
+  if (existing) return existing;
+
+  const fallbackName =
+    (user.user_metadata?.username as string | undefined) ??
+    (user.user_metadata?.full_name as string | undefined) ??
+    (user.email ? user.email.split("@")[0] : "Игрок");
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .insert({
+      user_id: user.id,
+      username: fallbackName,
+      display_name: fallbackName,
+      coins: 50,
+      level: 1,
+    })
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    console.error("[profile] ensure/insert error", error);
+    // Maybe a race created the row — try one more read.
+    return await getCurrentProfile();
+  }
+  return data as Profile | null;
+}
+
 export async function updateMyProfile(
   patch: Partial<
     Pick<

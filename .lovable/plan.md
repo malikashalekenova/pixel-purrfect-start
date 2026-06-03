@@ -1,32 +1,26 @@
-## Что не так сейчас
+## What I found
 
-1. **Бесконечная загрузка при регистрации.** В `CharacterCreation.tsx` после `supabase.auth.signUp(...)` сразу вызывается `updateMyProfile(...)`. Если в проекте включено подтверждение email, `signUp` возвращает `user`, но **сессии нет** → внутри `updateMyProfile` `supabase.auth.getUser()` возвращает `null`, RLS не пускает UPDATE, функция возвращает `null` без явной ошибки — а спиннер на кнопке «Сохраняем…» зависает, пока не уйдёт в `setErr`. На медленной сети и при отсутствии сессии запрос на `/auth/v1/user` может висеть достаточно долго, чтобы выглядеть как «вечная загрузка». Плюс профиль уже создаётся триггером `handle_new_user` — повторный UPDATE без сессии бессмысленен.
+The hosted backend is healthy, but the registration flow can still wait forever because the app relies on client-side profile reads immediately after signup. The database trigger for auto-creating profiles exists, but the app has no timeout-safe profile creation fallback if the trigger/session timing is delayed.
 
-2. **Окно регистрации не на весь экран и плохо адаптируется.** Сейчас это `absolute inset-0` с формой `max-w-lg` и фиксированными отступами — на маленьких/больших экранах смотрится как «карточка по центру», прокрутка кривая, на мобиле обрезается.
+## Plan
 
-## Что сделаем
+1. **Make registration deterministic**
+   - After signup, wait briefly for a valid user session.
+   - If the profile is not found, create/update the current user's profile from the app instead of waiting forever.
+   - Always stop the loading state and show a real error if auth/profile creation fails.
 
-### 1. Авто-подтверждение email + надёжный поток регистрации
-- Включить авто-подтверждение email через настройки auth, чтобы `signUp` сразу выдавал сессию (без письма).
-- В `CharacterCreation.handleSubmit` (signup):
-  - После `signUp` дождаться сессии (`onAuthStateChange` уже даёт `SIGNED_IN`, либо короткий `getSession()` с ретраем 3×300мс).
-  - Профиль уже создан триггером — вызываем `getCurrentProfile()`, затем `updateMyProfile({ display_name, fur_color, eye_color, clothing })`.
-  - Если на каком-то шаге `null` — показываем понятную ошибку и снимаем спиннер.
-  - Добавить общий `try/finally` на `setLoading(false)`, чтобы спиннер гарантированно гас.
-- Логин и Google-кнопка — без изменений по сути, но тоже обернуть в `try/finally`.
+2. **Split the flow cleanly**
+   - Signup/login succeeds → move to character creation.
+   - Character creation saves name/colors/clothes → immediately enters the game.
+   - Existing users who log in should go straight into the game if their profile already has a character.
 
-### 2. Полноэкранный и адаптивный экран регистрации
-- Контейнер: `fixed inset-0` + `flex` + `overflow-y-auto`, безопасные паддинги `p-4 sm:p-6`.
-- Форма: убрать `max-w-lg my-4`; на мобиле — занимает всю ширину/высоту (`w-full min-h-full sm:min-h-0 sm:max-w-xl sm:rounded-2xl rounded-none`), на десктопе — карточка по центру с разумной шириной.
-- Сетки выборов (мех/глаза/одежда) — `grid-cols-2 sm:grid-cols-4`/`sm:grid-cols-3`, чтобы не вылезали на узких экранах.
-- Кнопки и инпуты — `text-base sm:text-sm`, увеличенные тач-таргеты на мобиле.
-- Заголовок и отступы — компактнее на `sm:`, чтобы всё помещалось без скролла на десктопе и нормально скроллилось на телефоне.
+3. **Fix the root game handoff**
+   - Ensure `onCreated(profile)` updates the main page profile state, coins, XP, and advances the game screen instead of leaving the auth overlay stuck.
 
-### Файлы под изменения
-- `src/components/CharacterCreation.tsx` — логика signup + адаптивная вёрстка.
-- Настройка auth: включить `mailer_autoconfirm = true` (через инструмент конфигурации auth).
+4. **Add safe profile helper behavior**
+   - Add a helper that gets the authenticated user with `getUser()`.
+   - Add an `ensureCurrentProfile()` path that uses the authenticated user id and respects existing RLS policies.
 
-### Чего НЕ трогаем
-- Триггеры БД (`handle_new_user`, `handle_admin_signup`) уже стоят и работают — миграции не нужны.
-- `src/routes/index.tsx` — там корректный `onAuthStateChange`, который сам подхватит профиль.
-- Google-вход (уже работает через `lovable.auth`).
+5. **Verify with runtime signals**
+   - Check the auth/profile queries and console after changes.
+   - Confirm the loading button cannot remain stuck indefinitely.
