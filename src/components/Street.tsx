@@ -6,6 +6,7 @@ import { CafeScene } from "@/components/CafeScene";
 import { CatSprite } from "@/components/CatSprite";
 import { modVitals, getVitals } from "@/components/VitalsHUD";
 import type { Profile } from "@/lib/profile";
+import ryzhikImg from "@/assets/ryzhik.png";
 
 
 type MoodTier = "friend" | "neutral" | "negative" | "hate";
