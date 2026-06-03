@@ -7,6 +7,7 @@ import { Workshop } from "@/components/Workshop";
 import { Street } from "@/components/Street";
 import { Room } from "@/components/Room";
 import { Leaderboard } from "@/components/Leaderboard";
+import { CharacterCreation } from "@/components/CharacterCreation";
 import { ProfileWindow } from "@/components/ProfileWindow";
 import { ShopWindow, type ShopItem } from "@/components/ShopWindow";
 import { AdminPanel } from "@/components/AdminPanel";
