@@ -286,7 +286,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
       </div>
 
       {/* Needs HUD — vertical bars with stickers */}
-      <NeedsHud thirst={thirst} hunger={hunger} social={social} lonely={lonely} />
+      
 
       {/* NPC: Пушок (первый знакомый) */}
       <button
