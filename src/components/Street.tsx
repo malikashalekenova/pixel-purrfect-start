@@ -158,7 +158,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const openDialog = (npc: NpcId) => {
     const tier = npc === "pushok" ? moodPushok : moodRyzhik;
     if (tier === "hate") {
-      toast("NPC игнорирует тебя", { description: "Подними 💬 Общение, чтобы вернуть доверие." });
+      toast("NPC игнорирует тебя", { description: "Попробуй поговорить с другими котами." });
       return;
     }
     setActiveNpc(npc);
