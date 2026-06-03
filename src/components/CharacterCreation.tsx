@@ -6,6 +6,7 @@ import {
   EYE_COLORS,
   CLOTHING,
   getCurrentProfile,
+  ensureCurrentProfile,
   updateMyProfile,
   type Profile,
 } from "@/lib/profile";
@@ -17,13 +18,24 @@ type Props = {
 type Mode = "signup" | "login";
 type Step = "auth" | "character";
 
-async function waitForSession(maxTries = 8, delayMs = 250) {
-  for (let i = 0; i < maxTries; i++) {
-    const { data } = await supabase.auth.getSession();
-    if (data.session) return data.session;
-    await new Promise((r) => setTimeout(r, delayMs));
-  }
-  return null;
+/** Reject after `ms` so a stuck network call can never freeze the UI. */
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(
+      () => reject(new Error(`${label} timeout (${ms}ms)`)),
+      ms,
+    );
+    p.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(t);
+        reject(e);
+      },
+    );
+  });
 }
 
 export function CharacterCreation({ onCreated }: Props) {
@@ -42,7 +54,7 @@ export function CharacterCreation({ onCreated }: Props) {
 
   const finishWith = (p: Profile) => {
     setSuccess(true);
-    setTimeout(() => onCreated(p), 1000);
+    setTimeout(() => onCreated(p), 800);
   };
 
   const handleAuthSubmit = async (e: FormEvent) => {
@@ -55,37 +67,75 @@ export function CharacterCreation({ onCreated }: Props) {
     setLoading(true);
     try {
       if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) return setErr(error.message);
-        const profile = await getCurrentProfile();
-        if (!profile) return setErr("Профиль не найден.");
-        finishWith(profile);
+        const { error } = await withTimeout(
+          supabase.auth.signInWithPassword({ email, password }),
+          15000,
+          "Вход",
+        );
+        if (error) {
+          setErr(error.message);
+          return;
+        }
+        const profile =
+          (await ensureCurrentProfile()) ?? (await getCurrentProfile());
+        if (!profile) {
+          setErr("Не удалось загрузить профиль.");
+          return;
+        }
+        // Existing user with character → straight into the game.
+        if (profile.display_name && profile.display_name !== profile.username) {
+          finishWith(profile);
+        } else {
+          setExistingProfile(profile);
+          setName(profile.display_name ?? profile.username ?? "");
+          setStep("character");
+        }
         return;
       }
 
-      // signup
-      const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: window.location.origin },
-      });
+      // ============ signup ============
+      const { data: signUpData, error: signUpErr } = await withTimeout(
+        supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: window.location.origin },
+        }),
+        15000,
+        "Регистрация",
+      );
+
       if (signUpErr) {
-        if (/registered|exists/i.test(signUpErr.message)) {
+        if (/registered|exists|already/i.test(signUpErr.message)) {
           setErr("Этот email уже занят. Переключись на «Войти».");
-        } else setErr(signUpErr.message);
+        } else {
+          setErr(signUpErr.message);
+        }
         return;
       }
-      if (!signUpData?.user) return setErr("Не удалось создать аккаунт.");
+      if (!signUpData?.user) {
+        setErr("Не удалось создать аккаунт.");
+        return;
+      }
+      // No session means email confirmation is still required.
+      if (!signUpData.session) {
+        setErr(
+          "Проверь почту и подтверди email, затем нажми «Войти».",
+        );
+        setMode("login");
+        return;
+      }
 
-      const session = await waitForSession();
-      if (!session) return setErr("Сессия не получена. Попробуйте войти.");
-
-      // Profile auto-created by trigger — move to character step
-      const profile = await getCurrentProfile();
+      // Ensure profile exists (trigger may have failed silently).
+      const profile = await withTimeout(
+        ensureCurrentProfile(),
+        8000,
+        "Загрузка профиля",
+      );
       setExistingProfile(profile);
       if (profile?.display_name) setName(profile.display_name);
       setStep("character");
     } catch (e) {
+      console.error("[auth] submit failed", e);
       setErr(e instanceof Error ? e.message : "Что-то пошло не так.");
     } finally {
       setLoading(false);
@@ -100,11 +150,12 @@ export function CharacterCreation({ onCreated }: Props) {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
-      if (result.error) return setErr(result.error.message ?? "Не удалось войти через Google.");
+      if (result.error)
+        return setErr(result.error.message ?? "Не удалось войти через Google.");
       if (result.redirected) return;
-      const profile = await getCurrentProfile();
+      const profile =
+        (await ensureCurrentProfile()) ?? (await getCurrentProfile());
       if (!profile) return setErr("Профиль не найден.");
-      // If profile already customized, finish; otherwise go to character step
       if (profile.display_name && profile.display_name !== profile.username) {
         finishWith(profile);
       } else {
@@ -113,6 +164,7 @@ export function CharacterCreation({ onCreated }: Props) {
         setStep("character");
       }
     } catch (e) {
+      console.error("[auth] google failed", e);
       setErr(e instanceof Error ? e.message : "Ошибка Google входа.");
     } finally {
       setLoading(false);
@@ -126,16 +178,21 @@ export function CharacterCreation({ onCreated }: Props) {
     if (!name.trim()) return setErr("Введите имя персонажа.");
     setLoading(true);
     try {
-      const updated = await updateMyProfile({
-        display_name: name.trim(),
-        fur_color: fur,
-        eye_color: eyes,
-        clothing,
-      });
+      const updated = await withTimeout(
+        updateMyProfile({
+          display_name: name.trim(),
+          fur_color: fur,
+          eye_color: eyes,
+          clothing,
+        }),
+        10000,
+        "Сохранение",
+      );
       const profile = updated ?? (await getCurrentProfile());
       if (!profile) return setErr("Не удалось сохранить профиль.");
       finishWith(profile);
     } catch (e) {
+      console.error("[character] save failed", e);
       setErr(e instanceof Error ? e.message : "Ошибка сохранения.");
     } finally {
       setLoading(false);
