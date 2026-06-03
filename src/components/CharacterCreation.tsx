@@ -341,6 +341,18 @@ export function CharacterCreation({ onCreated }: Props) {
             </svg>
             Войти через Google
           </button>
+
+          <button
+            type="button"
+            disabled={loading}
+            onClick={handleGuestPlay}
+            className="mt-3 w-full rounded-lg border border-white/15 bg-white/[0.03] px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+          >
+            🐾 Играть как гость
+          </button>
+          <p className="mt-2 text-center text-[10px] text-white/40">
+            Без регистрации прогресс не сохранится между сессиями.
+          </p>
         </form>
       </div>
     );
