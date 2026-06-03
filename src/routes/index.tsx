@@ -102,8 +102,7 @@ function Index() {
   };
 
   const handleIntroFinish = () => {
-    setStage("zooming");
-    setTimeout(() => setStage("desktop"), 2200);
+    setStage("desktop");
   };
 
   const handleStartMission = () => {
