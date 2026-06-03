@@ -7,6 +7,7 @@ type Dir = "up" | "down" | "left" | "right";
 
 type Props = {
   onComplete: () => void;
+  skipIntro?: boolean;
 };
 
 type Cell = "road" | "wall" | "cafe";
