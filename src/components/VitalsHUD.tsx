@@ -91,7 +91,7 @@ export function VitalsHUD({ location, paused, onCrash }: Props) {
       _vitals = next;
       _listeners.forEach((fn) => fn(next));
 
-      const anyZero = next.health <= 0 || next.energy <= 0 || next.stability <= 0;
+      const anyZero = next.health <= 0 || next.stability <= 0 || next.social <= 0;
       if (anyZero && !crashedRef.current) {
         crashedRef.current = true;
         onCrash?.();
