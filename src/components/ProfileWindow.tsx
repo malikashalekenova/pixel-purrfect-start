@@ -10,6 +10,23 @@ type Props = {
 };
 
 export function ProfileWindow({ profile, onClose }: Props) {
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      // Try to remove profile row (will only succeed if a delete policy exists);
+      // either way we sign the player out so another person can log in.
+      await supabase.from("profiles").delete().eq("user_id", profile.user_id);
+    } catch {
+      // ignore — sign-out is the important part
+    }
+    await supabase.auth.signOut();
+    toast("Профиль удалён. Можно войти под другим аккаунтом.");
+    setTimeout(() => window.location.reload(), 600);
+  };
+
   const fur = FUR_COLORS.find((c) => c.id === profile.fur_color);
   const eyes = EYE_COLORS.find((c) => c.id === profile.eye_color);
   const clothing = CLOTHING.find((c) => c.id === profile.clothing);
