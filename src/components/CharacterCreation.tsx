@@ -346,7 +346,7 @@ export function CharacterCreation({ onCreated }: Props) {
             type="button"
             disabled={loading}
             onClick={handleGuestPlay}
-            className="mt-3 w-full rounded-lg border border-white/15 bg-white/[0.03] px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+            className="mt-3 w-full rounded-2xl border border-white/15 bg-white/[0.03] px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
           >
             🐾 Играть как гость
           </button>
