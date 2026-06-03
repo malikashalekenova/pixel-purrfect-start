@@ -168,9 +168,6 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const choose = (c: DialogChoice) => {
     if (!activeNpc) return;
     setReply(c.reply);
-    setSocial((s) => Math.min(100, s + c.comm));
-    // Push to global Общение vital (rude answers drain it)
-    modVitals({ social: c.rel < 0 ? -15 : c.comm * 0.4 });
     onCommunicate(c.xp);
 
     if (activeNpc === "pushok") {
