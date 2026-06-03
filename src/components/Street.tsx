@@ -152,6 +152,8 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const [pushokFarewell, setPushokFarewell] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
   const [showCafe, setShowCafe] = useState(false);
+  const [showReturnMaze, setShowReturnMaze] = useState(false);
+  const [cafeVisited, setCafeVisited] = useState(false);
 
   const moodPushok = moodFromScore(relPushok);
   const moodRyzhik = moodFromScore(relRyzhik);
@@ -217,9 +219,14 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
 
   const handleCafeExit = () => {
     setShowCafe(false);
-    toast("📍 Кафе отмечено на карте", { description: "Ты вышел обратно в город." });
-    setPushokFarewell(true);
-    setTimeout(() => setPushokFarewell(false), 5000);
+    toast("📍 Кафе отмечено на карте", { description: "Возвращаемся домой другой дорогой..." });
+    setShowReturnMaze(true);
+  };
+
+  const handleReturnMazeComplete = () => {
+    setShowReturnMaze(false);
+    setCafeVisited(true);
+    toast("Улица опустела", { description: "Знакомых котов поблизости нет." });
   };
 
 
@@ -290,45 +297,49 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
       
 
       {/* NPC: Пушок (первый знакомый) */}
-      <button
-        type="button"
-        onClick={() => openDialog("pushok")}
-        aria-label="Поговорить с Пушком"
-        className="group absolute left-[28%] bottom-[20%] cursor-pointer focus:outline-none transition-opacity"
-        style={{ opacity: moodPushok === "hate" ? 0.35 : 1 }}
-      >
-        <MoodBadge tier={moodPushok} />
-        {pushokFarewell && (
-          <div className="absolute -top-28 left-1/2 z-10 w-56 -translate-x-1/2 rounded-2xl bg-white px-3 py-2 text-[11px] leading-snug text-stone-800 shadow-2xl ring-1 ring-black/10 animate-fade-in">
-            «Надеюсь, тебе понравится в нашем городе!»
-            <div className="absolute -bottom-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white" />
+      {!cafeVisited && (
+        <button
+          type="button"
+          onClick={() => openDialog("pushok")}
+          aria-label="Поговорить с Пушком"
+          className="group absolute left-[28%] bottom-[20%] cursor-pointer focus:outline-none transition-opacity"
+          style={{ opacity: moodPushok === "hate" ? 0.35 : 1 }}
+        >
+          <MoodBadge tier={moodPushok} />
+          {pushokFarewell && (
+            <div className="absolute -top-28 left-1/2 z-10 w-56 -translate-x-1/2 rounded-2xl bg-white px-3 py-2 text-[11px] leading-snug text-stone-800 shadow-2xl ring-1 ring-black/10 animate-fade-in">
+              «Надеюсь, тебе понравится в нашем городе!»
+              <div className="absolute -bottom-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white" />
+            </div>
+          )}
+          <CatSprite size="md" />
+          <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-yellow-200">
+            ПУШОК
           </div>
-        )}
-        <CatSprite size="md" />
-        <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-yellow-200">
-          ПУШОК
-        </div>
-      </button>
+        </button>
+      )}
 
 
       {/* NPC: Рыжик */}
-      <button
-        type="button"
-        onClick={() => openDialog("ryzhik")}
-        aria-label="Поговорить с Рыжиком"
-        className="group absolute left-[68%] bottom-[22%] -translate-x-1/2 cursor-pointer focus:outline-none transition-opacity"
-        style={{ opacity: moodRyzhik === "hate" ? 0.35 : 1 }}
-      >
-        <MoodBadge tier={moodRyzhik} />
-        <img
-          src={ryzhikImg}
-          alt="Рыжик"
-          className="h-24 w-24 sm:h-28 sm:w-28 object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.5)]"
-        />
-        <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-orange-300">
-          РЫЖИК
-        </div>
-      </button>
+      {!cafeVisited && (
+        <button
+          type="button"
+          onClick={() => openDialog("ryzhik")}
+          aria-label="Поговорить с Рыжиком"
+          className="group absolute left-[68%] bottom-[22%] -translate-x-1/2 cursor-pointer focus:outline-none transition-opacity"
+          style={{ opacity: moodRyzhik === "hate" ? 0.35 : 1 }}
+        >
+          <MoodBadge tier={moodRyzhik} />
+          <img
+            src={ryzhikImg}
+            alt="Рыжик"
+            className="h-24 w-24 sm:h-28 sm:w-28 object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.5)]"
+          />
+          <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-orange-300">
+            РЫЖИК
+          </div>
+        </button>
+      )}
 
 
 
@@ -398,6 +409,9 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
 
       {/* Cafe interior */}
       {showCafe && <CafeScene onExit={handleCafeExit} coins={coins} onSpend={onSpend} />}
+
+      {/* Return labyrinth — different maze on the way back */}
+      {showReturnMaze && <PhoneReveal onComplete={handleReturnMazeComplete} skipIntro />}
 
       {/* Pull phone from pocket button */}
       <button
