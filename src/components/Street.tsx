@@ -219,9 +219,14 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
 
   const handleCafeExit = () => {
     setShowCafe(false);
-    toast("📍 Кафе отмечено на карте", { description: "Ты вышел обратно в город." });
-    setPushokFarewell(true);
-    setTimeout(() => setPushokFarewell(false), 5000);
+    toast("📍 Кафе отмечено на карте", { description: "Возвращаемся домой другой дорогой..." });
+    setShowReturnMaze(true);
+  };
+
+  const handleReturnMazeComplete = () => {
+    setShowReturnMaze(false);
+    setCafeVisited(true);
+    toast("Улица опустела", { description: "Знакомых котов поблизости нет." });
   };
 
 
