@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { CharacterCreation } from "@/components/CharacterCreation";
 import { PhoneReveal } from "@/components/PhoneReveal";
 import { CafeScene } from "@/components/CafeScene";
 import { CatSprite } from "@/components/CatSprite";
-import { modVitals, getVitals } from "@/components/VitalsHUD";
 import type { Profile } from "@/lib/profile";
 import ryzhikImg from "@/assets/ryzhik.png";
 
@@ -58,8 +57,6 @@ type DialogChoice = {
   comm: number;
 };
 
-type NpcId = "ryzhik";
-
 const RYZHIK_INTRO =
   "Привет. Ты новенький в этом районе, да? Я раньше тебя здесь не видел.";
 
@@ -102,68 +99,50 @@ const RYZHIK_CHOICES: DialogChoice[] = [
 
 export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCreated, coins, onSpend }: Props) {
   // Dialog state
-  const [activeNpc, setActiveNpc] = useState<NpcId | null>(null);
+  const [showDialog, setShowDialog] = useState(false);
   const [reply, setReply] = useState<string | null>(null);
-  const [relPushok, setRelPushok] = useState(0);
   const [relRyzhik, setRelRyzhik] = useState(0);
-  const [metPushok, setMetPushok] = useState(false);
   const [metRyzhik, setMetRyzhik] = useState(false);
 
   // Character creation flow
   const [showCreation, setShowCreation] = useState(false);
-  const [pushokFarewell, setPushokFarewell] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
   const [showCafe, setShowCafe] = useState(false);
   const [showReturnMaze, setShowReturnMaze] = useState(false);
   const [cafeVisited, setCafeVisited] = useState(false);
 
-  const moodPushok = moodFromScore(relPushok);
   const moodRyzhik = moodFromScore(relRyzhik);
 
-  const openDialog = (npc: NpcId) => {
-    const tier = npc === "pushok" ? moodPushok : moodRyzhik;
-    if (tier === "hate") {
+  const openDialog = () => {
+    if (moodRyzhik === "hate") {
       toast("NPC игнорирует тебя", { description: "Попробуй поговорить с другими котами." });
       return;
     }
-    setActiveNpc(npc);
+    setShowDialog(true);
     setReply(null);
   };
 
   const choose = (c: DialogChoice) => {
-    if (!activeNpc) return;
     setReply(c.reply);
     onCommunicate(c.xp);
-
-    if (activeNpc === "pushok") {
-      setRelPushok((r) => r + c.rel);
-      if (!metPushok) {
-        setMetPushok(true);
-        toast("Новый знакомый: Пушок", {
-          description: "Пушок будет иногда встречаться в районе.",
+    setRelRyzhik((r) => r + c.rel);
+    if (!metRyzhik) {
+      setMetRyzhik(true);
+      setTimeout(() => {
+        onDiscoverCafe();
+        toast("Новая отметка на карте", {
+          description: "Кафе «Ленивая Лапка» добавлено в карту города.",
         });
-      }
-    } else {
-      setRelRyzhik((r) => r + c.rel);
-      if (!metRyzhik) {
-        setMetRyzhik(true);
-        setTimeout(() => {
-          onDiscoverCafe();
-          toast("Новая отметка на карте", {
-            description: "Кафе «Ленивая Лапка» добавлено в карту города.",
-          });
-        }, 1400);
-      }
+      }, 1400);
     }
   };
 
   const closeDialog = () => {
-    const wasPushok = activeNpc === "pushok";
-    const justMetPushok = wasPushok && metPushok && !hasProfile && !showCreation && !pushokFarewell;
-    setActiveNpc(null);
+    const justMetRyzhik = metRyzhik && !hasProfile && !showCreation;
+    setShowDialog(false);
     setReply(null);
-    // After first Пушок dialog, if player has no profile yet — open character creation
-    if (justMetPushok) {
+    // After first Ryzhik dialog, if player has no profile yet — open character creation
+    if (justMetRyzhik) {
       setTimeout(() => setShowCreation(true), 400);
     }
   };
@@ -190,19 +169,6 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
     setCafeVisited(true);
     toast("Улица опустела", { description: "Знакомых котов поблизости нет." });
   };
-
-
-  const currentChoices = activeNpc === "pushok" ? PUSHOK_CHOICES : RYZHIK_CHOICES;
-  const currentIntro = activeNpc === "pushok" ? PUSHOK_INTRO : RYZHIK_INTRO;
-  const currentName = activeNpc === "pushok" ? "ПУШОК" : "РЫЖИК";
-  const currentRel = activeNpc === "pushok" ? relPushok : relRyzhik;
-  const currentAccent =
-    activeNpc === "pushok" ? "from-amber-200 to-yellow-400" : "from-orange-400 to-amber-600";
-  const currentBorder =
-    activeNpc === "pushok" ? "border-yellow-300/40" : "border-orange-400/30";
-  const currentLabelColor =
-    activeNpc === "pushok" ? "text-yellow-200" : "text-orange-300";
-
 
   return (
     <div className="absolute inset-0 z-20 overflow-hidden">
@@ -255,42 +221,11 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
         </div>
       </div>
 
-      {/* Needs HUD — vertical bars with stickers */}
-      
-
-      {/* NPC: Пушок (первый знакомый) */}
-      {!cafeVisited && (
-        <button
-          type="button"
-          onClick={() => openDialog("pushok")}
-          aria-label="Поговорить с Пушком"
-          className="group absolute left-[28%] bottom-[20%] cursor-pointer focus:outline-none transition-opacity"
-          style={{ opacity: moodPushok === "hate" ? 0.35 : 1 }}
-        >
-          <MoodBadge tier={moodPushok} />
-          {pushokFarewell && (
-            <div className="absolute -top-28 left-1/2 z-10 w-56 -translate-x-1/2 rounded-2xl bg-white px-3 py-2 text-[11px] leading-snug text-stone-800 shadow-2xl ring-1 ring-black/10 animate-fade-in">
-              «Надеюсь, тебе понравится в нашем городе!»
-              <div className="absolute -bottom-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 bg-white" />
-            </div>
-          )}
-          <img
-            src={pushokImg}
-            alt="Пушок"
-            className="h-24 w-24 sm:h-28 sm:w-28 object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.5)]"
-          />
-          <div className="mt-2 text-center font-['Press_Start_2P'] text-[8px] text-yellow-200">
-            ПУШОК
-          </div>
-        </button>
-      )}
-
-
       {/* NPC: Рыжик */}
       {!cafeVisited && (
         <button
           type="button"
-          onClick={() => openDialog("ryzhik")}
+          onClick={openDialog}
           aria-label="Поговорить с Рыжиком"
           className="group absolute left-[68%] bottom-[22%] -translate-x-1/2 cursor-pointer focus:outline-none transition-opacity"
           style={{ opacity: moodRyzhik === "hate" ? 0.35 : 1 }}
@@ -307,25 +242,22 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
         </button>
       )}
 
-
-
-
       {/* Dialog modal */}
-      {activeNpc && (
+      {showDialog && (
         <div className="absolute inset-0 z-30 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center">
-          <div className={`m-4 w-full max-w-xl rounded-xl border ${currentBorder} bg-[#0a0e1a]/95 p-5 shadow-2xl ring-1 ring-white/5`}>
+          <div className="m-4 w-full max-w-xl rounded-xl border border-orange-400/30 bg-[#0a0e1a]/95 p-5 shadow-2xl ring-1 ring-white/5">
             <div className="mb-3 flex items-center gap-3">
-              <div className={`flex h-12 w-10 items-center justify-center rounded-md bg-gradient-to-br ${currentAccent}`}>
+              <div className="flex h-12 w-10 items-center justify-center rounded-md bg-gradient-to-br from-orange-400 to-amber-600">
                 <CatSprite size="xs" />
               </div>
 
               <div>
-                <div className={`font-['Press_Start_2P'] text-[10px] ${currentLabelColor}`}>
-                  {currentName}
+                <div className="font-['Press_Start_2P'] text-[10px] text-orange-300">
+                  РЫЖИК
                 </div>
                 <div className="text-[10px] text-white/40">
-                  Отношение: {currentRel > 0 ? "+" : ""}
-                  {currentRel}
+                  Отношение: {relRyzhik > 0 ? "+" : ""}
+                  {relRyzhik}
                 </div>
               </div>
             </div>
@@ -333,10 +265,10 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
             {!reply ? (
               <>
                 <p className="mb-4 rounded-lg bg-white/5 p-3 text-sm leading-relaxed text-white/90">
-                  «{currentIntro}»
+                  «{RYZHIK_INTRO}»
                 </p>
                 <div className="grid gap-2">
-                  {currentChoices.map((c) => (
+                  {RYZHIK_CHOICES.map((c) => (
                     <button
                       key={c.id}
                       type="button"
@@ -367,7 +299,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
         </div>
       )}
 
-      {/* Character creation after meeting Пушок */}
+      {/* Character creation after meeting Ryzhik */}
       {showCreation && <CharacterCreation onCreated={handleProfileCreated} />}
 
       {/* Cinematic phone reveal → opens map mission to cafe */}
@@ -390,5 +322,3 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
     </div>
   );
 }
-
-// Котики унифицированы — см. src/components/CatSprite.tsx
