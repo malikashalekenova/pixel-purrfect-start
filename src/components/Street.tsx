@@ -227,10 +227,16 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
           type="button"
           onClick={openDialog}
           aria-label="Поговорить с Рыжиком"
-          className="group absolute left-[68%] bottom-[22%] -translate-x-1/2 cursor-pointer focus:outline-none transition-opacity"
+          className="group absolute left-1/2 bottom-[22%] -translate-x-1/2 cursor-pointer focus:outline-none transition-opacity"
           style={{ opacity: moodRyzhik === "hate" ? 0.35 : 1 }}
         >
           <MoodBadge tier={moodRyzhik} />
+          {!showDialog && (
+            <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-orange-300/40 bg-[#0a0e1a]/95 px-3 py-1.5 text-[10px] text-orange-100 shadow-lg animate-bounce">
+              Эй, новенький!
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-2 w-2 rotate-45 border-b border-r border-orange-300/40 bg-[#0a0e1a]/95" />
+            </div>
+          )}
           <img
             src={ryzhikImg}
             alt="Рыжик"
