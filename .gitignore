@@ -23,6 +23,7 @@ VERCEL_ENV_VALUES.local.md
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+supabase/.temp/
 
 # Editor directories and files
 .vscode/*
