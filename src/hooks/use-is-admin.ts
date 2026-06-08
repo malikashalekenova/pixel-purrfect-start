@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
 export function useIsAdmin() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
     let active = true;
 
     const check = async () => {
@@ -24,7 +26,9 @@ export function useIsAdmin() {
     };
 
     check();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => check());
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => check());
     return () => {
       active = false;
       subscription.unsubscribe();

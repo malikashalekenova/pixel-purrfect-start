@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
 export type Profile = {
   id: string;
@@ -44,6 +44,8 @@ export function levelFromXp(xp: number): number {
 }
 
 export async function getCurrentProfile(): Promise<Profile | null> {
+  if (!isSupabaseConfigured()) return null;
+
   const { data: userRes } = await supabase.auth.getUser();
   if (!userRes.user) return null;
   const { data, error } = await supabase
@@ -61,6 +63,8 @@ export async function getCurrentProfile(): Promise<Profile | null> {
 /** Make sure the current user has a profile row. If the auth trigger didn't
  * fire (or hasn't finished), insert one from the client using RLS. */
 export async function ensureCurrentProfile(): Promise<Profile | null> {
+  if (!isSupabaseConfigured()) return null;
+
   const { data: userRes } = await supabase.auth.getUser();
   const user = userRes.user;
   if (!user) return null;
@@ -112,6 +116,8 @@ export async function updateMyProfile(
     >
   >,
 ): Promise<Profile | null> {
+  if (!isSupabaseConfigured()) return null;
+
   const { data: userRes } = await supabase.auth.getUser();
   if (!userRes.user) return null;
   const { data, error } = await supabase

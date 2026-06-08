@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 
 type Row = {
   id: string;
@@ -27,6 +27,11 @@ export function Leaderboard({ open, onClose }: Props) {
     let active = true;
     setLoading(true);
     setErr(null);
+    if (!isSupabaseConfigured()) {
+      setErr("Рейтинг временно недоступен: Supabase не настроен.");
+      setLoading(false);
+      return;
+    }
     (supabase as any)
       .from("leaderboard")
       .select("id, username, xp, contracts_completed, total_earned")
@@ -65,11 +70,13 @@ export function Leaderboard({ open, onClose }: Props) {
         </div>
 
         <div className="flex gap-2 px-5 py-3 border-b border-white/5">
-          {([
-            ["xp", "По опыту ✦"],
-            ["contracts_completed", "По контрактам 📄"],
-            ["total_earned", "По заработку 🪙"],
-          ] as [SortKey, string][]).map(([key, label]) => (
+          {(
+            [
+              ["xp", "По опыту ✦"],
+              ["contracts_completed", "По контрактам 📄"],
+              ["total_earned", "По заработку 🪙"],
+            ] as [SortKey, string][]
+          ).map(([key, label]) => (
             <button
               key={key}
               onClick={() => setSortBy(key)}
@@ -85,12 +92,8 @@ export function Leaderboard({ open, onClose }: Props) {
         </div>
 
         <div className="max-h-[60vh] overflow-y-auto px-2 py-2">
-          {loading && (
-            <p className="px-4 py-8 text-center text-sm text-white/50">Загрузка...</p>
-          )}
-          {err && (
-            <p className="px-4 py-8 text-center text-sm text-red-400">{err}</p>
-          )}
+          {loading && <p className="px-4 py-8 text-center text-sm text-white/50">Загрузка...</p>}
+          {err && <p className="px-4 py-8 text-center text-sm text-red-400">{err}</p>}
           {!loading && !err && rows.length === 0 && (
             <p className="px-4 py-8 text-center text-sm text-white/50">
               Пока нет игроков. Стань первым!
@@ -111,23 +114,14 @@ export function Leaderboard({ open, onClose }: Props) {
                 {rows.map((r, i) => {
                   const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : null;
                   return (
-                    <tr
-                      key={r.id}
-                      className="border-t border-white/5 hover:bg-white/5"
-                    >
-                      <td className="px-3 py-2 text-white/50">
-                        {medal ?? i + 1}
-                      </td>
+                    <tr key={r.id} className="border-t border-white/5 hover:bg-white/5">
+                      <td className="px-3 py-2 text-white/50">{medal ?? i + 1}</td>
                       <td className="px-3 py-2 font-medium">{r.username}</td>
-                      <td className="px-3 py-2 text-right text-cyan-300">
-                        ✦ {r.xp}
-                      </td>
+                      <td className="px-3 py-2 text-right text-cyan-300">✦ {r.xp}</td>
                       <td className="px-3 py-2 text-right text-white/80">
                         {r.contracts_completed}
                       </td>
-                      <td className="px-3 py-2 text-right text-amber-300">
-                        🪙 {r.total_earned}
-                      </td>
+                      <td className="px-3 py-2 text-right text-amber-300">🪙 {r.total_earned}</td>
                     </tr>
                   );
                 })}

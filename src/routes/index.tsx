@@ -12,28 +12,39 @@ import { ProfileWindow } from "@/components/ProfileWindow";
 import { ShopWindow, type ShopItem } from "@/components/ShopWindow";
 import { AdminPanel } from "@/components/AdminPanel";
 import { VitalsHUD, modVitals, setVitals, FULL_VITALS } from "@/components/VitalsHUD";
-import { supabase } from "@/integrations/supabase/client";
-import {
-  getCurrentProfile,
-  levelFromXp,
-  updateMyProfile,
-  type Profile,
-} from "@/lib/profile";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
+import { getCurrentProfile, levelFromXp, updateMyProfile, type Profile } from "@/lib/profile";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Shadow District" },
-      { name: "description", content: "Shadow District — a pixel art story game about chasing success from a tiny dirty room in the slums." },
+      {
+        name: "description",
+        content:
+          "Shadow District — a pixel art story game about chasing success from a tiny dirty room in the slums.",
+      },
       { property: "og:title", content: "Shadow District" },
-      { property: "og:description", content: "A pixel art story game. Start your journey from the shadows." },
+      {
+        property: "og:description",
+        content: "A pixel art story game. Start your journey from the shadows.",
+      },
     ],
   }),
   component: Index,
 });
 
-type Stage = "menu" | "intro" | "zooming" | "desktop" | "mission" | "workshop" | "done" | "room-after" | "street";
+type Stage =
+  | "menu"
+  | "intro"
+  | "zooming"
+  | "desktop"
+  | "mission"
+  | "workshop"
+  | "done"
+  | "room-after"
+  | "street";
 
 function Index() {
   const [stage, setStage] = useState<Stage>("menu");
@@ -46,7 +57,12 @@ function Index() {
   const [purchases, setPurchases] = useState<ShopItem[]>([]);
   const [crashed, setCrashed] = useState(false);
 
-  const isHome = stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done" || stage === "room-after";
+  const isHome =
+    stage === "desktop" ||
+    stage === "mission" ||
+    stage === "workshop" ||
+    stage === "done" ||
+    stage === "room-after";
   const isStreet = stage === "street";
   const showVitals = isHome || isStreet;
 
@@ -59,8 +75,15 @@ function Index() {
     // Apply item effect on vitals (30% rule items)
     const n = item.name.toLowerCase();
     if (n.includes("анти") || n.includes("патч")) modVitals({ stability: 25 });
-    else if (n.includes("защит") || n.includes("firewall") || n.includes("shield")) modVitals({ health: 20, stability: 10 });
-    else if (n.includes("энерг") || n.includes("energy") || n.includes("coffee") || n.includes("кофе")) modVitals({ energy: 40 });
+    else if (n.includes("защит") || n.includes("firewall") || n.includes("shield"))
+      modVitals({ health: 20, stability: 10 });
+    else if (
+      n.includes("энерг") ||
+      n.includes("energy") ||
+      n.includes("coffee") ||
+      n.includes("кофе")
+    )
+      modVitals({ energy: 40 });
     else if (n.includes("резерв")) modVitals({ health: 30 });
     else modVitals({ stability: 10 });
 
@@ -72,6 +95,8 @@ function Index() {
 
   // Load profile on mount + on auth changes (autosave / login restore)
   useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
     let active = true;
     getCurrentProfile().then((p) => {
       if (!active) return;
@@ -81,7 +106,9 @@ function Index() {
         setXp(p.xp);
       }
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
       getCurrentProfile().then((p) => {
         if (!active) return;
         if (p) {
@@ -201,7 +228,10 @@ function Index() {
       {/* Fade-to-black during zoom transition */}
       <div
         className="pointer-events-none absolute inset-0 bg-black transition-opacity duration-1000"
-        style={{ opacity: stage === "zooming" ? 0.85 : 0, transitionDelay: stage === "zooming" ? "1200ms" : "0ms" }}
+        style={{
+          opacity: stage === "zooming" ? 0.85 : 0,
+          transitionDelay: stage === "zooming" ? "1200ms" : "0ms",
+        }}
       />
 
       {/* Title + Play button (menu only) */}
@@ -257,17 +287,13 @@ function Index() {
             <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">
               Мастерская на соседней улице
             </h2>
-            <p className="mt-4 text-sm text-white/60">
-              Загрузка локации...
-            </p>
+            <p className="mt-4 text-sm text-white/60">Загрузка локации...</p>
           </div>
         </div>
       )}
 
       {/* Workshop minigame */}
-      {stage === "workshop" && (
-        <Workshop onComplete={handleWorkshopComplete} />
-      )}
+      {stage === "workshop" && <Workshop onComplete={handleWorkshopComplete} />}
 
       {/* Room scene — after first contract, before going outside */}
       {stage === "room-after" && (
@@ -299,7 +325,12 @@ function Index() {
       )}
 
       {/* HUD: coins / xp */}
-      {(stage === "desktop" || stage === "mission" || stage === "workshop" || stage === "done" || stage === "room-after" || stage === "street") && (
+      {(stage === "desktop" ||
+        stage === "mission" ||
+        stage === "workshop" ||
+        stage === "done" ||
+        stage === "room-after" ||
+        stage === "street") && (
         <div className="pointer-events-none absolute right-3 top-3 z-[60] flex items-center gap-2 text-xs">
           <span className="rounded-full bg-black/60 px-2.5 py-1 text-amber-300 ring-1 ring-white/10 backdrop-blur">
             🪙 {coins}
