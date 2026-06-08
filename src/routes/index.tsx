@@ -13,7 +13,13 @@ import { ShopWindow, type ShopItem } from "@/components/ShopWindow";
 import { AdminPanel } from "@/components/AdminPanel";
 import { VitalsHUD, modVitals, setVitals, FULL_VITALS } from "@/components/VitalsHUD";
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
-import { getCurrentProfile, levelFromXp, updateMyProfile, type Profile } from "@/lib/profile";
+import {
+  ensureCurrentProfile,
+  getCurrentProfile,
+  levelFromXp,
+  updateMyProfile,
+  type Profile,
+} from "@/lib/profile";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
@@ -98,25 +104,21 @@ function Index() {
     if (!isSupabaseConfigured()) return;
 
     let active = true;
-    getCurrentProfile().then((p) => {
+    const loadProfile = async () => {
+      const p = (await ensureCurrentProfile()) ?? (await getCurrentProfile());
       if (!active) return;
       if (p) {
         setProfile(p);
         setCoins(p.coins);
         setXp(p.xp);
       }
-    });
+    };
+
+    loadProfile();
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
-      getCurrentProfile().then((p) => {
-        if (!active) return;
-        if (p) {
-          setProfile(p);
-          setCoins(p.coins);
-          setXp(p.xp);
-        }
-      });
+      loadProfile();
     });
     return () => {
       active = false;

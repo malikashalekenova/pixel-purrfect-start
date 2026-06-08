@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react";
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import {
   FUR_COLORS,
   EYE_COLORS,
@@ -154,11 +153,18 @@ export function CharacterCreation({ onCreated }: Props) {
     }
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin,
+        },
       });
-      if (result.error) return setErr(result.error.message ?? "Не удалось войти через Google.");
-      if (result.redirected) return;
+      if (error) return setErr(error.message ?? "Не удалось войти через Google.");
+      if (data.url) {
+        window.location.assign(data.url);
+        return;
+      }
+
       const profile = (await ensureCurrentProfile()) ?? (await getCurrentProfile());
       if (!profile) return setErr("Профиль не найден.");
       if (profile.display_name && profile.display_name !== profile.username) {
