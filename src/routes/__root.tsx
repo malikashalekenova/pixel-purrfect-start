@@ -79,19 +79,49 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Lovable App" },
-      { name: "description", content: "Pixel Art game start screen featuring a cat protagonist in a humble apartment." },
+      {
+        name: "description",
+        content: "Pixel Art game start screen featuring a cat protagonist in a humble apartment.",
+      },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Pixel Art game start screen featuring a cat protagonist in a humble apartment." },
+      {
+        property: "og:description",
+        content: "Pixel Art game start screen featuring a cat protagonist in a humble apartment.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Pixel Art game start screen featuring a cat protagonist in a humble apartment." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0ffe8812-e0d3-4c00-a977-9c0f1633cb05/id-preview-4239fe4a--ac8b2f8b-7455-4838-a8bd-cfc7e389d5bf.lovable.app-1780477546613.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0ffe8812-e0d3-4c00-a977-9c0f1633cb05/id-preview-4239fe4a--ac8b2f8b-7455-4838-a8bd-cfc7e389d5bf.lovable.app-1780477546613.png" },
+      {
+        name: "twitter:description",
+        content: "Pixel Art game start screen featuring a cat protagonist in a humble apartment.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0ffe8812-e0d3-4c00-a977-9c0f1633cb05/id-preview-4239fe4a--ac8b2f8b-7455-4838-a8bd-cfc7e389d5bf.lovable.app-1780477546613.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0ffe8812-e0d3-4c00-a977-9c0f1633cb05/id-preview-4239fe4a--ac8b2f8b-7455-4838-a8bd-cfc7e389d5bf.lovable.app-1780477546613.png",
+      },
     ],
     links: [
+      {
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap",
+      },
       {
         rel: "stylesheet",
         href: appCss,
@@ -129,4 +159,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-

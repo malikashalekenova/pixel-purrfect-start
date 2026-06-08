@@ -12,9 +12,13 @@ dist
 dist-ssr
 .output
 .vinxi
+.vercel
 .tanstack/**
 .nitro
+.env
 *.local
+VERCEL_ENV_IMPORT.local.env
+VERCEL_ENV_VALUES.local.md
 
 # Wrangler / Cloudflare
 .wrangler/
