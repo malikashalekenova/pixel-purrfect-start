@@ -34,6 +34,14 @@ function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   });
 }
 
+function getAuthErrorMessage(message?: string | null) {
+  if (!message) return "Не удалось войти.";
+  if (/missing OAuth secret|Unsupported provider/i.test(message)) {
+    return "Google вход ещё не настроен в Supabase: добавь Google Client ID и Client Secret в Auth Providers.";
+  }
+  return message;
+}
+
 export function CharacterCreation({ onCreated }: Props) {
   const [step, setStep] = useState<Step>("auth");
   const [mode, setMode] = useState<Mode>("signup");
@@ -159,7 +167,7 @@ export function CharacterCreation({ onCreated }: Props) {
           redirectTo: window.location.origin,
         },
       });
-      if (error) return setErr(error.message ?? "Не удалось войти через Google.");
+      if (error) return setErr(getAuthErrorMessage(error.message));
       if (data.url) {
         window.location.assign(data.url);
         return;
