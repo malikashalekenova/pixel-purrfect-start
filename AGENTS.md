@@ -8,6 +8,8 @@
 - Supabase anon/public publishable keys may be used in frontend variables. Supabase service role keys must stay backend/server-only.
 - Gemini API keys must stay backend/server-only and must not use a `VITE_*` prefix.
 - For Gemini features, default to `gemini-2.5-flash-lite` for free/low-cost student usage.
+- Do not save AI Mentor questions or answers to the database unless explicitly requested.
+- Do not send user emails, auth tokens, session tokens, or secrets to AI providers.
 - Do not require `SUPABASE_SERVICE_ROLE_KEY` unless backend admin privileges are actually used by the app.
 - Remote font CSS imports can break Lightning CSS/Vite builds; prefer document/head font links.
 - App database tables must exist in Supabase before Vercel or local runtime can query them.

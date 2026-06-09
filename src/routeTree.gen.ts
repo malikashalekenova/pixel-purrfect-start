@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiAiAdvisorRouteImport } from './routes/api/ai-advisor'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiAdvisorRoute = ApiAiAdvisorRouteImport.update({
+  id: '/api/ai-advisor',
+  path: '/api/ai-advisor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/ai-advisor': typeof ApiAiAdvisorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/ai-advisor': typeof ApiAiAdvisorRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/ai-advisor': typeof ApiAiAdvisorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/ai-advisor'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/ai-advisor'
+  id: '__root__' | '/' | '/api/ai-advisor'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiAiAdvisorRoute: typeof ApiAiAdvisorRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai-advisor': {
+      id: '/api/ai-advisor'
+      path: '/api/ai-advisor'
+      fullPath: '/api/ai-advisor'
+      preLoaderRoute: typeof ApiAiAdvisorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiAiAdvisorRoute: ApiAiAdvisorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

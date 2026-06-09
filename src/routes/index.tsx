@@ -10,6 +10,7 @@ import { Leaderboard } from "@/components/Leaderboard";
 import { CharacterCreation } from "@/components/CharacterCreation";
 import { ProfileWindow } from "@/components/ProfileWindow";
 import { ShopWindow, type ShopItem } from "@/components/ShopWindow";
+import { AIAdvisorWindow } from "@/components/AIAdvisorWindow";
 import { AdminPanel } from "@/components/AdminPanel";
 import { VitalsHUD, modVitals, setVitals, FULL_VITALS } from "@/components/VitalsHUD";
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
@@ -60,6 +61,7 @@ function Index() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [aiAdvisorOpen, setAiAdvisorOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [purchases, setPurchases] = useState<ShopItem[]>([]);
   const [crashed, setCrashed] = useState(false);
@@ -282,6 +284,7 @@ function Index() {
           onOpenShop={() => setShopOpen(true)}
           onOpenLeaderboard={() => setLeaderboardOpen(true)}
           onOpenProfile={() => setProfileOpen(true)}
+          onOpenAIAdvisor={() => setAiAdvisorOpen(true)}
           hasProfile={!!profile}
         />
       )}
@@ -389,6 +392,16 @@ function Index() {
       />
 
       <Leaderboard open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
+
+      {aiAdvisorOpen && (
+        <AIAdvisorWindow
+          profile={profile}
+          coins={coins}
+          xp={xp}
+          stage={stage}
+          onClose={() => setAiAdvisorOpen(false)}
+        />
+      )}
 
       <AdminPanel
         stage={stage}

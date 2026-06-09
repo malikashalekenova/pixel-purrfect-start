@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 type IconKey =
+  | "ai"
   | "contracts"
   | "messages"
   | "map"
@@ -11,6 +12,7 @@ type IconKey =
   | "settings";
 
 const ICONS: { key: IconKey; label: string; glyph: string; accent: string }[] = [
+  { key: "ai", label: "AI Mentor", glyph: "◇", accent: "#7fe7ff" },
   { key: "contracts", label: "Контракты", glyph: "📋", accent: "#7fe7ff" },
   { key: "messages", label: "Сообщения", glyph: "✉", accent: "#a78bfa" },
   { key: "shop", label: "Магазин", glyph: "🛒", accent: "#34d399" },
@@ -41,12 +43,14 @@ export function Desktop({
   onOpenShop,
   onOpenLeaderboard,
   onOpenProfile,
+  onOpenAIAdvisor,
   hasProfile,
 }: {
   onStartMission: () => void;
   onOpenShop?: () => void;
   onOpenLeaderboard?: () => void;
   onOpenProfile?: () => void;
+  onOpenAIAdvisor?: () => void;
   hasProfile?: boolean;
 }) {
   const { time, date } = useClock();
@@ -65,6 +69,7 @@ export function Desktop({
   };
 
   const handleIconClick = (key: IconKey) => {
+    if (key === "ai") return onOpenAIAdvisor?.();
     if (key === "messages") return openMail();
     if (key === "shop") return onOpenShop?.();
     if (key === "leaderboard") return onOpenLeaderboard?.();
@@ -311,7 +316,7 @@ export function Desktop({
             backdropFilter: "blur(14px)",
           }}
         >
-          {ICONS.slice(0, 6).map((ic) => (
+          {ICONS.slice(0, 7).map((ic) => (
             <button
               key={`dock-${ic.key}`}
               onClick={() => handleIconClick(ic.key)}
