@@ -6,10 +6,11 @@ import { toast } from "sonner";
 
 type Props = {
   profile: Profile;
+  email: string | null;
   onClose: () => void;
 };
 
-export function ProfileWindow({ profile, onClose }: Props) {
+export function ProfileWindow({ profile, email, onClose }: Props) {
   const [stage, setStage] = useState<"idle" | "askDelete" | "confirmDelete">("idle");
   const [working, setWorking] = useState(false);
 
@@ -38,6 +39,7 @@ export function ProfileWindow({ profile, onClose }: Props) {
 
   const rows: [string, React.ReactNode][] = [
     ["ID игрока", <span className="font-mono text-[10px] text-white/40">{profile.user_id.slice(0, 8)}...</span>],
+    ["Email", email ?? <span className="text-white/40">Гость / не найден</span>],
     ["Имя", profile.display_name ?? profile.username],
     ["Цвет шерсти", <span className="inline-flex items-center gap-2">{fur && <span className="h-3 w-3 rounded-full ring-1 ring-white/30" style={{ background: fur.hex }} />}{fur?.label ?? profile.fur_color}</span>],
     ["Цвет глаз", <span className="inline-flex items-center gap-2">{eyes && <span className="h-3 w-3 rounded-full ring-1 ring-white/30" style={{ background: eyes.hex }} />}{eyes?.label ?? profile.eye_color}</span>],

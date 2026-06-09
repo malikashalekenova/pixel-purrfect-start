@@ -58,6 +58,7 @@ function Index() {
   const [xp, setXp] = useState(0);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [authEmail, setAuthEmail] = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [purchases, setPurchases] = useState<ShopItem[]>([]);
@@ -105,12 +106,18 @@ function Index() {
 
     let active = true;
     const loadProfile = async () => {
-      const p = (await ensureCurrentProfile()) ?? (await getCurrentProfile());
+      const [{ data: userRes }, p] = await Promise.all([
+        supabase.auth.getUser(),
+        ensureCurrentProfile().then((profile) => profile ?? getCurrentProfile()),
+      ]);
       if (!active) return;
+      setAuthEmail(userRes.user?.email ?? null);
       if (p) {
         setProfile(p);
         setCoins(p.coins);
         setXp(p.xp);
+      } else {
+        setProfile(null);
       }
     };
 
@@ -366,7 +373,11 @@ function Index() {
       )}
 
       {profile && profileOpen && (
-        <ProfileWindow profile={profile} onClose={() => setProfileOpen(false)} />
+        <ProfileWindow
+          profile={profile}
+          email={authEmail}
+          onClose={() => setProfileOpen(false)}
+        />
       )}
 
       <ShopWindow
