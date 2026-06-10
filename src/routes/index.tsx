@@ -326,7 +326,7 @@ function Index() {
               <button
                 type="button"
                 onClick={handleRegister}
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-cyan-300/30 bg-black/60 px-4 py-3 text-sm font-semibold text-cyan-100 ring-1 ring-white/10 backdrop-blur transition hover:bg-cyan-400/15 hover:text-white"
+                className="inline-flex min-h-14 items-center justify-center gap-2 border-4 border-[#0a1016] bg-[#a78bfa] px-3 py-3 font-['Press_Start_2P'] text-[10px] leading-none text-[#0a1016] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#c4b5fd] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016] sm:text-xs"
               >
                 <UserPlus size={17} />
                 Регистрация
@@ -334,7 +334,7 @@ function Index() {
               <button
                 type="button"
                 onClick={() => setSettingsOpen(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-violet-300/30 bg-black/60 px-4 py-3 text-sm font-semibold text-violet-100 ring-1 ring-white/10 backdrop-blur transition hover:bg-violet-400/15 hover:text-white"
+                className="inline-flex min-h-14 items-center justify-center gap-2 border-4 border-[#0a1016] bg-[#34d399] px-3 py-3 font-['Press_Start_2P'] text-[10px] leading-none text-[#0a1016] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#6ee7b7] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016] sm:text-xs"
               >
                 <Settings size={17} />
                 Настройки
