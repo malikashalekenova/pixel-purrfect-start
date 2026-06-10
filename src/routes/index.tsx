@@ -501,6 +501,7 @@ function Index() {
         }}
         onAddCoins={(n) => setCoins((c) => c + n)}
         onAddXp={(n) => setXp((x) => x + n)}
+        onResetCrash={() => setCrashed(false)}
       />
 
       {/* Global CRT scanlines */}
