@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CharacterCreation } from "@/components/CharacterCreation";
 import { PhoneReveal } from "@/components/PhoneReveal";
@@ -47,6 +47,7 @@ type Props = {
   coins: number;
   onSpend: (amount: number) => boolean;
   onGoHome: () => void;
+  skipToWalkHomeToken?: number;
 };
 
 
@@ -99,7 +100,16 @@ const RYZHIK_CHOICES: DialogChoice[] = [
 ];
 
 
-export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCreated, coins, onSpend, onGoHome }: Props) {
+export function Street({
+  onCommunicate,
+  onDiscoverCafe,
+  hasProfile,
+  onProfileCreated,
+  coins,
+  onSpend,
+  onGoHome,
+  skipToWalkHomeToken = 0,
+}: Props) {
   // Dialog state
   const [showDialog, setShowDialog] = useState(false);
   const [reply, setReply] = useState<string | null>(null);
@@ -114,6 +124,16 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const [cafeVisited, setCafeVisited] = useState(false);
 
   const moodRyzhik = moodFromScore(relRyzhik);
+
+  useEffect(() => {
+    if (skipToWalkHomeToken <= 0) return;
+    setShowDialog(false);
+    setShowCreation(false);
+    setShowPhone(false);
+    setShowCafe(false);
+    setShowWalkHome(true);
+    toast("Админ-скип", { description: "Лабиринт и кафе пропущены. Дорога домой открыта." });
+  }, [skipToWalkHomeToken]);
 
   const openDialog = () => {
     if (moodRyzhik === "hate") {

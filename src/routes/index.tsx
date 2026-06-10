@@ -93,6 +93,7 @@ function Index() {
   const [shopOpen, setShopOpen] = useState(false);
   const [purchases, setPurchases] = useState<ShopItem[]>([]);
   const [crashed, setCrashed] = useState(false);
+  const [skipToWalkHomeToken, setSkipToWalkHomeToken] = useState(0);
 
   const isHome =
     stage === "desktop" ||
@@ -250,6 +251,13 @@ function Index() {
 
   const handleGoHomeFromStreet = () => {
     setStage("room-after");
+  };
+
+  const handleSkipToWalkHome = () => {
+    setCrashed(false);
+    setStage("street");
+    setSkipToWalkHomeToken((token) => token + 1);
+    toast("Скип включён", { description: "Лабиринт и кафе пропущены." });
   };
 
   const handleProfileCreated = (p: Profile) => {
@@ -413,6 +421,7 @@ function Index() {
             return true;
           }}
           onGoHome={handleGoHomeFromStreet}
+          skipToWalkHomeToken={skipToWalkHomeToken}
         />
       )}
 
@@ -499,6 +508,7 @@ function Index() {
           setCrashed(false);
           setStage(s);
         }}
+        onSkipToWalkHome={handleSkipToWalkHome}
         onAddCoins={(n) => setCoins((c) => c + n)}
         onAddXp={(n) => setXp((x) => x + n)}
         onResetCrash={() => setCrashed(false)}

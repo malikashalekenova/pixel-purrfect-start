@@ -18,6 +18,7 @@ type Props = {
   onSkipIntro: () => void;
   onSkipWorkshop: () => void;
   onJump: (stage: Stage) => void;
+  onSkipToWalkHome: () => void;
   onAddCoins: (n: number) => void;
   onAddXp: (n: number) => void;
   onResetCrash: () => void;
@@ -39,6 +40,7 @@ export function AdminPanel({
   onSkipIntro,
   onSkipWorkshop,
   onJump,
+  onSkipToWalkHome,
   onAddCoins,
   onAddXp,
   onResetCrash,
@@ -108,6 +110,14 @@ export function AdminPanel({
             className="mb-2 w-full rounded-md bg-rose-500/30 px-2 py-1.5 text-left text-rose-100 ring-1 ring-rose-400/40 hover:bg-rose-500/50"
           >
             ▶ Скип этапа
+          </button>
+
+          <button
+            type="button"
+            onClick={onSkipToWalkHome}
+            className="mb-2 w-full rounded-md bg-cyan-500/25 px-2 py-1.5 text-left text-cyan-100 ring-1 ring-cyan-300/40 hover:bg-cyan-500/40"
+          >
+            ⏭ Скип лабиринт + кафе
           </button>
 
           <div className="mb-1 text-[10px] uppercase tracking-wider text-rose-300/60">
