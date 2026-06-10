@@ -1,9 +1,9 @@
-// Котики в стиле "Бубу" — кремовый, чёрный злой, и Томас (фото).
-import creamAsset from "@/assets/bubu-cream.png.asset.json";
-import blackAsset from "@/assets/bubu-black.png.asset.json";
-import tomasAsset from "@/assets/bubu-tomas.png.asset.json";
-import noirAsset from "@/assets/bubu-noir.png.asset.json";
-import noirNewAsset from "@/assets/bubu-noir-v2.png.asset.json";
+// Котики в стиле "Бубу" — импортируем реальные PNG, чтобы Vite сам собрал пути.
+import blackImg from "@/assets/bubu-black.png";
+import creamImg from "@/assets/bubu-cream.png";
+import noirImg from "@/assets/bubu-noir.png";
+import noirNewImg from "@/assets/bubu-noir-v2.png";
+import orangeImg from "@/assets/bubu-orange.png";
 
 type Size = "xs" | "sm" | "md" | "lg";
 type Variant = "cream" | "black" | "tomas" | "orange" | "noir" | "rex";
@@ -16,12 +16,12 @@ const SIZES: Record<Size, number> = {
 };
 
 const SRC: Record<Variant, string> = {
-  cream: creamAsset.url,
-  orange: creamAsset.url, // legacy alias
-  black: blackAsset.url,
-  tomas: noirAsset.url, // Томас теперь использует старую картинку Нуара
-  noir: noirNewAsset.url, // Нуар — новая картинка
-  rex: tomasAsset.url, // Рекс — старая картинка Томаса
+  cream: creamImg,
+  orange: orangeImg,
+  black: blackImg,
+  tomas: noirImg, // Томас теперь использует старую картинку Нуара
+  noir: noirNewImg, // Нуар — новая картинка
+  rex: orangeImg, // Рекс — старая картинка Томаса
 };
 
 type Props = {
