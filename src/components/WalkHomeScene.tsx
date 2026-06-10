@@ -120,18 +120,16 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
     return () => window.clearTimeout(timer);
   }, [phase, timeLeft]);
 
+  const usesImageBackground =
+    phase === "choose" || phase === "ambush" || phase === "right-route" || phase === "dead-end";
+
   return (
-    <div className="fixed inset-0 z-[120] overflow-hidden bg-[#060914] text-white animate-fade-in">
-      {(
-        phase === "choose" ||
-        phase === "ambush" ||
-        phase === "right-route" ||
-        phase === "dead-end"
-      ) && (
+    <div className="fixed inset-0 z-[220] overflow-hidden bg-[#060914] text-white animate-fade-in">
+      {usesImageBackground && (
         <div
-          className="absolute inset-0 opacity-55"
+          className="absolute inset-0"
           style={{
-            backgroundImage: `linear-gradient(rgba(3,7,18,0.35), rgba(3,7,18,0.88)), url(${
+            backgroundImage: `url(${
               phase === "choose"
                 ? pathChoiceImg
                 : phase === "right-route"
@@ -145,34 +143,33 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
           }}
         />
       )}
-      <div
-        className={`absolute inset-0 bg-gradient-to-b from-[#080b1d] via-[#161331] to-[#07040d] ${
-          phase === "choose" || phase === "ambush" || phase === "right-route" || phase === "dead-end"
-            ? "opacity-70"
-            : ""
-        }`}
-      />
-      <div className="absolute inset-x-0 top-[18%] h-48 opacity-80">
-        <div className="h-full bg-[linear-gradient(90deg,#070512_0_10%,#15102b_10%_18%,#070512_18%_28%,#21183b_28%_38%,#070512_38%_50%,#17112d_50%_62%,#070512_62%_72%,#23163c_72%_82%,#070512_82%_100%)]" />
-      </div>
-      <div
-        className="absolute inset-x-0 top-[18%] h-48 opacity-45"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle, #7fe7ff 1px, transparent 2px), radial-gradient(circle, #f472b6 1px, transparent 2px), radial-gradient(circle, #fbbf24 1px, transparent 2px)",
-          backgroundSize: "30px 20px, 42px 24px, 54px 28px",
-        }}
-      />
-      <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-b from-[#17101f] to-black" />
-      <div className="absolute left-[15%] bottom-[28%] h-72 w-72 rounded-full bg-cyan-300/10 blur-3xl" />
-      <div className="absolute right-[8%] bottom-[18%] h-80 w-80 rounded-full bg-violet-400/12 blur-3xl" />
-      <div
-        className="absolute inset-x-0 bottom-[30%] h-1 opacity-50"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(90deg, #7fe7ff 0 16px, transparent 16px 34px)",
-        }}
-      />
+      {!usesImageBackground && (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#080b1d] via-[#161331] to-[#07040d]" />
+          <div className="absolute inset-x-0 top-[18%] h-48 opacity-80">
+            <div className="h-full bg-[linear-gradient(90deg,#070512_0_10%,#15102b_10%_18%,#070512_18%_28%,#21183b_28%_38%,#070512_38%_50%,#17112d_50%_62%,#070512_62%_72%,#23163c_72%_82%,#070512_82%_100%)]" />
+          </div>
+          <div
+            className="absolute inset-x-0 top-[18%] h-48 opacity-45"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, #7fe7ff 1px, transparent 2px), radial-gradient(circle, #f472b6 1px, transparent 2px), radial-gradient(circle, #fbbf24 1px, transparent 2px)",
+              backgroundSize: "30px 20px, 42px 24px, 54px 28px",
+            }}
+          />
+          <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-b from-[#17101f] to-black" />
+          <div className="absolute left-[15%] bottom-[28%] h-72 w-72 rounded-full bg-cyan-300/10 blur-3xl" />
+          <div className="absolute right-[8%] bottom-[18%] h-80 w-80 rounded-full bg-violet-400/12 blur-3xl" />
+          <div
+            className="absolute inset-x-0 bottom-[30%] h-1 opacity-50"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, #7fe7ff 0 16px, transparent 16px 34px)",
+            }}
+          />
+        </>
+      )}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(0,0,0,0.62)_100%)]" />
 
       {phase === "choose" && (
         <div className="relative z-10 min-h-full">
