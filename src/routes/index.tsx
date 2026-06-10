@@ -102,6 +102,7 @@ function Index() {
     stage === "room-after";
   const isStreet = stage === "street";
   const showVitals = isHome || isStreet;
+  const startMenuLocked = !profile;
 
   const saveSettings = (next: GameSettings) => {
     setSettings(next);
@@ -317,7 +318,9 @@ function Index() {
             <button
               type="button"
               onClick={handlePlay}
-              className="inline-flex items-center justify-center gap-3 border-4 border-[#0a1016] bg-[#7fe7ff] px-8 py-4 font-['Press_Start_2P'] text-lg text-[#0a1016] shadow-[6px_6px_0_0_#0a1016] transition-transform hover:bg-[#a8f1ff] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[3px_3px_0_0_#0a1016] sm:px-10 sm:py-5 sm:text-2xl"
+              disabled={startMenuLocked}
+              title={startMenuLocked ? "Сначала зарегистрируйся или войди" : "Начать игру"}
+              className="inline-flex items-center justify-center gap-3 border-4 border-[#0a1016] bg-[#7fe7ff] px-8 py-4 font-['Press_Start_2P'] text-lg text-[#0a1016] shadow-[6px_6px_0_0_#0a1016] transition-transform hover:bg-[#a8f1ff] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[3px_3px_0_0_#0a1016] disabled:cursor-not-allowed disabled:bg-slate-500 disabled:text-slate-900 disabled:opacity-60 disabled:grayscale disabled:hover:bg-slate-500 disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:active:shadow-[6px_6px_0_0_#0a1016] sm:px-10 sm:py-5 sm:text-2xl"
             >
               <Play size={22} fill="currentColor" />
               ИГРАТЬ
@@ -334,7 +337,9 @@ function Index() {
               <button
                 type="button"
                 onClick={() => setSettingsOpen(true)}
-                className="inline-flex min-h-14 items-center justify-center gap-2 border-4 border-[#0a1016] bg-[#34d399] px-3 py-3 font-['Press_Start_2P'] text-[10px] leading-none text-[#0a1016] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#6ee7b7] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016] sm:text-xs"
+                disabled={startMenuLocked}
+                title={startMenuLocked ? "Сначала зарегистрируйся или войди" : "Открыть настройки"}
+                className="inline-flex min-h-14 items-center justify-center gap-2 border-4 border-[#0a1016] bg-[#34d399] px-3 py-3 font-['Press_Start_2P'] text-[10px] leading-none text-[#0a1016] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#6ee7b7] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016] disabled:cursor-not-allowed disabled:bg-slate-500 disabled:text-slate-900 disabled:opacity-60 disabled:grayscale disabled:hover:bg-slate-500 disabled:active:translate-x-0 disabled:active:translate-y-0 disabled:active:shadow-[5px_5px_0_0_#0a1016] sm:text-xs"
               >
                 <Settings size={17} />
                 Настройки
