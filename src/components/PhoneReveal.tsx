@@ -234,14 +234,20 @@ export function PhoneReveal({ onComplete, skipIntro = false }: Props) {
 
       {/* Phone UI */}
       {frame >= 5 && (
-        <div className="relative h-[640px] w-[320px] rounded-[28px] border-2 border-cyan-300/60 bg-[#0a1322] p-3 shadow-[0_0_60px_rgba(127,231,255,0.6)] animate-scale-in">
-          <div className="mx-auto mb-2 h-1.5 w-16 rounded-full bg-white/20" />
-          <div className="mb-2 flex items-center justify-between px-2 font-mono text-[10px] text-cyan-200/80">
+        <div
+          className="relative flex flex-col rounded-[28px] border-2 border-cyan-300/60 bg-[#0a1322] p-3 shadow-[0_0_60px_rgba(127,231,255,0.6)] animate-scale-in"
+          style={{
+            width: "min(320px, calc(100vw - 24px))",
+            height: "min(640px, calc(100dvh - 24px))",
+          }}
+        >
+          <div className="mx-auto mb-2 h-1.5 w-16 flex-none rounded-full bg-white/20" />
+          <div className="mb-2 flex flex-none items-center justify-between px-2 font-mono text-[10px] text-cyan-200/80">
             <span>NEKO_OS v1.0</span>
             <span>****</span>
           </div>
 
-          <div className="mb-2 grid grid-cols-3 gap-1 rounded-lg bg-black/40 p-1">
+          <div className="mb-2 grid flex-none grid-cols-3 gap-1 rounded-lg bg-black/40 p-1">
             {(["map", "messages", "settings"] as Tab[]).map((t) => {
               const icon = t === "map" ? "MAP" : t === "messages" ? "MSG" : "SET";
               const label = t === "map" ? "Карта" : t === "messages" ? "Чат" : "Настр.";
@@ -259,14 +265,20 @@ export function PhoneReveal({ onComplete, skipIntro = false }: Props) {
             })}
           </div>
 
-          <div className="relative h-[510px] overflow-hidden rounded-lg border border-cyan-300/20 bg-black/60 p-2">
+          <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg border border-cyan-300/20 bg-black/60 p-2">
             {tab === "map" && (
               <div className="flex h-full flex-col gap-2">
-                <div className="rounded-md border border-cyan-300/40 bg-cyan-400/10 px-2 py-1 text-[10px] text-cyan-100">
+                <div className="flex-none rounded-md border border-cyan-300/40 bg-cyan-400/10 px-2 py-1 text-[10px] text-cyan-100">
                   <b>добраться до кафе</b> {arrived && "[OK]"}
                 </div>
 
-                <div className={`relative flex-1 overflow-hidden rounded-md bg-[#06101c] p-1 ${unstable ? "vitals-glitch-mini" : ""}`}>
+                <div
+                  className={`relative mx-auto w-full max-w-[260px] flex-none overflow-hidden rounded-md bg-[#06101c] p-1 ${unstable ? "vitals-glitch-mini" : ""}`}
+                  style={{
+                    aspectRatio: `${COLS} / ${ROWS}`,
+                    maxHeight: "min(300px, 48dvh)",
+                  }}
+                >
                   <div
                     className="grid h-full w-full gap-[1px]"
                     style={{
@@ -318,7 +330,7 @@ export function PhoneReveal({ onComplete, skipIntro = false }: Props) {
 
                 {frame === 6 && (
                   <button type="button" onClick={startMission}
-                    className="rounded-md bg-cyan-400 px-3 py-1.5 text-xs font-bold text-[#0a1322] hover:bg-cyan-300">
+                    className="flex-none rounded-md bg-cyan-400 px-3 py-1.5 text-xs font-bold text-[#0a1322] hover:bg-cyan-300">
                     {'[>]' } ЗАПУСТИТЬ МАРШРУТ
                   </button>
                 )}
@@ -336,7 +348,7 @@ export function PhoneReveal({ onComplete, skipIntro = false }: Props) {
                       )}
                     </div>
 
-                    <div className="mx-auto grid grid-cols-3 grid-rows-3 gap-1" style={{ width: 150 }}>
+                    <div className="mx-auto grid flex-none grid-cols-3 grid-rows-3 gap-1" style={{ width: 150 }}>
                       <div />
                       <button type="button" onClick={() => step("up")}
                         className={`rounded bg-cyan-400/20 py-2 text-xs text-cyan-100 ring-1 ring-cyan-300/40 active:bg-cyan-400/40 ${arrowDisabledClass}`}>^</button>
