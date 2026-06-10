@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { modVitals } from "@/components/VitalsHUD";
 import dangerStreetImg from "@/assets/background_danger.jpg";
+import deadEndImg from "@/assets/background_dead_end_v2.png";
 
 type Props = {
   coins: number;
@@ -8,8 +9,8 @@ type Props = {
   onHome: () => void;
 };
 
-type RouteChoice = "left" | "right";
-type ScenePhase = "choose" | "ambush" | "escaped" | "safe";
+type RouteChoice = "left" | "right" | "dead-end";
+type ScenePhase = "choose" | "ambush" | "escaped" | "safe" | "dead-end";
 
 const ESCAPE_STEPS = [
   { id: "left", label: "←", text: "Свернуть за вывеску" },
@@ -48,6 +49,15 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
     setPhase("safe");
     setOutcome(
       "Ты выбрал правую освещённую улицу. Дольше, зато район звучит тише, и мысли собираются обратно в одну линию.",
+    );
+  };
+
+  const chooseDeadEnd = () => {
+    modVitals({ energy: -4, stability: -3 });
+    setChoice("dead-end");
+    setPhase("dead-end");
+    setOutcome(
+      "Ты свернул к закрытым воротам. Дальше только бетон, мокрый металл и пустой шум неона. Пришлось возвращаться и искать дорогу домой.",
     );
   };
 
@@ -106,11 +116,13 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
 
   return (
     <div className="fixed inset-0 z-[120] overflow-hidden bg-[#060914] text-white animate-fade-in">
-      {phase === "ambush" && (
+      {(phase === "ambush" || phase === "dead-end") && (
         <div
-          className="absolute inset-0 opacity-45"
+          className="absolute inset-0 opacity-50"
           style={{
-            backgroundImage: `linear-gradient(rgba(3,7,18,0.45), rgba(3,7,18,0.88)), url(${dangerStreetImg})`,
+            backgroundImage: `linear-gradient(rgba(3,7,18,0.35), rgba(3,7,18,0.88)), url(${
+              phase === "dead-end" ? deadEndImg : dangerStreetImg
+            })`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -118,7 +130,7 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
       )}
       <div
         className={`absolute inset-0 bg-gradient-to-b from-[#080b1d] via-[#161331] to-[#07040d] ${
-          phase === "ambush" ? "opacity-75" : ""
+          phase === "ambush" || phase === "dead-end" ? "opacity-75" : ""
         }`}
       />
       <div className="absolute inset-x-0 top-[18%] h-48 opacity-80">
@@ -159,7 +171,7 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
           </div>
 
           {phase === "choose" ? (
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
               <button
                 type="button"
                 onClick={chooseLeftPath}
@@ -178,6 +190,16 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
                 <span className="block font-['Press_Start_2P'] text-[10px]">Правый путь</span>
                 <span className="mt-2 block text-xs font-semibold opacity-80">
                   Светлее и спокойнее. Дольше, зато +5 стабильности.
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={chooseDeadEnd}
+                className="border-4 border-[#0a1016] bg-[#fbbf24] px-4 py-3 text-left text-[#0a1016] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#fde68a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016]"
+              >
+                <span className="block font-['Press_Start_2P'] text-[10px]">Тупик</span>
+                <span className="mt-2 block text-xs font-semibold opacity-80">
+                  Закрытые ворота. Быстро, но придётся развернуться.
                 </span>
               </button>
             </div>
@@ -260,7 +282,11 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
             <div className="mt-5">
               <div className="rounded-md border border-cyan-300/25 bg-cyan-400/10 p-4 text-sm leading-relaxed text-cyan-50">
                 <div className="mb-2 text-[10px] uppercase tracking-[0.24em] text-cyan-300/80">
-                  {choice === "left" ? "маршрут: левый" : "маршрут: правый"}
+                  {choice === "left"
+                    ? "маршрут: левый"
+                    : choice === "dead-end"
+                      ? "маршрут: тупик"
+                      : "маршрут: правый"}
                 </div>
                 {outcome}
               </div>
@@ -269,7 +295,7 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
                 onClick={onHome}
                 className="mt-4 w-full border-4 border-[#0a1016] bg-[#7fe7ff] px-5 py-3 font-['Press_Start_2P'] text-xs text-[#0a1016] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#a8f1ff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016]"
               >
-                {choice === "left" ? "Бежать домой" : "Вернуться домой"}
+                {choice === "left" ? "Бежать домой" : choice === "dead-end" ? "Развернуться домой" : "Вернуться домой"}
               </button>
             </div>
           )}
