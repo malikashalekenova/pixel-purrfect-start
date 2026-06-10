@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { modVitals } from "@/components/VitalsHUD";
 import dangerStreetImg from "@/assets/background_danger.jpg";
 
@@ -18,6 +18,8 @@ const ESCAPE_STEPS = [
   { id: "sprint", label: "Ускориться", text: "Рвануть к дому" },
 ] as const;
 
+const ESCAPE_LIMIT_SECONDS = 30;
+
 type EscapeStep = (typeof ESCAPE_STEPS)[number]["id"];
 
 export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
@@ -27,10 +29,14 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
   const [escapeIndex, setEscapeIndex] = useState(0);
   const [misses, setMisses] = useState(0);
   const [flash, setFlash] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState(ESCAPE_LIMIT_SECONDS);
 
   const chooseLeftPath = () => {
     setChoice("left");
     setPhase("ambush");
+    setEscapeIndex(0);
+    setMisses(0);
+    setTimeLeft(ESCAPE_LIMIT_SECONDS);
     setOutcome(
       "Левый переулок оказался слишком пустым. Неон погас на секунду, и кто-то отделился от стены.",
     );
@@ -46,6 +52,8 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
   };
 
   const pressEscape = (step: EscapeStep) => {
+    if (phase !== "ambush" || timeLeft <= 0) return;
+
     const expected = ESCAPE_STEPS[escapeIndex];
     if (!expected) return;
 
@@ -76,6 +84,25 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
   };
 
   const escapeProgress = Math.round((escapeIndex / ESCAPE_STEPS.length) * 100);
+  const timeProgress = Math.round((timeLeft / ESCAPE_LIMIT_SECONDS) * 100);
+
+  useEffect(() => {
+    if (phase !== "ambush") return;
+    if (timeLeft <= 0) {
+      modVitals({ energy: -10, stability: -10 });
+      setPhase("escaped");
+      setOutcome(
+        "Ты замешкался. Тень успела подойти слишком близко, пришлось вырваться рывком почти вслепую. Дом рядом, но руки дрожат.",
+      );
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setTimeLeft((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [phase, timeLeft]);
 
   return (
     <div className="fixed inset-0 z-[120] overflow-hidden bg-[#060914] text-white animate-fade-in">
@@ -165,8 +192,28 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
                 </div>
                 <p>{outcome}</p>
                 <p className="mt-3 text-cyan-100">
-                  Нажми действия по порядку, чтобы сбросить преследователя и добежать домой.
+                  Нажми действия по порядку меньше чем за 30 секунд, чтобы сбросить
+                  преследователя и добежать домой.
                 </p>
+
+                <div className="mt-4 flex items-center justify-between text-[11px] text-white/65">
+                  <span>Таймер</span>
+                  <span
+                    className={`font-['Press_Start_2P'] text-[10px] ${
+                      timeLeft <= 10 ? "text-rose-200 animate-pulse" : "text-cyan-200"
+                    }`}
+                  >
+                    {timeLeft}s
+                  </span>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-black/50">
+                  <div
+                    className={`h-full transition-all ${
+                      timeLeft <= 10 ? "bg-rose-300" : "bg-amber-300"
+                    }`}
+                    style={{ width: `${timeProgress}%` }}
+                  />
+                </div>
 
                 <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/50">
                   <div
