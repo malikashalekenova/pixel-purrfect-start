@@ -174,6 +174,34 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
         }}
       />
 
+      {phase === "choose" && (
+        <div className="relative z-10 min-h-full">
+          <div className="absolute left-[9%] top-1/2 -translate-y-1/2 sm:left-[12%]">
+            <button
+              type="button"
+              onClick={chooseLeftPath}
+              aria-label="Левый путь"
+              title="Левый путь"
+              className="flex h-16 w-16 items-center justify-center border-4 border-[#0a1016] bg-[#7fe7ff]/85 font-['Press_Start_2P'] text-3xl text-[#07101a] shadow-[6px_6px_0_0_#0a1016] backdrop-blur-sm transition-transform hover:bg-[#a8f1ff] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[3px_3px_0_0_#0a1016] sm:h-20 sm:w-20 sm:text-4xl"
+            >
+              ←
+            </button>
+          </div>
+          <div className="absolute right-[9%] top-1/2 -translate-y-1/2 sm:right-[12%]">
+            <button
+              type="button"
+              onClick={chooseRightPath}
+              aria-label="Правый путь"
+              title="Правый путь"
+              className="flex h-16 w-16 items-center justify-center border-4 border-[#0a1016] bg-[#7fe7ff]/85 font-['Press_Start_2P'] text-3xl text-[#07101a] shadow-[6px_6px_0_0_#0a1016] backdrop-blur-sm transition-transform hover:bg-[#a8f1ff] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[3px_3px_0_0_#0a1016] sm:h-20 sm:w-20 sm:text-4xl"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {phase !== "choose" && (
       <div className="relative z-10 flex min-h-full items-end justify-center p-4 sm:items-center">
         <div className="w-full max-w-2xl rounded-lg border-4 border-[#0a1016] bg-black/75 p-5 shadow-[8px_8px_0_0_#0a1016] backdrop-blur">
           <div className="mb-3 font-['Press_Start_2P'] text-sm text-cyan-200 sm:text-base">
@@ -189,30 +217,7 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
             <span className="text-amber-300">🪙 {coins}</span>
           </div>
 
-          {phase === "choose" ? (
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={chooseLeftPath}
-                className="border-4 border-[#0a1016] bg-[#a78bfa] px-4 py-3 text-left text-[#0a1016] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#c4b5fd] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016]"
-              >
-                <span className="block font-['Press_Start_2P'] text-[10px]">Левый путь</span>
-                <span className="mt-2 block text-xs font-semibold opacity-80">
-                  Быстрее. Тот самый переулок, о котором шептал Нуар.
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={chooseRightPath}
-                className="border-4 border-[#0a1016] bg-[#34d399] px-4 py-3 text-left text-[#0a1016] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#6ee7b7] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016]"
-              >
-                <span className="block font-['Press_Start_2P'] text-[10px]">Правый путь</span>
-                <span className="mt-2 block text-xs font-semibold opacity-80">
-                  Светлее и спокойнее. Дольше, зато +5 стабильности.
-                </span>
-              </button>
-            </div>
-          ) : phase === "ambush" ? (
+          {phase === "ambush" ? (
             <div className="mt-5">
               <div className="relative overflow-hidden rounded-md border border-rose-300/40 bg-rose-950/40 p-4 text-sm leading-relaxed text-rose-50 shadow-[0_0_30px_rgba(244,63,94,0.2)]">
                 <div className="absolute right-4 top-3 font-['Press_Start_2P'] text-[10px] text-rose-300/70">
@@ -341,6 +346,7 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
