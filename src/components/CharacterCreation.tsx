@@ -12,6 +12,7 @@ import {
 
 type Props = {
   onCreated: (profile: Profile) => void;
+  onClose?: () => void;
 };
 
 type Mode = "signup" | "login";
@@ -42,7 +43,7 @@ function getAuthErrorMessage(message?: string | null) {
   return message;
 }
 
-export function CharacterCreation({ onCreated }: Props) {
+export function CharacterCreation({ onCreated, onClose }: Props) {
   const [step, setStep] = useState<Step>("auth");
   const [mode, setMode] = useState<Mode>("signup");
   const [name, setName] = useState("");
@@ -260,6 +261,15 @@ export function CharacterCreation({ onCreated }: Props) {
     const isLogin = mode === "login";
     return (
       <div className="fixed inset-0 z-[80] flex items-stretch justify-center bg-[#0a0f1a] overflow-y-auto animate-fade-in">
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="fixed right-4 top-4 z-[81] rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
+          >
+            Закрыть
+          </button>
+        )}
         <form
           onSubmit={handleAuthSubmit}
           className="w-full max-w-md mx-auto flex flex-col justify-center p-5 sm:p-8 text-white min-h-full"
@@ -389,6 +399,15 @@ export function CharacterCreation({ onCreated }: Props) {
   // ============ CHARACTER STEP ============
   return (
     <div className="fixed inset-0 z-[80] flex items-stretch justify-center bg-[#0a0f1a] overflow-y-auto animate-fade-in">
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          className="fixed right-4 top-4 z-[81] rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
+        >
+          Закрыть
+        </button>
+      )}
       <form
         onSubmit={handleCharacterSubmit}
         className="w-full max-w-2xl mx-auto flex flex-col p-5 sm:p-8 text-white min-h-full"

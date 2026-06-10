@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Play, Settings, UserPlus } from "lucide-react";
 import bg from "@/assets/shadow-district-bg.png";
 import { Desktop } from "@/components/Desktop";
 import { GameIntro } from "@/components/GameIntro";
@@ -11,6 +12,7 @@ import { CharacterCreation } from "@/components/CharacterCreation";
 import { ProfileWindow } from "@/components/ProfileWindow";
 import { ShopWindow, type ShopItem } from "@/components/ShopWindow";
 import { AIAdvisorWindow } from "@/components/AIAdvisorWindow";
+import { SettingsWindow, type GameSettings } from "@/components/SettingsWindow";
 import { AdminPanel } from "@/components/AdminPanel";
 import { VitalsHUD, modVitals, setVitals, FULL_VITALS } from "@/components/VitalsHUD";
 import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
@@ -53,6 +55,28 @@ type Stage =
   | "room-after"
   | "street";
 
+type AuthIntent = "play" | "register";
+
+const DEFAULT_SETTINGS: GameSettings = {
+  sound: true,
+  effects: true,
+};
+
+function loadSettings(): GameSettings {
+  if (typeof window === "undefined") return DEFAULT_SETTINGS;
+  try {
+    const raw = window.localStorage.getItem("shadow-district-settings");
+    if (!raw) return DEFAULT_SETTINGS;
+    const parsed = JSON.parse(raw) as Partial<GameSettings>;
+    return {
+      sound: typeof parsed.sound === "boolean" ? parsed.sound : DEFAULT_SETTINGS.sound,
+      effects: typeof parsed.effects === "boolean" ? parsed.effects : DEFAULT_SETTINGS.effects,
+    };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
 function Index() {
   const [stage, setStage] = useState<Stage>("menu");
   const [coins, setCoins] = useState(0);
@@ -61,6 +85,10 @@ function Index() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [authEmail, setAuthEmail] = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authIntent, setAuthIntent] = useState<AuthIntent>("register");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState<GameSettings>(() => loadSettings());
   const [aiAdvisorOpen, setAiAdvisorOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [purchases, setPurchases] = useState<ShopItem[]>([]);
@@ -74,6 +102,11 @@ function Index() {
     stage === "room-after";
   const isStreet = stage === "street";
   const showVitals = isHome || isStreet;
+
+  const saveSettings = (next: GameSettings) => {
+    setSettings(next);
+    window.localStorage.setItem("shadow-district-settings", JSON.stringify(next));
+  };
 
   const handleBuy = async (item: ShopItem) => {
     const newCoins = coins - item.price;
@@ -136,7 +169,21 @@ function Index() {
   }, []);
 
   const handlePlay = () => {
+    if (!profile) {
+      setAuthIntent("play");
+      setAuthOpen(true);
+      return;
+    }
     setStage("intro");
+  };
+
+  const handleRegister = () => {
+    if (profile) {
+      setProfileOpen(true);
+      return;
+    }
+    setAuthIntent("register");
+    setAuthOpen(true);
   };
 
   const handleIntroFinish = () => {
@@ -204,7 +251,11 @@ function Index() {
     setProfile(p);
     setCoins(p.coins);
     setXp(p.xp);
+    setAuthOpen(false);
     toast("Прогресс будет сохраняться автоматически.");
+    if (authIntent === "play" && stage === "menu") {
+      setStage("intro");
+    }
   };
 
   // Monitor approximate center in the background image (percent of image)
@@ -245,7 +296,7 @@ function Index() {
         }}
       />
 
-      {/* Title + Play button (menu only) */}
+      {/* Title + menu buttons (menu only) */}
       {stage === "menu" && (
         <>
           <div className="relative z-10 flex w-full flex-col items-center px-6 pt-10 sm:pt-16">
@@ -262,14 +313,33 @@ function Index() {
             </h1>
           </div>
 
-          <div className="absolute bottom-16 left-1/2 z-10 -translate-x-1/2 sm:bottom-24">
+          <div className="absolute bottom-10 left-1/2 z-10 flex w-[min(92vw,560px)] -translate-x-1/2 flex-col items-stretch gap-3 sm:bottom-16 sm:items-center">
             <button
               type="button"
               onClick={handlePlay}
-              className="font-['Press_Start_2P'] text-xl sm:text-2xl text-[#0a1016] bg-[#7fe7ff] px-10 py-5 border-4 border-[#0a1016] shadow-[6px_6px_0_0_#0a1016] transition-transform active:translate-x-[3px] active:translate-y-[3px] active:shadow-[3px_3px_0_0_#0a1016] hover:bg-[#a8f1ff]"
+              className="inline-flex items-center justify-center gap-3 border-4 border-[#0a1016] bg-[#7fe7ff] px-8 py-4 font-['Press_Start_2P'] text-lg text-[#0a1016] shadow-[6px_6px_0_0_#0a1016] transition-transform hover:bg-[#a8f1ff] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[3px_3px_0_0_#0a1016] sm:px-10 sm:py-5 sm:text-2xl"
             >
+              <Play size={22} fill="currentColor" />
               ИГРАТЬ
             </button>
+            <div className="grid grid-cols-2 gap-3 sm:w-full">
+              <button
+                type="button"
+                onClick={handleRegister}
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-cyan-300/30 bg-black/60 px-4 py-3 text-sm font-semibold text-cyan-100 ring-1 ring-white/10 backdrop-blur transition hover:bg-cyan-400/15 hover:text-white"
+              >
+                <UserPlus size={17} />
+                Регистрация
+              </button>
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-violet-300/30 bg-black/60 px-4 py-3 text-sm font-semibold text-violet-100 ring-1 ring-white/10 backdrop-blur transition hover:bg-violet-400/15 hover:text-white"
+              >
+                <Settings size={17} />
+                Настройки
+              </button>
+            </div>
           </div>
         </>
       )}
@@ -393,6 +463,14 @@ function Index() {
 
       <Leaderboard open={leaderboardOpen} onClose={() => setLeaderboardOpen(false)} />
 
+      {settingsOpen && (
+        <SettingsWindow
+          settings={settings}
+          onChange={saveSettings}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
+
       {aiAdvisorOpen && (
         <AIAdvisorWindow
           profile={profile}
@@ -416,19 +494,21 @@ function Index() {
       />
 
       {/* Global CRT scanlines */}
-      <div
-        className="pointer-events-none absolute inset-0 z-50 opacity-15 mix-blend-overlay"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(0deg, rgba(0,0,0,0.6) 0 2px, transparent 2px 4px)",
-        }}
-      />
+      {settings.effects && (
+        <div
+          className="pointer-events-none absolute inset-0 z-50 opacity-15 mix-blend-overlay"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(0deg, rgba(0,0,0,0.6) 0 2px, transparent 2px 4px)",
+          }}
+        />
+      )}
 
       {/* Vitals HUD — правило 30% */}
       {showVitals && !crashed && (
         <VitalsHUD
           location={isStreet ? "street" : "home"}
-          paused={shopOpen || profileOpen || leaderboardOpen}
+          paused={shopOpen || profileOpen || leaderboardOpen || settingsOpen}
           onCrash={() => setCrashed(true)}
         />
       )}
@@ -455,8 +535,12 @@ function Index() {
         </div>
       )}
 
-      {/* Registration gate — shown from the very start until the user finishes character creation */}
-      {!profile && <CharacterCreation onCreated={handleProfileCreated} />}
+      {authOpen && !profile && (
+        <CharacterCreation
+          onCreated={handleProfileCreated}
+          onClose={() => setAuthOpen(false)}
+        />
+      )}
     </main>
   );
 }
