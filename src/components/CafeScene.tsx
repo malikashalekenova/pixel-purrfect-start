@@ -454,6 +454,51 @@ export function CafeScene({ onExit, onGoHome, coins, onSpend }: Props) {
 
         {/* MENU */}
         <div className="flex h-[calc(56%-40px)] flex-col">
+          <div className="border-b border-cyan-300/30 bg-[linear-gradient(135deg,rgba(251,191,36,0.18),rgba(34,211,238,0.12),rgba(10,14,26,0.35))] px-3 py-3 shadow-[0_0_34px_rgba(34,211,238,0.18)]">
+            <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-center">
+              <div className="min-w-0">
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="rounded border border-amber-300/40 bg-amber-400/15 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.24em] text-amber-200">
+                    Бариста
+                  </span>
+                  <span className="hidden text-[10px] uppercase tracking-[0.2em] text-cyan-200/60 sm:inline">
+                    сюжетный сигнал
+                  </span>
+                </div>
+                <p className="font-['Press_Start_2P'] text-[12px] leading-relaxed text-amber-100 drop-shadow-[0_0_12px_rgba(251,191,36,0.85)] animate-pulse sm:text-sm">
+                  {coffeeReady
+                    ? "Кофе выпит. Район ждёт за дверью."
+                    : "Выглядишь выжатым. Возьми кофе перед дорогой домой."}
+                </p>
+                <p className="mt-2 text-[11px] leading-relaxed text-cyan-100/70">
+                  {coffeeReady
+                    ? "Лапы снова слушаются, процессор тёплый. Теперь можно выбраться из кафе и пройти домой через ночной район."
+                    : "Бариста ставит чашку ближе. Это не обычная реплика NPC — это твой следующий шаг."}
+                </p>
+              </div>
+
+              <div className="grid gap-2 sm:min-w-56">
+                {!coffeeReady ? (
+                  <button
+                    type="button"
+                    onClick={drinkCoffee}
+                    className="border-4 border-[#0a1016] bg-[#fbbf24] px-4 py-3 font-['Press_Start_2P'] text-[11px] text-[#1b110a] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#fde68a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016]"
+                  >
+                    ☕ Выпить кофе
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onGoHome}
+                    className="border-4 border-[#0a1016] bg-[#7fe7ff] px-4 py-3 font-['Press_Start_2P'] text-[11px] text-[#07101a] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#a8f1ff] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016]"
+                  >
+                    Идти домой
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center gap-1 border-b border-amber-300/15 bg-black/30 px-3 py-2">
             {CAT_TABS.filter((c) => c.key !== "secret" || secretTabVisible).map((c) => (
               <button
