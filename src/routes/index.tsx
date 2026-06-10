@@ -248,6 +248,10 @@ function Index() {
     // marker added to city map (future feature)
   };
 
+  const handleGoHomeFromStreet = () => {
+    setStage("room-after");
+  };
+
   const handleProfileCreated = (p: Profile) => {
     setProfile(p);
     setCoins(p.coins);
@@ -408,6 +412,7 @@ function Index() {
             }
             return true;
           }}
+          onGoHome={handleGoHomeFromStreet}
         />
       )}
 

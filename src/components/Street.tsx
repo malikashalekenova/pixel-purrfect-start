@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { CharacterCreation } from "@/components/CharacterCreation";
 import { PhoneReveal } from "@/components/PhoneReveal";
 import { CafeScene } from "@/components/CafeScene";
+import { WalkHomeScene } from "@/components/WalkHomeScene";
 import { CatSprite } from "@/components/CatSprite";
 import type { Profile } from "@/lib/profile";
 import ryzhikImg from "@/assets/ryzhik.png";
@@ -45,6 +46,7 @@ type Props = {
   onProfileCreated: (profile: Profile) => void;
   coins: number;
   onSpend: (amount: number) => boolean;
+  onGoHome: () => void;
 };
 
 
@@ -97,7 +99,7 @@ const RYZHIK_CHOICES: DialogChoice[] = [
 ];
 
 
-export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCreated, coins, onSpend }: Props) {
+export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCreated, coins, onSpend, onGoHome }: Props) {
   // Dialog state
   const [showDialog, setShowDialog] = useState(false);
   const [reply, setReply] = useState<string | null>(null);
@@ -108,7 +110,7 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
   const [showCreation, setShowCreation] = useState(false);
   const [showPhone, setShowPhone] = useState(false);
   const [showCafe, setShowCafe] = useState(false);
-  const [showReturnMaze, setShowReturnMaze] = useState(false);
+  const [showWalkHome, setShowWalkHome] = useState(false);
   const [cafeVisited, setCafeVisited] = useState(false);
 
   const moodRyzhik = moodFromScore(relRyzhik);
@@ -160,14 +162,20 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
 
   const handleCafeExit = () => {
     setShowCafe(false);
-    toast("📍 Кафе отмечено на карте", { description: "Возвращаемся домой другой дорогой..." });
-    setShowReturnMaze(true);
+    toast("📍 Кафе отмечено на карте", { description: "Можно вернуться на улицу или выпить кофе и пойти домой." });
   };
 
-  const handleReturnMazeComplete = () => {
-    setShowReturnMaze(false);
+  const handleCafeGoHome = () => {
+    setShowCafe(false);
+    setShowWalkHome(true);
+    toast("Кофе выпит", { description: "Дорога домой началась." });
+  };
+
+  const handleWalkHomeComplete = () => {
+    setShowWalkHome(false);
     setCafeVisited(true);
-    toast("Улица опустела", { description: "Знакомых котов поблизости нет." });
+    toast("Дом близко", { description: "Ты вернулся в свою комнату." });
+    onGoHome();
   };
 
   return (
@@ -312,10 +320,19 @@ export function Street({ onCommunicate, onDiscoverCafe, hasProfile, onProfileCre
       {showPhone && <PhoneReveal onComplete={handlePhoneComplete} />}
 
       {/* Cafe interior */}
-      {showCafe && <CafeScene onExit={handleCafeExit} coins={coins} onSpend={onSpend} />}
+      {showCafe && (
+        <CafeScene
+          onExit={handleCafeExit}
+          onGoHome={handleCafeGoHome}
+          coins={coins}
+          onSpend={onSpend}
+        />
+      )}
 
-      {/* Return labyrinth — different maze on the way back */}
-      {showReturnMaze && <PhoneReveal onComplete={handleReturnMazeComplete} skipIntro />}
+      {/* Walk home after coffee */}
+      {showWalkHome && (
+        <WalkHomeScene coins={coins} onSpend={onSpend} onHome={handleWalkHomeComplete} />
+      )}
 
       {/* Pull phone from pocket button */}
       <button

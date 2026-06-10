@@ -5,6 +5,7 @@ import milaImg from "@/assets/mila.png";
 
 type Props = {
   onExit: () => void;
+  onGoHome: () => void;
   coins: number;
   onSpend: (amount: number) => boolean;
 };
@@ -191,7 +192,7 @@ function driftPrice(base: number, broken: boolean) {
   return Math.max(1, Math.round(base + sign * base * (0.1 + Math.random() * 0.3)));
 }
 
-export function CafeScene({ onExit, coins, onSpend }: Props) {
+export function CafeScene({ onExit, onGoHome, coins, onSpend }: Props) {
   const [active, setActive] = useState<Npc | null>(null);
   const [reply, setReply] = useState<string | null>(null);
   const [rel, setRel] = useState<Record<string, number>>(
@@ -203,6 +204,7 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
   const [questDone, setQuestDone] = useState(false);
   const [secretUnlocked, setSecretUnlocked] = useState(false);
   const [memoryActive, setMemoryActive] = useState(false);
+  const [coffeeReady, setCoffeeReady] = useState(false);
   const [tick, force] = useState(0);
 
   useEffect(() => {
@@ -318,6 +320,16 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
     showFlash("📝 Квест взят: «Передай привет Нуару».", 2200);
   };
 
+  const drinkCoffee = () => {
+    if (cold) {
+      showFlash("Бариста ставит кофе ближе: «Пей медленно. Система у тебя на грани.»");
+    } else {
+      showFlash("☕ Кофе прогрел процессор. Пора идти домой.", 2200);
+    }
+    modVitals({ energy: 25, stability: 10 });
+    setCoffeeReady(true);
+  };
+
   // ---------- render ----------
   const visibleItems = MENU.filter((m) => {
     if (m.cat !== tab) return false;
@@ -342,6 +354,24 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
             <span>🪙 {coins}</span>
             <span>{GUESTS.length} гостей</span>
             {memoryActive && <span className="text-cyan-300">🧠 память активна</span>}
+          </div>
+          <div className="hidden items-center gap-2 sm:flex">
+            <button
+              type="button"
+              onClick={drinkCoffee}
+              className="rounded-md bg-amber-400 px-3 py-1 text-[11px] font-bold text-[#1b110a] hover:bg-amber-300"
+            >
+              ☕ Выпить кофе
+            </button>
+            {coffeeReady && (
+              <button
+                type="button"
+                onClick={onGoHome}
+                className="rounded-md bg-cyan-300 px-3 py-1 text-[11px] font-bold text-[#07101a] hover:bg-cyan-200"
+              >
+                Идти домой
+              </button>
+            )}
           </div>
           <button
             type="button"
@@ -442,6 +472,25 @@ export function CafeScene({ onExit, coins, onSpend }: Props) {
             <div className="ml-auto text-[10px] text-amber-100/60">
               {broken ? "⚠ Система <30% — цены плавают, эффекты −50%" : "Меню стабильно"}
             </div>
+          </div>
+
+          <div className="grid gap-2 border-b border-amber-300/15 bg-black/20 px-3 py-2 sm:hidden">
+            <button
+              type="button"
+              onClick={drinkCoffee}
+              className="rounded-md bg-amber-400 px-3 py-2 text-[11px] font-bold text-[#1b110a] hover:bg-amber-300"
+            >
+              ☕ Выпить кофе
+            </button>
+            {coffeeReady && (
+              <button
+                type="button"
+                onClick={onGoHome}
+                className="rounded-md bg-cyan-300 px-3 py-2 text-[11px] font-bold text-[#07101a] hover:bg-cyan-200"
+              >
+                Идти домой
+              </button>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto px-3 py-2">
