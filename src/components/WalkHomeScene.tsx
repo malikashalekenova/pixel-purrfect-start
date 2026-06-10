@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { modVitals } from "@/components/VitalsHUD";
 import dangerStreetImg from "@/assets/background_danger.jpg";
-import deadEndImg from "@/assets/background_dead_end_v2.png";
+import deadEndImg from "@/assets/background_dead_end.png";
+import pathChoiceImg from "@/assets/path_choice.png";
+import rightPathImg from "@/assets/right_path.png";
 
 type Props = {
   coins: number;
@@ -10,7 +12,7 @@ type Props = {
 };
 
 type RouteChoice = "left" | "right" | "dead-end";
-type ScenePhase = "choose" | "ambush" | "escaped" | "safe" | "dead-end";
+type ScenePhase = "choose" | "ambush" | "escaped" | "right-route" | "safe" | "dead-end";
 
 const ESCAPE_STEPS = [
   { id: "left", label: "←", text: "Свернуть за вывеску" },
@@ -44,12 +46,16 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
   };
 
   const chooseRightPath = () => {
-    modVitals({ stability: 5 });
     setChoice("right");
-    setPhase("safe");
+    setPhase("right-route");
     setOutcome(
-      "Ты выбрал правую освещённую улицу. Дольше, зато район звучит тише, и мысли собираются обратно в одну линию.",
+      "Правая улица светлее. Неон отражается в лужах, а впереди виден спокойный поворот к дому.",
     );
+  };
+
+  const chooseRightHome = () => {
+    modVitals({ stability: 5 });
+    onHome();
   };
 
   const chooseDeadEnd = () => {
@@ -116,12 +122,23 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
 
   return (
     <div className="fixed inset-0 z-[120] overflow-hidden bg-[#060914] text-white animate-fade-in">
-      {(phase === "ambush" || phase === "dead-end") && (
+      {(
+        phase === "choose" ||
+        phase === "ambush" ||
+        phase === "right-route" ||
+        phase === "dead-end"
+      ) && (
         <div
-          className="absolute inset-0 opacity-50"
+          className="absolute inset-0 opacity-55"
           style={{
             backgroundImage: `linear-gradient(rgba(3,7,18,0.35), rgba(3,7,18,0.88)), url(${
-              phase === "dead-end" ? deadEndImg : dangerStreetImg
+              phase === "choose"
+                ? pathChoiceImg
+                : phase === "right-route"
+                  ? rightPathImg
+                  : phase === "dead-end"
+                    ? deadEndImg
+                    : dangerStreetImg
             })`,
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -130,7 +147,9 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
       )}
       <div
         className={`absolute inset-0 bg-gradient-to-b from-[#080b1d] via-[#161331] to-[#07040d] ${
-          phase === "ambush" || phase === "dead-end" ? "opacity-75" : ""
+          phase === "choose" || phase === "ambush" || phase === "right-route" || phase === "dead-end"
+            ? "opacity-70"
+            : ""
         }`}
       />
       <div className="absolute inset-x-0 top-[18%] h-48 opacity-80">
@@ -171,7 +190,7 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
           </div>
 
           {phase === "choose" ? (
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={chooseLeftPath}
@@ -190,16 +209,6 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
                 <span className="block font-['Press_Start_2P'] text-[10px]">Правый путь</span>
                 <span className="mt-2 block text-xs font-semibold opacity-80">
                   Светлее и спокойнее. Дольше, зато +5 стабильности.
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={chooseDeadEnd}
-                className="border-4 border-[#0a1016] bg-[#fbbf24] px-4 py-3 text-left text-[#0a1016] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#fde68a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016]"
-              >
-                <span className="block font-['Press_Start_2P'] text-[10px]">Тупик</span>
-                <span className="mt-2 block text-xs font-semibold opacity-80">
-                  Закрытые ворота. Быстро, но придётся развернуться.
                 </span>
               </button>
             </div>
@@ -276,6 +285,37 @@ export function WalkHomeScene({ coins, onSpend, onHome }: Props) {
                     </button>
                   );
                 })}
+              </div>
+            </div>
+          ) : phase === "right-route" ? (
+            <div className="mt-5">
+              <div className="rounded-md border border-emerald-300/25 bg-emerald-400/10 p-4 text-sm leading-relaxed text-emerald-50">
+                <div className="mb-2 text-[10px] uppercase tracking-[0.24em] text-emerald-300/80">
+                  маршрут: правый
+                </div>
+                {outcome}
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={chooseRightHome}
+                  className="border-4 border-[#0a1016] bg-[#34d399] px-4 py-3 text-left text-[#0a1016] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#6ee7b7] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016]"
+                >
+                  <span className="block font-['Press_Start_2P'] text-[10px]">Домой</span>
+                  <span className="mt-2 block text-xs font-semibold opacity-80">
+                    Идти по свету и вернуться в комнату.
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={chooseDeadEnd}
+                  className="border-4 border-[#0a1016] bg-[#fbbf24] px-4 py-3 text-left text-[#0a1016] shadow-[5px_5px_0_0_#0a1016] transition-transform hover:bg-[#fde68a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[3px_3px_0_0_#0a1016]"
+                >
+                  <span className="block font-['Press_Start_2P'] text-[10px]">Тупик</span>
+                  <span className="mt-2 block text-xs font-semibold opacity-80">
+                    Проверить закрытые ворота.
+                  </span>
+                </button>
               </div>
             </div>
           ) : (
